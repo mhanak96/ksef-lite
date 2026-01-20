@@ -1,0 +1,129 @@
+import {
+  SessionEncryption,
+  PublicKeyCertificate,
+  PublicKeyCertificatesResponse,
+  EncryptionKeys,
+  EncryptedInvoice,
+  SessionCryptoOperations,
+} from "./types";
+
+export class EncryptionService {
+  constructor(private readonly crypto: SessionCryptoOperations) {}
+
+  prepareSessionEncryption(certificatesResponse: PublicKeyCertificatesResponse): EncryptionKeys {
+    console.log("🔐 Preparing session encryption...");
+
+    const certificates = this.extractCertificates(certificatesResponse);
+
+    console.log("📋 Certificates to process:", certificates.length);
+
+    if (certificates.length === 0) {
+      console.error("❌ No certificates found in response!");
+      console.error("📋 Response structure:", JSON.stringify(certificatesResponse, null, 2));
+      throw new Error("No certificates returned from API");
+    }
+
+    const symKeyCert = this.findValidCertificate(certificates);
+
+    console.log("✅ Found certificate");
+    console.log("📋 Usage:", symKeyCert.usage);
+    console.log("📋 Valid from:", symKeyCert.validFrom);
+    console.log("📋 Valid to:", symKeyCert.validTo);
+
+    const symmetricKey = this.crypto.generateAesKey();
+    const iv = this.crypto.generateIv();
+
+    const encryptedSymmetricKey = this.crypto.encryptSymmetricKey(symmetricKey, symKeyCert.certificate);
+
+    console.log("✅ Symmetric key encrypted");
+
+    return {
+      symmetricKey,
+      iv,
+      encryptedSymmetricKey,
+    };
+  }
+
+  createSessionEncryptionPayload(keys: EncryptionKeys): SessionEncryption {
+    return {
+      encryptedSymmetricKey: keys.encryptedSymmetricKey.toString("base64"),
+      initializationVector: keys.iv.toString("base64"),
+    };
+  }
+
+  encryptInvoice(invoiceXml: string, symmetricKey: Buffer, iv: Buffer): EncryptedInvoice {
+    console.log("🔐 Encrypting invoice...");
+
+    const result = this.crypto.encryptInvoiceXml(invoiceXml, symmetricKey, iv);
+
+    console.log("✅ Invoice encrypted");
+    console.log("📝 Original size:", result.originalSize, "bytes");
+    console.log("📝 Encrypted size:", result.encryptedSize, "bytes");
+
+    return {
+      encryptedContent: result.encrypted.toString("base64"),
+      invoiceHash: result.originalHash,
+      invoiceSize: result.originalSize,
+      encryptedHash: result.encryptedHash,
+      encryptedSize: result.encryptedSize,
+    };
+  }
+
+  private extractCertificates(response: PublicKeyCertificatesResponse): PublicKeyCertificate[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (response?.certificates) {
+      return response.certificates;
+    }
+
+    if (response?.publicKeys) {
+      return response.publicKeys;
+    }
+
+    if (response?.items) {
+      return response.items;
+    }
+
+    return [];
+  }
+
+  private findValidCertificate(certificates: PublicKeyCertificate[]): PublicKeyCertificate {
+    const now = new Date();
+
+    const validCerts = certificates.filter((cert) => {
+      const hasUsage = cert.usage?.includes("SymmetricKeyEncryption");
+      const validFrom = new Date(cert.validFrom);
+      const validTo = new Date(cert.validTo);
+      const isValid = validFrom <= now && validTo >= now;
+
+      console.log("🔍 Checking cert:", {
+        usage: cert.usage,
+        hasUsage,
+        validFrom: cert.validFrom,
+        validTo: cert.validTo,
+        isValid,
+        match: hasUsage && isValid,
+      });
+
+      return hasUsage && isValid;
+    });
+
+    if (validCerts.length === 0) {
+      console.error("❌ No valid SymmetricKeyEncryption certificate found!");
+      console.error(
+        "📋 Available certificates:",
+        certificates.map((c) => ({
+          usage: c.usage,
+          validFrom: c.validFrom,
+          validTo: c.validTo,
+        }))
+      );
+      throw new Error("No valid certificate found for SymmetricKeyEncryption");
+    }
+
+    // Wybierz najnowszy certyfikat
+    return validCerts.sort((a, b) => new Date(b.validFrom).getTime() - new Date(a.validFrom).getTime())[0];
+  }
+}

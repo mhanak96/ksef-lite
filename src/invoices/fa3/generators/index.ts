@@ -1,0 +1,1 @@
+export { FA3InvoiceGenerator } from './FA3InvoiceGenerator';
