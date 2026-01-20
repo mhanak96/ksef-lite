@@ -171,7 +171,7 @@ Format odpowiedzi:
   "upoDownloadUrlExpirationDate": "2026-01-23T21:19:09.476Z",
   "xml": "<UPO_XML>",
   "sha256Base64": "<UPO_SHA256_BASE64>"
-};
+}
 
 ```
 

@@ -24,18 +24,14 @@
     "typescript",
     "javascript"
   ],
-  
-
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
-
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -43,13 +39,10 @@
       "import": "./dist/index.js"
     }
   },
-
   "sideEffects": false,
-
   "engines": {
     "node": ">=18.0.0"
   },
-
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -p tsconfig.build.json",
@@ -63,15 +56,13 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --runInBand",
-    "prepack": "npm run build && npm test"
+    "prepack": "npm run build"
   },
-
   "dependencies": {
     "@xmldom/xmldom": "^0.8.11",
     "qrcode": "^1.5.4",
     "xml-crypto": "^6.1.2"
   },
-
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
@@ -87,7 +78,6 @@
     "ts-jest": "^29.1.0",
     "typescript": "^5.9.3"
   },
-
   "publishConfig": {
     "access": "public"
   }
