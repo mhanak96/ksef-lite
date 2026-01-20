@@ -1,6 +1,6 @@
 {
   "name": "ksef-lite",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Unofficial TypeScript/JavaScript client for Polish KSeF (Krajowy System e-Faktur) with FA(3) XML generation, submission helpers and QR support.",
   "license": "MIT",
   "author": "Mateusz Hanak contact@encodedlegal.com",
