@@ -2,7 +2,7 @@
 export * from "./types";
 
 // Hash utilities
-export { sha256Base64, sha256Base64Buffer, pemFromBase64Cert, pickCertificate } from "./hash.utils";
+export { sha256Base64, sha256Base64Buffer, pemFromBase64Cert } from "./hash.utils";
 
 // AES
 export { AesCrypto } from "./aes.crypto";

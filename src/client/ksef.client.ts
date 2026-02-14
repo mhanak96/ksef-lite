@@ -1,21 +1,25 @@
-import { createHash } from 'crypto';
 import { HttpClient } from './http.client';
 import {
-  KSefCryptoOperations,
-  AuthResult,
   SessionCryptoOperations,
   OpenSessionOptions,
   SessionStatusResponse,
 } from './auth/session/types';
+import {
+  KSefCryptoOperations,
+  AuthResult,
+} from './auth/types';
 import { ksefCrypto } from './index';
 import { AuthService, SessionManager } from './index';
 import { InvoiceService } from './retrieval/invoice/invoice.service';
 import {
-  KSefClientConfig,
   KSefEnvironment,
-  KSEF_SESSION_URLS,
   KSEF_API_URLS,
 } from './types';
+import type {
+  KSefClientConfigWithCrypto,
+  SendInvoiceOptions,
+  SendInvoiceResult,
+} from './types/ksef-client.types';
 import {
   InvoiceUpoResult,
   GetInvoiceUpoOptions,
@@ -27,52 +31,15 @@ import {
   DownloadedInvoice,
   DownloadInvoiceOptions,
 } from './retrieval/invoice/types';
+import { debugLog, debugWarn, debugError, setDebugEnabled } from '../utils/logger';
+import {
+  extractSellerNip,
+  extractIssueDate,
+  formatDateForQr,
+  computeSha256Base64Url,
+} from './xml-extract.utils';
 
-/* =========================
-   EXTENDED CONFIG (with optional crypto)
-   ========================= */
-
-export interface KSefClientConfigWithCrypto extends KSefClientConfig {
-  crypto?: KSefCryptoOperations;
-}
-
-/* =========================
-   SEND INVOICE OPTIONS & RESULT
-   ========================= */
-
-export interface SendInvoiceOptions {
-  upo?: boolean;
-  qr?: boolean;
-}
-
-export interface SendInvoiceResult {
-  // Status
-  status: number; // 200 = sukces, 4xx/5xx = błąd
-  error?: string; // Opis błędu (tylko przy błędzie)
-  
-  // Numer KSeF (null jeśli błąd)
-  invoiceKsefNumber: string | null;
-  
-  // Referencje - zawsze dostępne
-  invoiceReferenceNumber: string;
-  sessionReferenceNumber: string;
-  
-  // Dane faktury
-  invoiceHash: string;
-  invoiceSize: number;
-  
-  // Meta
-  meta: {
-    sellerNip: string;
-    issueDate: string;
-    invoiceHashBase64Url: string;
-    qrVerificationUrl: string;
-  };
-  
-  // Opcjonalne (tylko przy sukcesie)
-  upo?: { xml: string; sha256Base64?: string; };
-  qrCode?: { pngBase64: string; label: string; };
-}
+export type { KSefClientConfigWithCrypto, SendInvoiceOptions, SendInvoiceResult };
 
 /* =========================
    ERROR STATUSES - do przerwania pętli
@@ -131,7 +98,7 @@ export class KSefClient {
   constructor(config: KSefClientConfigWithCrypto) {
     this.validateConfig(config);
 
-    this.mode = config.mode ?? 'production';
+    this.mode = config.mode ?? 'test';
     this.baseUrl = KSEF_API_URLS[this.mode];
     this.apiBaseUrl = KSEF_API_URLS[this.mode];
     this.contextNip = config.contextNip;
@@ -139,6 +106,7 @@ export class KSefClient {
 
     this.httpClient = new HttpClient(this.baseUrl, config.debug ?? false);
     this.apiHttpClient = new HttpClient(this.apiBaseUrl, config.debug ?? false);
+    setDebugEnabled(config.debug ?? false);
 
     this.authService = new AuthService(
       this.httpClient,
@@ -159,7 +127,7 @@ export class KSefClient {
       () => this.accessToken
     );
 
-    console.log(`🔧 KSefClient initialized: mode=${this.mode}`);
+    debugLog(`🔧 KSefClient initialized: mode=${this.mode}`);
   }
 
   /* =========================
@@ -171,17 +139,17 @@ export class KSefClient {
     ksefNumber: string,
     options: GetInvoiceQRCodeOptions = {}
   ): Promise<InvoiceQRCodeResult> {
-    console.log(`🔲 [QR] generateQRCodeFromXml called`);
-    console.log(`🔲 [QR] ksefNumber: ${ksefNumber}`);
+    debugLog(`🔲 [QR] generateQRCodeFromXml called`);
+    debugLog(`🔲 [QR] ksefNumber: ${ksefNumber}`);
     
     try {
       const result = await this.invoiceService.generateQRCodeFromXml(invoiceXml, ksefNumber, options);
-      console.log(`✅ [QR] Generated successfully`);
-      console.log(`🔲 [QR] URL: ${result.url}`);
-      console.log(`🔲 [QR] PNG base64 length: ${result.qrPngBase64?.length ?? 0}`);
+      debugLog(`✅ [QR] Generated successfully`);
+      debugLog(`🔲 [QR] URL: ${result.url}`);
+      debugLog(`🔲 [QR] PNG base64 length: ${result.qrPngBase64?.length ?? 0}`);
       return result;
     } catch (error) {
-      console.error(`❌ [QR] Generation FAILED:`, error);
+      debugError(`❌ [QR] Generation FAILED:`, error);
       throw error;
     }
   }
@@ -203,15 +171,15 @@ async sendInvoice(
 ): Promise<SendInvoiceResult> {
   const { upo = false, qr = false } = options;
   
-  console.log(`📤 [sendInvoice] Starting...`);
-  console.log(`📤 [sendInvoice] Options: upo=${upo}, qr=${qr}`);
+  debugLog(`📤 [sendInvoice] Starting...`);
+  debugLog(`📤 [sendInvoice] Options: upo=${upo}, qr=${qr}`);
 
   await this.ensureAuthenticated();
 
   // Otwórz sesję
   const openResponse = await this.openSession();
   const sessionReferenceNumber = openResponse.referenceNumber;
-  console.log(`📤 [sendInvoice] Session opened: ${sessionReferenceNumber}`);
+  debugLog(`📤 [sendInvoice] Session opened: ${sessionReferenceNumber}`);
 
   let invoiceReferenceNumber: string = '';
   let invoiceHash: string = '';
@@ -228,13 +196,13 @@ async sendInvoice(
     invoiceReferenceNumber = invoiceResponse.referenceNumber;
     invoiceHash = invoiceResponse.invoiceHash;
     invoiceSize = invoiceResponse.invoiceSize;
-    console.log(`📤 [sendInvoice] Invoice sent: ${invoiceReferenceNumber}`);
+    debugLog(`📤 [sendInvoice] Invoice sent: ${invoiceReferenceNumber}`);
 
     // Zamknij sesję
     await this.safeCloseSession();
 
   } catch (error: any) {
-    console.error(`❌ [sendInvoice] Error during send/close:`, error);
+    debugError(`❌ [sendInvoice] Error during send/close:`, error);
     await this.emergencyCloseSession();
     // Nie rzucamy - kontynuujemy żeby zebrać dane
     errorMessage = error?.message ?? String(error);
@@ -246,8 +214,8 @@ async sendInvoice(
   try {
     sessionStatus = await this.pollSessionStatusWithErrorHandling(sessionReferenceNumber);
     
-    console.log(`📤 [sendInvoice] Session status code: ${sessionStatus.status?.code}`);
-    console.log(`📤 [sendInvoice] Session status desc: ${sessionStatus.status?.description}`);
+    debugLog(`📤 [sendInvoice] Session status code: ${sessionStatus.status?.code}`);
+    debugLog(`📤 [sendInvoice] Session status desc: ${sessionStatus.status?.description}`);
 
     // Ustaw kod błędu z sesji jeśli jest
     if (sessionStatus.status?.code && sessionStatus.status.code >= 400) {
@@ -255,7 +223,7 @@ async sendInvoice(
       errorMessage = sessionStatus.status.description ?? `Error code: ${statusCode}`;
     }
   } catch (error: any) {
-    console.error(`❌ [sendInvoice] Error polling session:`, error);
+    debugError(`❌ [sendInvoice] Error polling session:`, error);
     if (!errorMessage) {
       errorMessage = error?.message ?? String(error);
       statusCode = 500;
@@ -267,9 +235,9 @@ async sendInvoice(
   try {
     const invoiceMetadata = await this.fetchInvoiceMetadataWithErrorHandling(sessionReferenceNumber);
     ksefNumber = invoiceMetadata?.ksefNumber || null;
-    console.log(`📤 [sendInvoice] ksefNumber: ${ksefNumber}`);
+    debugLog(`📤 [sendInvoice] ksefNumber: ${ksefNumber}`);
   } catch (error: any) {
-    console.error(`❌ [sendInvoice] Error fetching metadata:`, error);
+    debugError(`❌ [sendInvoice] Error fetching metadata:`, error);
     // Nie nadpisujemy statusCode - metadata to tylko dodatkowe info
   }
 
@@ -280,22 +248,22 @@ async sendInvoice(
   let qrVerificationUrl = '';
   
   try {
-    sellerNip = this.extractSellerNip(invoiceXml);
-    issueDate = this.extractIssueDate(invoiceXml);
-    invoiceHashBase64Url = this.computeSha256Base64Url(invoiceXml);
-    const qrBaseUrl = this.mode === 'production' 
-      ? 'https://qr.ksef.mf.gov.pl' 
+    sellerNip = extractSellerNip(invoiceXml);
+    issueDate = extractIssueDate(invoiceXml);
+    invoiceHashBase64Url = computeSha256Base64Url(invoiceXml);
+    const qrBaseUrl = this.mode === 'production'
+      ? 'https://qr.ksef.mf.gov.pl'
       : 'https://qr-test.ksef.mf.gov.pl';
-    const issueDateForQr = this.formatDateForQr(issueDate);
+    const issueDateForQr = formatDateForQr(issueDate);
     qrVerificationUrl = `${qrBaseUrl}/invoice/${sellerNip}/${issueDateForQr}/${invoiceHashBase64Url}`;
   } catch (error: any) {
-    console.error(`❌ [sendInvoice] Error extracting XML data:`, error);
+    debugError(`❌ [sendInvoice] Error extracting XML data:`, error);
   }
 
   // UPO - tylko jeśli sukces i mamy ksefNumber
   let invoiceUpo: InvoiceUpoResult | undefined;
   if (upo && statusCode < 400 && ksefNumber) {
-    console.log(`📄 [UPO] Fetching UPO...`);
+    debugLog(`📄 [UPO] Fetching UPO...`);
     try {
       invoiceUpo = await this.invoiceService.getInvoiceUpo(sessionReferenceNumber, {
         pollingDelayMs: this.DEFAULTS.PROCESSING_DELAY_MS,
@@ -303,16 +271,16 @@ async sendInvoice(
         apiTimeoutMs: this.DEFAULTS.UPO_API_TIMEOUT_MS,
         downloadTimeoutMs: this.DEFAULTS.UPO_DOWNLOAD_TIMEOUT_MS,
       });
-      console.log(`✅ [UPO] Fetched successfully`);
+      debugLog(`✅ [UPO] Fetched successfully`);
     } catch (error) {
-      console.error(`❌ [UPO] Failed:`, error);
+      debugError(`❌ [UPO] Failed:`, error);
     }
   }
 
   // QR - tylko jeśli sukces i mamy ksefNumber
   let qrPngBase64: string | undefined;
   if (qr && statusCode < 400 && ksefNumber) {
-    console.log(`🔲 [QR] Generating QR code...`);
+    debugLog(`🔲 [QR] Generating QR code...`);
     try {
       const invoiceQrCode = await this.invoiceService.generateQRCodeFromXml(
         invoiceXml,
@@ -320,9 +288,9 @@ async sendInvoice(
         { apiTimeoutMs: this.DEFAULTS.QR_API_TIMEOUT_MS }
       );
       qrPngBase64 = invoiceQrCode.qrPngBase64;
-      console.log(`✅ [QR] Generated successfully!`);
+      debugLog(`✅ [QR] Generated successfully!`);
     } catch (error) {
-      console.error(`❌ [QR] Generation FAILED:`, error);
+      debugError(`❌ [QR] Generation FAILED:`, error);
     }
   }
 
@@ -366,10 +334,10 @@ async sendInvoice(
     } : {}),
   };
 
-  console.log(`${statusCode < 400 ? '✅' : '❌'} [sendInvoice] Complete!`);
-  console.log(`📤 [sendInvoice] status: ${result.status}`);
-  console.log(`📤 [sendInvoice] error: ${errorMessage ?? 'none'}`);
-  console.log(`📤 [sendInvoice] invoiceKsefNumber: ${result.invoiceKsefNumber}`);
+  debugLog(`${statusCode < 400 ? '✅' : '❌'} [sendInvoice] Complete!`);
+  debugLog(`📤 [sendInvoice] status: ${result.status}`);
+  debugLog(`📤 [sendInvoice] error: ${errorMessage ?? 'none'}`);
+  debugLog(`📤 [sendInvoice] invoiceKsefNumber: ${result.invoiceKsefNumber}`);
   
   return result;
 }
@@ -416,7 +384,7 @@ async sendInvoice(
     const maxAttempts = this.DEFAULTS.MAX_POLLING_ATTEMPTS;
     const delayMs = this.DEFAULTS.PROCESSING_DELAY_MS;
     
-    console.log(`⏳ [Poll] Starting session status polling (max ${maxAttempts} attempts)...`);
+    debugLog(`⏳ [Poll] Starting session status polling (max ${maxAttempts} attempts)...`);
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -433,23 +401,23 @@ async sendInvoice(
         const code = response.status?.code;
         const desc = response.status?.description ?? '';
         
-        console.log(`⏳ [Poll] Attempt ${attempt}/${maxAttempts}: code=${code}, desc="${desc}"`);
+        debugLog(`⏳ [Poll] Attempt ${attempt}/${maxAttempts}: code=${code}, desc="${desc}"`);
 
  
         if (code && code >= 400) {
-          console.error(`❌ [Poll] Error status detected! Stopping.`);
+          debugError(`❌ [Poll] Error status detected! Stopping.`);
           return response;
         }
 
         if (this.isTerminalStatus(response)) {
-          console.log(`✅ [Poll] Terminal status reached`);
+          debugLog(`✅ [Poll] Terminal status reached`);
           return response;
         }
 
 
         await this.sleep(delayMs);
       } catch (error: any) {
-        console.error(`❌ [Poll] Attempt ${attempt} failed:`, error?.message ?? error);
+        debugError(`❌ [Poll] Attempt ${attempt} failed:`, error?.message ?? error);
         
         if (error?.status && error.status >= 400) {
           throw new Error(`Session polling failed with HTTP ${error.status}: ${error.message}`);
@@ -512,7 +480,7 @@ async sendInvoice(
     const maxAttempts = this.DEFAULTS.MAX_POLLING_ATTEMPTS;
     const delayMs = this.DEFAULTS.PROCESSING_DELAY_MS;
     
-    console.log(`📋 [Metadata] Fetching invoice metadata (max ${maxAttempts} attempts)...`);
+    debugLog(`📋 [Metadata] Fetching invoice metadata (max ${maxAttempts} attempts)...`);
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -528,13 +496,13 @@ async sendInvoice(
 
         const invoice = response.invoices?.[0];
         
-        console.log(`📋 [Metadata] Attempt ${attempt}/${maxAttempts}`);
-        console.log(`📋 [Metadata] Invoices count: ${response.invoices?.length ?? 0}`);
+        debugLog(`📋 [Metadata] Attempt ${attempt}/${maxAttempts}`);
+        debugLog(`📋 [Metadata] Invoices count: ${response.invoices?.length ?? 0}`);
         
         if (invoice) {
-          console.log(`📋 [Metadata] Invoice referenceNumber: ${invoice.referenceNumber}`);
-          console.log(`📋 [Metadata] Invoice ksefNumber: ${invoice.ksefNumber}`);
-          console.log(`📋 [Metadata] Invoice status: ${JSON.stringify(invoice.status)}`);
+          debugLog(`📋 [Metadata] Invoice referenceNumber: ${invoice.referenceNumber}`);
+          debugLog(`📋 [Metadata] Invoice ksefNumber: ${invoice.ksefNumber}`);
+          debugLog(`📋 [Metadata] Invoice status: ${JSON.stringify(invoice.status)}`);
           
          
           const invoiceStatus = invoice.status?.code;
@@ -546,14 +514,14 @@ async sendInvoice(
           
        
           if (invoice.ksefNumber) {
-            console.log(`✅ [Metadata] Got ksefNumber: ${invoice.ksefNumber}`);
+            debugLog(`✅ [Metadata] Got ksefNumber: ${invoice.ksefNumber}`);
             return invoice;
           }
         }
 
         await this.sleep(delayMs);
       } catch (error: any) {
-        console.error(`❌ [Metadata] Attempt ${attempt} failed:`, error?.message ?? error);
+        debugError(`❌ [Metadata] Attempt ${attempt} failed:`, error?.message ?? error);
         
         // ✅ Jeśli to błąd faktury - przerwij
         if (error?.message?.includes('Invoice error')) {
@@ -561,7 +529,7 @@ async sendInvoice(
         }
         
         if (attempt === maxAttempts) {
-          console.warn(`⚠️ [Metadata] Max attempts reached, returning null`);
+          debugWarn(`⚠️ [Metadata] Max attempts reached, returning null`);
           return null;
         }
         
@@ -569,7 +537,7 @@ async sendInvoice(
       }
     }
 
-    console.warn(`⚠️ [Metadata] Could not fetch ksefNumber after ${maxAttempts} attempts`);
+    debugWarn(`⚠️ [Metadata] Could not fetch ksefNumber after ${maxAttempts} attempts`);
     return null;
   }
 
@@ -602,6 +570,7 @@ async sendInvoice(
   }
 
   setDebug(debug: boolean): void {
+    setDebugEnabled(debug);
     this.httpClient.setDebug(debug);
     this.apiHttpClient.setDebug(debug);
   }
@@ -642,22 +611,6 @@ async sendInvoice(
     }
   }
 
-  /* =========================
-     PRIVATE - SESSION (old method kept for reference)
-     ========================= */
-
-  /**
-   * @deprecated Use pollSessionStatusWithErrorHandling instead
-   */
-  private async fetchInvoiceMetadata(
-    sessionReferenceNumber: string,
-    pollingDelayMs: number,
-    timeoutMs: number
-  ): Promise<any> {
-  
-    return this.fetchInvoiceMetadataWithErrorHandling(sessionReferenceNumber);
-  }
-
   private async openSession(options?: OpenSessionOptions) {
     this.ensureSessionManager();
     return this.sessionManager!.openSession(options);
@@ -685,7 +638,7 @@ async sendInvoice(
     try {
       await this.closeSession();
     } catch (error) {
-      console.warn('⚠️ Failed to close session (non-critical):', error);
+      debugWarn('⚠️ Failed to close session (non-critical):', error);
     }
   }
 
@@ -718,58 +671,6 @@ async sendInvoice(
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /* =========================
-     PRIVATE - XML DATA EXTRACTION
-     ========================= */
-
-  private extractSellerNip(xml: string): string {
-    const podmiot1Match = xml.match(/<Podmiot1[\s\S]*?<NIP>(\d{10})<\/NIP>/);
-    if (podmiot1Match?.[1]) {
-      return podmiot1Match[1];
-    }
-    const anyNipMatch = xml.match(/<NIP>(\d{10})<\/NIP>/);
-    if (anyNipMatch?.[1]) {
-      return anyNipMatch[1];
-    }
-    throw new Error("Cannot extract seller NIP from XML");
-  }
-
-  private extractIssueDate(xml: string): string {
-    const match = xml.match(/<P_1>([^<]+)<\/P_1>/);
-    const raw = match?.[1]?.trim();
-    if (!raw) {
-      throw new Error("Cannot extract issue date (P_1) from XML");
-    }
-   
-    const isoDatePart = raw.slice(0, 10);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(isoDatePart)) {
-      return isoDatePart;
-    }
-    return raw;
-  }
-
-  private formatDateForQr(dateStr: string): string {
-    const s = String(dateStr).trim();
-    if (/^\d{2}-\d{2}-\d{4}$/.test(s)) {
-      return s;
-    }
-    const isoDatePart = s.slice(0, 10);
-    if (/^\d{4}-\d{2}-\d{2}$/.test(isoDatePart)) {
-      const [yyyy, mm, dd] = isoDatePart.split("-");
-      return `${dd}-${mm}-${yyyy}`;
-    }
-    throw new Error(`Unsupported date format: "${s}"`);
-  }
-
-  private computeSha256Base64Url(xml: string): string {
-    try {
-      return createHash("sha256").update(Buffer.from(xml, "utf8")).digest("base64url");
-    } catch {
-      const b64 = createHash("sha256").update(Buffer.from(xml, "utf8")).digest("base64");
-      return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-    }
   }
 
   private validateConfig(config: KSefClientConfigWithCrypto): void {

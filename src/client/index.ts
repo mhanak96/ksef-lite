@@ -46,29 +46,18 @@ export {
   ksefCrypto,
 
 
-  AesCrypto,
-  RsaCrypto,
-
-
   generateAuthTokenRequestXml,
   signXmlSimple,
   verifyKeyMatchesCert,
   parseCertificateInfo,
   formatSigningTime,
-  exclusiveCanonicalize,
-  exclusiveCanonicalizeNode,
-  canonicalizeNode,
-  convertDerToP1363WithLowS,
 
 
   sha256Base64,
   sha256Base64Buffer,
   pemFromBase64Cert,
 
- 
-  EncryptedInvoiceData,
-  InvoiceEncryptionResult,
-  AuthTokenRequestData,
+
   CertificateInfo,
 } from './auth';
 

@@ -23,20 +23,3 @@ export function pemFromBase64Cert(base64Cert: string): string {
   return `-----BEGIN CERTIFICATE-----\n${clean}\n-----END CERTIFICATE-----`;
 }
 
-/**
- * Wybiera odpowiedni certyfikat z listy na podstawie usage
- */
-export function pickCertificate(certificates: any[], usage: string): any | null {
-  if (!Array.isArray(certificates) || certificates.length === 0) {
-    return null;
-  }
-
-  const cert = certificates.find(
-    (c) =>
-      c.subjectName?.includes(usage) ||
-      c.usage === usage ||
-      c.subjectName?.toLowerCase().includes(usage.toLowerCase())
-  );
-
-  return cert || null;
-}

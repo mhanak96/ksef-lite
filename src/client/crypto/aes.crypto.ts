@@ -1,6 +1,12 @@
 import crypto from "crypto";
 import { sha256Base64Buffer } from "./hash.utils";
-import { EncryptedInvoiceData } from "./types";
+export interface EncryptedInvoiceData {
+  encrypted: Buffer;
+  originalHash: string;
+  originalSize: number;
+  encryptedHash: string;
+  encryptedSize: number;
+}
 
 const ALGORITHM = "aes-256-cbc";
 const KEY_LENGTH = 32;

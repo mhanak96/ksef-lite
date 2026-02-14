@@ -1,3 +1,4 @@
+import { debugLog } from '../../../utils/logger';
 import { HttpClient, isHttpError } from "../../http.client";
 import { EncryptionService } from "./encryption.service";
 import {
@@ -48,14 +49,14 @@ export class SessionManager {
     }
 
     if (this.state.isActive) {
-      console.log("⚠️  Session already active:", this.state.referenceNumber);
+      debugLog("⚠️  Session already active:", this.state.referenceNumber);
       return {
         referenceNumber: this.state.referenceNumber!,
         timestamp: new Date().toISOString(),
       };
     }
 
-    console.log("🔓 Opening session...");
+    debugLog("🔓 Opening session...");
 
     const certificatesResponse = await this.getPublicCertificates();
 
@@ -91,7 +92,7 @@ export class SessionManager {
     this.state.referenceNumber = response.referenceNumber;
     this.state.isActive = true;
 
-    console.log("✅ Session opened:", response.referenceNumber);
+    debugLog("✅ Session opened:", response.referenceNumber);
 
     return response;
   }
@@ -108,7 +109,7 @@ export class SessionManager {
       throw new Error("Encryption keys not initialized");
     }
 
-    console.log("📤 Sending invoice...");
+    debugLog("📤 Sending invoice...");
 
     const encrypted = this.encryptionService.encryptInvoice(
       invoiceXml,
@@ -140,7 +141,7 @@ export class SessionManager {
       throw new Error("Missing invoice referenceNumber in response");
     }
 
-    console.log("✅ Invoice sent:", response.referenceNumber);
+    debugLog("✅ Invoice sent:", response.referenceNumber);
 
     return {
       ...response,
@@ -154,7 +155,7 @@ export class SessionManager {
       throw new Error("No active session to close");
     }
 
-    console.log("🔒 Closing session...");
+    debugLog("🔒 Closing session...");
 
     await this.httpClient.post(
       `/sessions/online/${encodeURIComponent(this.state.referenceNumber)}/close`,
@@ -170,7 +171,7 @@ export class SessionManager {
     this.state.symmetricKey = null;
     this.state.iv = null;
   
-    console.log("✅ Session closed:", this.state.referenceNumber);
+    debugLog("✅ Session closed:", this.state.referenceNumber);
   }
 
   async getStatus(): Promise<SessionStatusResponse> {
@@ -233,15 +234,15 @@ export class SessionManager {
 
   forceCloseSession(): void {
     this.resetState();
-    console.log("⚠️  Session force closed (no API call)");
+    debugLog("⚠️  Session force closed (no API call)");
   }
 
   private async getPublicCertificates(): Promise<PublicKeyCertificatesResponse> {
-    console.log("🔐 Fetching public certificates...");
+    debugLog("🔐 Fetching public certificates...");
 
     const response = await this.httpClient.get<PublicKeyCertificatesResponse>("/security/public-key-certificates");
 
-    console.log("📋 Full certificates response:", JSON.stringify(response, null, 2));
+    debugLog("📋 Full certificates response:", JSON.stringify(response, null, 2));
 
     return response;
   }

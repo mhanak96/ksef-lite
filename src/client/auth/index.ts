@@ -29,20 +29,12 @@ export {
   // Ready-to-use implementation
   ksefCrypto,
 
-  // Classes
-  AesCrypto,
-  RsaCrypto,
-
   // XAdES functions
   generateAuthTokenRequestXml,
   signXmlSimple,
   verifyKeyMatchesCert,
   parseCertificateInfo,
   formatSigningTime,
-  exclusiveCanonicalize,
-  exclusiveCanonicalizeNode,
-  canonicalizeNode,
-  convertDerToP1363WithLowS,
 
   // Hash utilities
   sha256Base64,
@@ -50,8 +42,5 @@ export {
   pemFromBase64Cert,
 
   // Types
-  EncryptedInvoiceData,
-  InvoiceEncryptionResult,
-  AuthTokenRequestData,
   CertificateInfo,
 } from "../crypto";

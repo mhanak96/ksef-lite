@@ -1,3 +1,4 @@
+import { debugLog, debugWarn, debugError } from '../../utils/logger';
 import { HttpClient } from "../http.client";
 import { ChallengeService } from "./challenge.service";
 import {
@@ -31,7 +32,7 @@ export class AuthService {
   }
 
   async authenticate(): Promise<AuthResult> {
-    console.log("🔐 Starting authentication process...");
+    debugLog("🔐 Starting authentication process...");
 
     const { challenge } = await this.challengeService.getChallenge();
 
@@ -42,7 +43,7 @@ export class AuthService {
       subjectIdentifierType: this.config.subjectIdentifierType,
     });
 
-    console.log("📄 Generated XML AuthTokenRequest");
+    debugLog("📄 Generated XML AuthTokenRequest");
 
     const signedXml = await this.crypto.signXml(
       xmlString,
@@ -50,11 +51,11 @@ export class AuthService {
       this.config.privateKey
     );
 
-    console.log("📝 XML signed with XAdES");
+    debugLog("📝 XML signed with XAdES");
 
     const authStart = await this.startAuthentication(signedXml);
 
-    console.log("✅ Authentication started:", authStart.referenceNumber);
+    debugLog("✅ Authentication started:", authStart.referenceNumber);
 
     await this.waitForAuthCompletion(
       authStart.referenceNumber,
@@ -63,7 +64,7 @@ export class AuthService {
 
     const accessToken = await this.redeemToken(authStart.authenticationToken.token);
 
-    console.log("✅ Authentication completed successfully");
+    debugLog("✅ Authentication completed successfully");
 
     return {
       accessToken,
@@ -73,7 +74,7 @@ export class AuthService {
   }
 
   private async startAuthentication(signedXml: string): Promise<AuthStartResponse> {
-    console.log("📤 Sending signed XML to KSeF...");
+    debugLog("📤 Sending signed XML to KSeF...");
 
     const response = await this.httpClient.post<AuthStartResponse>(
       "/auth/xades-signature",
@@ -100,7 +101,7 @@ export class AuthService {
     const deadline = Date.now() + maxWaitMs;
     let attempts = 0;
 
-    console.log("⏳ Waiting for authentication verification...");
+    debugLog("⏳ Waiting for authentication verification...");
 
     while (Date.now() < deadline) {
       attempts++;
@@ -114,13 +115,13 @@ export class AuthService {
       );
 
       if (attempts === 1) {
-        console.log("📋 First auth status response:", JSON.stringify(status, null, 2));
+        debugLog("📋 First auth status response:", JSON.stringify(status, null, 2));
       }
 
       const statusCode = this.extractStatusCode(status);
 
       if (this.isAuthSuccess(status, statusCode)) {
-        console.log("✅ Authentication verified (attempt:", attempts, ")");
+        debugLog("✅ Authentication verified (attempt:", attempts, ")");
         return status;
       }
 
@@ -131,7 +132,7 @@ export class AuthService {
       }
 
       const maxAttempts = Math.ceil(maxWaitMs / intervalMs);
-      console.log(
+      debugLog(
         `⏳ Still waiting... (attempt ${attempts}/${maxAttempts}, status.code: ${statusCode ?? "null"})`
       );
 
@@ -142,7 +143,7 @@ export class AuthService {
   }
 
   private async redeemToken(authToken: string): Promise<string> {
-    console.log("🔄 Redeeming token...");
+    debugLog("🔄 Redeeming token...");
 
     const response = await this.httpClient.post<TokenRedeemResponse>(
       "/auth/token/redeem",

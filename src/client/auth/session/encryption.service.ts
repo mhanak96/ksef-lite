@@ -1,3 +1,4 @@
+import { debugLog, debugError } from '../../../utils/logger';
 import {
   SessionEncryption,
   PublicKeyCertificate,
@@ -11,31 +12,31 @@ export class EncryptionService {
   constructor(private readonly crypto: SessionCryptoOperations) {}
 
   prepareSessionEncryption(certificatesResponse: PublicKeyCertificatesResponse): EncryptionKeys {
-    console.log("🔐 Preparing session encryption...");
+    debugLog("🔐 Preparing session encryption...");
 
     const certificates = this.extractCertificates(certificatesResponse);
 
-    console.log("📋 Certificates to process:", certificates.length);
+    debugLog("📋 Certificates to process:", certificates.length);
 
     if (certificates.length === 0) {
-      console.error("❌ No certificates found in response!");
-      console.error("📋 Response structure:", JSON.stringify(certificatesResponse, null, 2));
+      debugError("❌ No certificates found in response!");
+      debugError("📋 Response structure:", JSON.stringify(certificatesResponse, null, 2));
       throw new Error("No certificates returned from API");
     }
 
     const symKeyCert = this.findValidCertificate(certificates);
 
-    console.log("✅ Found certificate");
-    console.log("📋 Usage:", symKeyCert.usage);
-    console.log("📋 Valid from:", symKeyCert.validFrom);
-    console.log("📋 Valid to:", symKeyCert.validTo);
+    debugLog("✅ Found certificate");
+    debugLog("📋 Usage:", symKeyCert.usage);
+    debugLog("📋 Valid from:", symKeyCert.validFrom);
+    debugLog("📋 Valid to:", symKeyCert.validTo);
 
     const symmetricKey = this.crypto.generateAesKey();
     const iv = this.crypto.generateIv();
 
     const encryptedSymmetricKey = this.crypto.encryptSymmetricKey(symmetricKey, symKeyCert.certificate);
 
-    console.log("✅ Symmetric key encrypted");
+    debugLog("✅ Symmetric key encrypted");
 
     return {
       symmetricKey,
@@ -52,13 +53,13 @@ export class EncryptionService {
   }
 
   encryptInvoice(invoiceXml: string, symmetricKey: Buffer, iv: Buffer): EncryptedInvoice {
-    console.log("🔐 Encrypting invoice...");
+    debugLog("🔐 Encrypting invoice...");
 
     const result = this.crypto.encryptInvoiceXml(invoiceXml, symmetricKey, iv);
 
-    console.log("✅ Invoice encrypted");
-    console.log("📝 Original size:", result.originalSize, "bytes");
-    console.log("📝 Encrypted size:", result.encryptedSize, "bytes");
+    debugLog("✅ Invoice encrypted");
+    debugLog("📝 Original size:", result.originalSize, "bytes");
+    debugLog("📝 Encrypted size:", result.encryptedSize, "bytes");
 
     return {
       encryptedContent: result.encrypted.toString("base64"),
@@ -98,7 +99,7 @@ export class EncryptionService {
       const validTo = new Date(cert.validTo);
       const isValid = validFrom <= now && validTo >= now;
 
-      console.log("🔍 Checking cert:", {
+      debugLog("🔍 Checking cert:", {
         usage: cert.usage,
         hasUsage,
         validFrom: cert.validFrom,
@@ -111,8 +112,8 @@ export class EncryptionService {
     });
 
     if (validCerts.length === 0) {
-      console.error("❌ No valid SymmetricKeyEncryption certificate found!");
-      console.error(
+      debugError("❌ No valid SymmetricKeyEncryption certificate found!");
+      debugError(
         "📋 Available certificates:",
         certificates.map((c) => ({
           usage: c.usage,

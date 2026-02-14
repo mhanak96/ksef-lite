@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { debugLog, debugError } from "../../../utils/logger";
 import { CertificateInfo } from "../types";
 
 /**
@@ -16,11 +17,11 @@ export function verifyKeyMatchesCert(certPem: string, privateKeyPem: string): bo
     verify.update(testData);
     const isValid = verify.verify(certPem, signature);
 
-    console.log("🔍 Key-certificate match:", isValid ? "✅ OK" : "❌ MISMATCH");
+    debugLog("🔍 Key-certificate match:", isValid ? "✅ OK" : "❌ MISMATCH");
 
     return isValid;
   } catch (error) {
-    console.error("🔴 Key verification error:", error instanceof Error ? error.message : String(error));
+    debugError("🔴 Key verification error:", error instanceof Error ? error.message : String(error));
     return false;
   }
 }
@@ -37,8 +38,8 @@ export function parseCertificateInfo(certPem: string): CertificateInfo {
   const serialBigInt = BigInt("0x" + serialHex);
   const serialNumber = serialBigInt.toString(10);
 
-  console.log("📝 Certificate Issuer:", issuer);
-  console.log("📝 Certificate SerialNumber:", serialNumber);
+  debugLog("📝 Certificate Issuer:", issuer);
+  debugLog("📝 Certificate SerialNumber:", serialNumber);
 
   return { issuer, serialNumber };
 }

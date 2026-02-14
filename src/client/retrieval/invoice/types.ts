@@ -70,7 +70,7 @@
      GET INVOICES (METADATA QUERY)
      ========================= */
   
-  export type SubjectType = "Seller" | "Buyer" | "Any";
+  export type SubjectType = "Subject1" | "Subject2" | "Subject3" | "SubjectAuthorized";
   export type DateType = "PermanentStorage" | "Invoicing" | "Issue";
   export type SortOrder = "Asc" | "Desc";
   

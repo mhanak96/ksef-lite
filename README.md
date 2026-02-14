@@ -1,37 +1,38 @@
 # KSeF Lite
 
-Nieoficjalna, lekka biblioteka TypeScript/JavaScript do integracji z KSeF, stanowiąca produkcyjną bazę do rozbudowy, ponieważ w praktyce większość integracji z KSeF potrzebuje tylko kilku najważniejszych operacji.
+Nieoficjalna, lekka biblioteka TypeScript/JavaScript do integracji z polskim KSeF (Krajowy System e-Faktur).
 
-Założenia:
+**Kluczowe cechy:**
 
-- Tylko to, co naprawdę potrzebne w typowych wdrożeniach.
-- Czytelny kod i typy → łatwo dopisać kolejne endpointy/flow.
-- Biblioteka jest nastawiona na uwierzytelnianie certyfikatem (tokeny mają być wycofane do końca 2026 r.).
-- Jak potrzebujesz czgoś bardziej zaawansowanego to sobie dobudujesz (patrz. plik CONTEXT.MD dla modeli LLM).
+- Uwierzytelnianie wyłącznie certyfikatem (tokeny mają być wycofane do końca 2026 r.)
+- Biblioteka backendowa — wymaga Node.js >= 18
+- Tylko 3 zależności produkcyjne: `@xmldom/xmldom`, `qrcode`, `xml-crypto`
+- Generowanie XML faktur FA(3) z JSON-a (`KSefInvoiceGenerator`)
 
-## Aktualne funkcjonalności
+## Funkcjonalności
 
-- ✅ Uwierzytelnianie użytkownika do KSeF przy pomocy certyfikatu
-- ✅ Wysyłka faktur w formacie XML FA(3) do KSeF
-- ✅ Pobieranie UPO
-- ✅ Generowanie kodów QR dla faktur
-- ✅ Pobieranie listy dostępnych faktur z KSeF
+- Uwierzytelnianie użytkownika do KSeF przy pomocy certyfikatu
+- Wysyłka faktur w formacie XML FA(3) do KSeF
+- Pobieranie faktur z KSeF
+- Pobieranie UPO (Urzędowe Poświadczenie Odbioru)
+- Generowanie kodów QR dla faktur (online i offline)
+- Pobieranie listy faktur z KSeF (z paginacją i deduplikacją)
+- Generowanie XML faktur FA(3) z obiektu JSON (`KSefInvoiceGenerator`)
 
 ## TODO
 
-- ⏳ `KsefInvoiceGenerator()` — generowanie XML faktury z JSON-a
-- ⏳ `KsefParser()` — parsowanie XML faktury na obiekt JSON
+- `KsefParser()` — parsowanie XML faktury na obiekt JSON
 
-## Instalacja 
+## Instalacja
 
 ```
 npm i ksef-lite
 ```
 
-## Konfiguracja przy użyciu certyfikatu KSeF
+## Konfiguracja certyfikatu KSeF
 
 1. Zaloguj się do KSeF i wygeneruj certyfikat (autoryzacja tokenami **nie jest obsługiwana**).
-  ![Generowanie certyfikatu w KSeF](./images/certyfikat-strona-ksef.png)
+   ![Generowanie certyfikatu w KSeF](./images/certyfikat-strona-ksef.png)
 
 2. Po uzupełnieniu wszystkich wymaganych informacji otrzymasz dwa pliki:
    - `cert.crt` (certyfikat)
@@ -39,329 +40,467 @@ npm i ksef-lite
 
 3. Plik `.crt` jest gotowy do użycia, natomiast plik `.key` jest zaszyfrowany hasłem podanym w KSeF i przed użyciem trzeba go odszyfrować do postaci PEM.
 
-  ![Plik .crt](./images/certyfikat.png)
+   ![Plik .crt](./images/certyfikat.png)
 
-  ![Zaszyfrowany plik .key](./images/klucz-zaszyfrowany.png)
+   ![Zaszyfrowany plik .key](./images/klucz-zaszyfrowany.png)
 
-   **macOS / windows / linux:**
+   **macOS / Windows / Linux:**
 ```bash
-   openssl rsa -in cert.key -out cert-decrypted.key
+openssl pkey -in cert.key -passin pass:HASLO -out cert-decrypted.key -traditional
 ```
+   > **Uwaga:** W haśle do certyfikatu unikaj znaków specjalnych bash (np. `!`, `$`, `\`, `` ` ``). Ze znaków specjalnych bezpiecznie jest używać tylko podkreślnik `_`. W przeciwnym razie mogą wystąpić problemy z dekodowaniem klucza prywatnego. Komenda działa dla OpenSSL 1.1.1T i nowszych.
 
-4. Otwórz plik `.crt` oraz odszyfrowany klucz (`cert-decrypted.key`) w edytorze (np. VS Code), skopiuj ich zawartość i wklej do `.env` jako wartości zmiennych środowiskowych:
+4. Otwórz plik `.crt` oraz odszyfrowany klucz (`cert-decrypted.key`) w edytorze, skopiuj ich zawartość i wklej do `.env`:
 
 ```env
-   KSEF_CERT=-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----
-   KSEF_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
+KSEF_CERT=-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----
+KSEF_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
 ```
 
-## Przykłady użycia
+## Szybki start
 
-> Przykłady zakładają użycie certyfikatu i klucza z `.env`
-
-### Uwierzytelnianie w KSeF 
-
-> **Ważne (założenia biblioteki):**
-> - `ksef-lite` jest nastawiony na **uwierzytelnianie certyfikatem** (PEM).  
-> - **Tokeny nie są wspierane** (i nie planujemy ich dodawać — to celowe, zgodne z filozofią „lite”).
-> - To jest biblioteka **backendowa** (Node.js / serverless). Nie wkładaj certyfikatu/klucza do frontendu.
-> - Certyfikat i klucz trzymaj w **zmiennych środowiskowych / sekretach** (np. Secret Manager), nie w repo.
-
-
-```js
+```ts
 const { KSefClient } = require("ksef-lite");
 
 const client = new KSefClient({
-  mode, // "test" | "production"
-  contextNip,
-  certificate,
-  privateKey,
-  debug: "test",
+  mode: "test",
+  contextNip: "7812345678",
+  certificate: process.env.KSEF_CERT,
+  privateKey: process.env.KSEF_KEY,
+});
+
+// Wysyłka faktury z UPO i kodem QR
+const result = await client.sendInvoice(invoiceXml, { upo: true, qr: true });
+console.log(result.invoiceKsefNumber); // numer KSeF
+```
+
+## API Reference
+
+### `KSefClient`
+
+Główna klasa biblioteki. Orkiestruje uwierzytelnianie, sesje, wysyłkę/pobieranie faktur, UPO i kody QR.
+
+#### `constructor(config)`
+
+```ts
+new KSefClient(config: KSefClientConfigWithCrypto)
+```
+
+| Parametr | Typ | Wymagany | Opis |
+|---|---|---|---|
+| `mode` | `"production" \| "test" \| "demo"` | Nie | Środowisko KSeF. Domyślnie `"test"` |
+| `contextNip` | `string` | Tak | NIP podmiotu (10 cyfr) |
+| `certificate` | `string` | Tak | Certyfikat w formacie PEM (zawartość pliku `.crt`) |
+| `privateKey` | `string` | Tak | Odszyfrowany klucz prywatny w formacie PEM |
+| `subjectIdentifierType` | `"certificateSubject" \| "certificateFingerprint"` | Nie | Typ identyfikatora. Domyślnie `"certificateSubject"` |
+| `debug` | `boolean` | Nie | Włącza szczegółowe logowanie. Domyślnie `false` |
+| `crypto` | `KSefCryptoOperations` | Nie | Własna implementacja operacji kryptograficznych |
+
+```ts
+const client = new KSefClient({
+  mode: "test",
+  contextNip: "7812345678",
+  certificate: process.env.KSEF_CERT,
+  privateKey: process.env.KSEF_KEY,
+  debug: true,
 });
 ```
-Gdzie:
-- mode: środowisko testowe lub produkcyjne (domyślnie testowe). 
-- contextNip: numer NIP podmiotu, na który wystawiono certyfikat w KSeF
-- certificate - certyfikat (zawartośc pliku .crt)
-- privateKey (zawartośc ODSZYFROWANEGO pliku .key)
-- debug - szczegółowość logowania całego procesu (TODO)
 
-### Wysyłanie faktury do KSeF
+---
 
-```js
-const { KSefClient } = require("ksef-lite");
+#### `sendInvoice(invoiceXml, options?)`
 
-(async () => {
-  const client = new KSefClient({
-    mode, // "test" | "production"
-    contextNip,
-    certificate,
-    privateKey,
-    debug: "test",
-  });
+Wysyła fakturę XML do KSeF. Automatycznie uwierzytelnia się, otwiera sesję, wysyła fakturę i zamyka sesję.
 
-  // Twój plik z fakturą w formacie FA(3) - przykłady link w FAQ
-  const invoiceXml = "";
-
-  const result = await client.sendInvoice(invoiceXml, {
-    upo: true, // czy odpowiedź ma zawierać UPO dla przesłanej faktury
-    qr: true,  // czy odpowiedź ma zawierać kod QR przesłanej faktury
-  });
-
-  console.log(result);
-})().catch(console.error);
+```ts
+async sendInvoice(invoiceXml: string, options?: SendInvoiceOptions): Promise<SendInvoiceResult>
 ```
 
+**`SendInvoiceOptions`**
 
-Format odpowiedzi:
+| Parametr | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `upo` | `boolean` | `false` | Pobrać UPO po wysyłce |
+| `qr` | `boolean` | `false` | Wygenerować kod QR po wysyłce |
 
-```json
+**`SendInvoiceResult`**
+
+```ts
 {
-  "status": 200,
-  "invoiceKsefNumber": "<KSEF_NUMBER>",
-  "invoiceReferenceNumber": "<INVOICE_REF_NUMBER>",
-  "sessionReferenceNumber": "<SESSION_REF_NUMBER>",
-  "invoiceHash": "<INVOICE_HASH_BASE64>",
-  "invoiceSize": 2340,
-  "meta": {
-    "sellerNip": "<SELLER_NIP>",
-    "issueDate": "2026-01-20",
-    "invoiceHashBase64Url": "<INVOICE_HASH_BASE64URL>",
-    "qrVerificationUrl": "<QR_VERIFICATION_URL>"
-  },
-  "upo": {
-    "xml": "<UPO_XML>",
-    "sha256Base64": "<UPO_SHA256_BASE64>"
-  },
-  "qrCode": {
-    "pngBase64": "<QR_PNG_BASE64>",
-    "label": "<KSEF_NUMBER>"
-  }
+  status: number;                    // 200 = sukces, 4xx/5xx = błąd
+  error?: string;                    // opis błędu (tylko przy błędzie)
+  invoiceKsefNumber: string | null;  // numer KSeF faktury
+  invoiceReferenceNumber: string;    // numer referencyjny faktury
+  sessionReferenceNumber: string;    // numer referencyjny sesji
+  invoiceHash: string;               // hash faktury (base64)
+  invoiceSize: number;               // rozmiar faktury w bajtach
+  meta: {
+    sellerNip: string;
+    issueDate: string;
+    invoiceHashBase64Url: string;
+    qrVerificationUrl: string;
+  };
+  upo?: { xml: string; sha256Base64?: string };       // tylko gdy upo=true
+  qrCode?: { pngBase64: string; label: string };      // tylko gdy qr=true
 }
-
 ```
 
-### Pobieranie UPO 
-
-```js
-const { KSefClient } = require("ksef-lite");
-
-(async () => {
-  const client = new KSefClient({
-    mode, // "test" | "production"
-    contextNip,
-    certificate,
-    privateKey,
-    debug: "test",
-  });
-
-  const upo = await client.getInvoiceUpo(KSEF_SESSION_REFERENCE_NUMBER); 
-  // numer sesji w KSeF (patrz wysyłanie faktur) - nie pomyl z resztą numerów!
-
-  console.log(upo);
-})().catch(console.error);
+```ts
+const result = await client.sendInvoice(invoiceXml, { upo: true, qr: true });
+console.log(result.invoiceKsefNumber);
+console.log(result.upo?.xml);
 ```
 
-Format odpowiedzi:
+---
 
-```json
+#### `downloadInvoice(ksefNumber, options?)`
+
+Pobiera fakturę z KSeF po numerze KSeF.
+
+```ts
+async downloadInvoice(ksefNumber: string, options?: DownloadInvoiceOptions): Promise<DownloadedInvoice>
+```
+
+**`DownloadInvoiceOptions`**
+
+| Parametr | Typ | Opis |
+|---|---|---|
+| `timeoutMs` | `number` | Timeout żądania HTTP (ms) |
+
+**`DownloadedInvoice`**
+
+```ts
 {
-  "invoiceReferenceNumber": "<INVOICE_REF_NUMBER>",
-  "ksefNumber": "<KSEF_NUMBER>",
-  "upoDownloadUrlExpirationDate": "2026-01-23T21:19:09.476Z",
-  "xml": "<UPO_XML>",
-  "sha256Base64": "<UPO_SHA256_BASE64>"
+  xml: string;            // pełny XML faktury
+  sha256Base64?: string;  // hash SHA256 (base64)
 }
-
 ```
 
-### Generowanie QR kodu dla faktury 
-
-```js
-const { KSefClient } = require("ksef-lite");
-
-// Generowanie przy pomocy paczki qrcode (można użyć jej ustawień)
-const HARD_CODED = {
-  options: {
-    pixelsPerModule: 5,
-    margin: 1,
-    errorCorrectionLevel: "M",
-    includeDataUrl: true,
-    labelUsesKsefNumber: true,
-  },
-};
-
-(async () => {
-  const client = new KSefClient({
-    mode, // "test" | "production"
-    contextNip,
-    certificate,
-    privateKey,
-    debug: "test",
-  });
-
-  const qr = await client.getInvoiceQRCode(ksefNumber, HARD_CODED.options || {});
-  console.log(qr);
-})().catch(console.error);
+```ts
+const invoice = await client.downloadInvoice("1234567890-20260120-ABCDEF-12");
+console.log(invoice.xml);
 ```
-Format odpowiedzi:
 
-```json
+---
+
+#### `getInvoiceUpo(sessionReferenceNumber, options?)`
+
+Pobiera UPO (Urzędowe Poświadczenie Odbioru) dla sesji.
+
+```ts
+async getInvoiceUpo(sessionReferenceNumber: string, options?: GetInvoiceUpoOptions): Promise<InvoiceUpoResult>
+```
+
+**`GetInvoiceUpoOptions`**
+
+| Parametr | Typ | Opis |
+|---|---|---|
+| `pollingDelayMs` | `number` | Opóźnienie między kolejnymi próbami pollingu |
+| `timeoutMs` | `number` | Maksymalny czas oczekiwania na UPO |
+| `apiTimeoutMs` | `number` | Timeout żądania API |
+| `downloadTimeoutMs` | `number` | Timeout pobierania pliku UPO |
+
+**`InvoiceUpoResult`**
+
+```ts
 {
-  "url": "https://qr-test.ksef.mf.gov.pl/invoice...",
-  "qrPngBase64": "iVBORw0KGgoAAAANSUhEUgAAANcAAADXCAYAAACJfcS1AAAAAklEQVR4AewaftIAAAmASURBVO3B...",
-  "qrDataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANcAAADXCAYAAACJfcS1AAAAAklEQVR4AewaftIAAAmASURBVO3B...",
-  "label": "7812...",
-  "meta": {
-    "sellerNip": "...",
-    "issueDateRaw": "2026-01-17",
-    "issueDateForQr": "17-01-2026",
-    "invoiceHashBase64Url": "...",
-    "qrBaseUrl": "https://qr-test.ksef.mf.gov.pl"
-  }
+  invoiceReferenceNumber: string;
+  ksefNumber: string | null;
+  upoDownloadUrlExpirationDate: string | null;
+  xml: string;
+  sha256Base64?: string;
 }
-
 ```
 
-### Pobieranie faktury 
-
-```js
-const { KSefClient } = require("ksef-lite");
-
-(async () => {
-  const client = new KSefClient({
-    mode, // "test" | "production"
-    contextNip,
-    certificate,
-    privateKey,
-    debug: "test",
-  });
-
-  const invoice = await client.downloadInvoice(ksefNumber);
-  console.log(invoice);
-})().catch(console.error);
+```ts
+const upo = await client.getInvoiceUpo(sessionReferenceNumber);
+console.log(upo.xml);
 ```
 
-```json
+---
+
+#### `getInvoiceQRCode(ksefNumber, options?)`
+
+Generuje kod QR dla faktury (wymaga uwierzytelnienia — pobiera dane z API KSeF).
+
+```ts
+async getInvoiceQRCode(ksefNumber: string, options?: GetInvoiceQRCodeOptions): Promise<InvoiceQRCodeResult>
+```
+
+**`GetInvoiceQRCodeOptions`**
+
+| Parametr | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `pixelsPerModule` | `number` | `5` | Rozmiar piksela modułu QR |
+| `margin` | `number` | `1` | Margines kodu QR |
+| `errorCorrectionLevel` | `"L" \| "M" \| "Q" \| "H"` | `"M"` | Poziom korekcji błędów |
+| `includeDataUrl` | `boolean` | `false` | Dołączyć data URL (`data:image/png;base64,...`) |
+| `labelUsesKsefNumber` | `boolean` | `false` | Użyć numeru KSeF jako etykiety |
+| `apiTimeoutMs` | `number` | — | Timeout żądania API |
+
+**`InvoiceQRCodeResult`**
+
+```ts
 {
-  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Faktura xmlns:etd=\"...\" xmlns:xsi=\"...\" xmlns=\"...\">\n...\n</Faktura>",
-  "sha256Base64": "OYbwcHG8xBEjAqDEO6CjsW9RfncaQVPtHesVzuJwipU="
+  url: string;           // URL weryfikacyjny zakodowany w QR
+  qrPngBase64: string;   // obraz PNG jako base64
+  qrDataUrl?: string;    // data URL (gdy includeDataUrl=true)
+  label: string;         // etykieta (numer KSeF lub "OFFLINE")
+  meta: {
+    sellerNip: string;
+    issueDateRaw: string;
+    issueDateForQr: string;
+    invoiceHashBase64Url: string;
+    qrBaseUrl: string;
+  };
 }
-
 ```
 
-### Pobieranie listy faktur 
+```ts
+const qr = await client.getInvoiceQRCode(ksefNumber, {
+  includeDataUrl: true,
+  errorCorrectionLevel: "H",
+});
+console.log(qr.qrPngBase64);
+```
 
-```js
-const { KSefClient } = require("ksef-lite");
+---
 
-const query = {
-  subjectType: "Subject1", // sprzedawca
+#### `generateQRCodeFromXml(invoiceXml, ksefNumber, options?)`
+
+Generuje kod QR offline — na podstawie XML faktury, bez zapytania do API KSeF. Przydatne gdy masz XML i numer KSeF, ale nie chcesz otwierać sesji.
+
+```ts
+async generateQRCodeFromXml(
+  invoiceXml: string,
+  ksefNumber: string,
+  options?: GetInvoiceQRCodeOptions
+): Promise<InvoiceQRCodeResult>
+```
+
+Parametry `options` i typ wyniku są identyczne jak w `getInvoiceQRCode`.
+
+```ts
+const qr = await client.generateQRCodeFromXml(invoiceXml, ksefNumber);
+console.log(qr.url);
+```
+
+---
+
+#### `getInvoices(query, options?)`
+
+Pobiera listę faktur z KSeF z automatyczną paginacją i opcjonalną deduplikacją.
+
+```ts
+async getInvoices(query: GetInvoicesQuery, options?: GetInvoicesOptions): Promise<GetInvoicesResult>
+```
+
+**`GetInvoicesQuery`**
+
+| Parametr | Typ | Wymagany | Opis |
+|---|---|---|---|
+| `subjectType` | `"Subject1" \| "Subject2" \| "Subject3" \| "SubjectAuthorized"` | Tak | Typ podmiotu (Subject1 = sprzedawca, Subject2 = nabywca) |
+| `dateRange` | `DateRange` | Tak | Zakres dat (patrz niżej) |
+| `invoiceNumber` | `string` | Nie | Filtrowanie po numerze faktury |
+| `ksefNumber` | `string` | Nie | Filtrowanie po numerze KSeF |
+| `counterpartyNip` | `string` | Nie | Filtrowanie po NIP kontrahenta |
+
+**`DateRange`**
+
+| Parametr | Typ | Wymagany | Opis |
+|---|---|---|---|
+| `dateType` | `"PermanentStorage" \| "Invoicing" \| "Issue"` | Tak | Typ daty |
+| `from` | `string` | Tak | Data początkowa (ISO 8601) |
+| `to` | `string` | Nie | Data końcowa (ISO 8601) |
+
+**`GetInvoicesOptions`**
+
+| Parametr | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `sortOrder` | `"Asc" \| "Desc"` | `"Asc"` | Kolejność sortowania |
+| `pageSize` | `number` | `250` | Rozmiar strony |
+| `timeoutMs` | `number` | — | Timeout żądań HTTP |
+| `maxRequests` | `number` | — | Maksymalna liczba żądań |
+| `dedupe` | `boolean` | `false` | Usuwanie duplikatów |
+
+**`GetInvoicesResult`**
+
+```ts
+{
+  invoices: Array<Record<string, unknown>>;   // lista faktur
+  permanentStorageHwmDate: string | null;     // data high-water mark
+  stats: {
+    requests: number;
+    pages: number;
+    windows: number;
+    deduped: number;
+  };
+  cursor: {
+    sortOrder: "Asc" | "Desc";
+    pageSize: number;
+    pageOffset: number;
+    dateRange: DateRange;
+  };
+}
+```
+
+```ts
+const result = await client.getInvoices({
+  subjectType: "Subject1",
   dateRange: {
     dateType: "PermanentStorage",
-    from: "2026-01-01T00:00:00.000Z", // data początkowa
-    to: "2026-01-20T00:00:00.000Z",   // data końcowa
-    restrictToPermanentStorageHwmDate: true,
+    from: "2026-01-01T00:00:00.000Z",
+    to: "2026-01-31T00:00:00.000Z",
   },
-};
+}, { dedupe: true, pageSize: 250 });
 
-const opts = {
-  sortOrder: "Asc",
-  pageSize: 250,
-  timeoutMs: 20000,
-  maxRequests: 2000,
-  dedupe: true,
-};
-
-(async () => {
-  const client = new KSefClient({
-    mode, // "test" | "production"
-    contextNip,
-    certificate,
-    privateKey,
-    debug: "test",
-  });
-
-  const result = await client.getInvoices(query, opts);
-  console.log(result);
-})().catch(console.error);
+console.log(`Znaleziono ${result.invoices.length} faktur`);
 ```
 
-Format odpowiedzi:
+---
 
-```json
+#### `setDebug(debug)` / `isAuthenticated()` / `getConfig()`
 
+Metody pomocnicze:
+
+```ts
+client.setDebug(true);                // włącza/wyłącza debug logging
+client.isAuthenticated();             // true jeśli klient jest uwierzytelniony
+client.getConfig();                   // { mode, baseUrl, apiBaseUrl, contextNip }
+```
+
+---
+
+### `KSefInvoiceGenerator`
+
+Generator faktur XML FA(3) z obiektu JSON. Automatycznie oblicza kwoty VAT, sumy i zaokrąglenia.
+
+```ts
+const { KSefInvoiceGenerator } = require("ksef-lite");
+```
+
+#### `generate(invoice, options?)`
+
+Generuje XML faktury FA(3) z obiektu JSON.
+
+```ts
+generate(invoice: Fa3Invoice | Fa3InvoiceInput | string, options?: { version?: "FA3" }): string
+```
+
+Przyjmuje obiekt `Fa3Invoice` / `Fa3InvoiceInput` lub JSON string. Zwraca gotowy XML faktury.
+
+```ts
+const generator = new KSefInvoiceGenerator();
+const xml = generator.generate({
+  seller: {
+    nip: "7812345678",
+    name: "Firma Sp. z o.o.",
+    address: { countryCode: "PL", line1: "ul. Testowa 1", line2: "00-001 Warszawa" },
+  },
+  buyer: {
+    nip: "2222222222",
+    name: "Klient Sp. z o.o.",
+    address: { countryCode: "PL", line1: "ul. Fakturowa 7", line2: "30-001 Kraków" },
+  },
+  details: {
+    invoiceNumber: "FV/2026/01/001",
+    issueDate: new Date(),
+    currency: "PLN",
+    items: [
+      {
+        description: "Usługa programistyczna",
+        quantity: 10,
+        unitOfMeasure: "godz.",
+        unitPrice: 200,
+        vatRate: "23",
+      },
+    ],
+  },
+});
+
+// xml jest gotowy do wysłania przez client.sendInvoice(xml)
+```
+
+#### `createSampleInvoice()`
+
+Statyczna metoda zwracająca przykładowy obiekt `Fa3Invoice` — przydatna do testów.
+
+```ts
+const sample = KSefInvoiceGenerator.createSampleInvoice();
+const xml = new KSefInvoiceGenerator().generate(sample);
+```
+
+---
+
+### `generateKSefInvoiceQRCode`
+
+Niskopoziomowa, standalone funkcja do generowania kodu QR z dowolnego stringa (np. URL weryfikacyjnego).
+
+```ts
+import { generateKSefInvoiceQRCode } from "ksef-lite";
+
+async function generateKSefInvoiceQRCode(
+  content: string,
+  options?: QRGeneratorOptions
+): Promise<QRCodeResult>
+```
+
+**`QRGeneratorOptions`**
+
+| Parametr | Typ | Domyślnie | Opis |
+|---|---|---|---|
+| `pixelsPerModule` | `number` | `5` | Rozmiar piksela |
+| `margin` | `number` | `1` | Margines |
+| `errorCorrectionLevel` | `"L" \| "M" \| "Q" \| "H"` | `"M"` | Poziom korekcji błędów |
+
+**`QRCodeResult`**
+
+```ts
 {
-  "invoices": [
-    {
-      "ksefNumber": "<KSEF_NUMBER_1>",
-      "invoiceNumber": "<INVOICE_NO_1>",
-      "issueDate": "2026-01-07",
-      "seller": { "nip": "<NIP_SELLER>", "name": "<SELLER_NAME>" },
-      "buyer": { "identifier": { "type": "Nip", "value": "<NIP_BUYER>" }, "name": "<BUYER_NAME>" },
-      "netAmount": 100,
-      "vatAmount": 23,
-      "grossAmount": 123,
-      "currency": "PLN",
-      "invoicingMode": "Online",
-      "invoiceType": "Vat",
-      "invoiceHash": "<HASH_1>"
-    },
-    {
-      "ksefNumber": "<KSEF_NUMBER_2>",
-      "invoiceNumber": "<INVOICE_NO_2>",
-      "issueDate": "2026-01-09",
-      "seller": { "nip": "<NIP_SELLER>", "name": "<SELLER_NAME>" },
-      "buyer": { "identifier": { "type": "Nip", "value": "<NIP_BUYER>" }, "name": "<BUYER_NAME>" },
-      "netAmount": 1000,
-      "vatAmount": 230,
-      "grossAmount": 1230,
-      "currency": "PLN",
-      "invoicingMode": "Online",
-      "invoiceType": "Vat",
-      "invoiceHash": "<HASH_2>",
-      "thirdSubjects": [
-        { "identifier": { "type": "Nip", "value": "<NIP_PAYER>" }, "name": "<PAYER_NAME>", "role": 1 },
-        { "identifier": { "type": "Nip", "value": "<NIP_RECEIVER>" }, "name": "<RECEIVER_NAME>", "role": 2 }
-      ]
-    }
-  ],
-  "permanentStorageHwmDate": "2026-01-20T00:00:00+00:00",
-  "stats": { "requests": 1, "pages": 1 },
-  "cursor": {
-    "sortOrder": "Asc",
-    "pageSize": 250,
-    "pageOffset": 0,
-    "dateRange": {
-      "dateType": "PermanentStorage",
-      "from": "2026-01-01T00:00:00.000Z",
-      "to": "2026-01-20T00:00:00.000Z",
-      "restrictToPermanentStorageHwmDate": true
-    }
-  }
+  pngBase64: string;  // obraz PNG jako base64
+  dataUrl: string;    // data URL gotowy do użycia w <img src="...">
 }
-
 ```
+
+```ts
+const qr = await generateKSefInvoiceQRCode("https://qr.ksef.mf.gov.pl/invoice/...");
+console.log(qr.pngBase64);
+```
+
+## Zaawansowane
+
+Biblioteka eksportuje również niskopoziomowe klasy i funkcje, które można wykorzystać do budowy własnych integracji:
+
+- `AuthService`, `ChallengeService` — obsługa procesu uwierzytelniania
+- `SessionManager` — zarządzanie sesjami KSeF
+- `EncryptionService` — szyfrowanie faktur (AES + RSA)
+- `HttpClient` — klient HTTP z obsługą błędów i timeoutów
+- Funkcje kryptograficzne: `sha256Base64`, `signXmlSimple`, `parseCertificateInfo` i inne
+
+Szczegóły architektury znajdziesz w pliku [CONTEXT.md](./CONTEXT.md).
+
 ## FAQ
 
-**1. Dlaczego dodawanie faktury wyrzuca błąd?**  
+**1. Dlaczego dodawanie faktury wyrzuca błąd?**
 Najczęściej dlatego, że próbujesz wysłać **drugą identyczną fakturę**. W KSeF nie mogą istnieć dwie faktury o tym samym numerze, więc upewnij się, że nie wrzucasz jej ponownie.
 
-**2. Gdzie znajdę więcej informacji o strukturze XML faktury (FA(3))?**  
-Oficjalne materiały i przykłady znajdziesz na stronie KAS:  
+**2. Gdzie znajdę więcej informacji o strukturze XML faktury (FA(3))?**
+Oficjalne materiały i przykłady znajdziesz na stronie KAS:
 https://www.gov.pl/web/kas/krajowy-system-e-faktur
 
 Schemy XML i dokumentacja techniczna są też w oficjalnym repozytorium KSeF API na GitHubie:
-https://github.com/CIRFMF/ksef-docs   
+https://github.com/CIRFMF/ksef-docs
 
-PS. Pracuję też nad funkcją, która pozwoli generować XML FA(3) z JSON-a (`KsefInvoiceGenerator()`).
+**3. Gdzie znajdę kod źródłowy?**
+https://github.com/mhanak96/ksef-lite
+Możesz obserwować repo, zgłaszać uwagi i wrzucać issue — im więcej feedbacku, tym lepiej.
 
-**3. Gdzie znajdę kod źródłowy?**  
-Tutaj 👉 https://github.com/mhanak96/ksef-lite  
-Możesz obserwować repo, zgłaszać uwagi i wrzucać issue - im więcej feedbacku, tym lepiej.
+**4. Czy polecasz jakąś muzykę dobrze oddającą współpracę z API KSeF?**
+Tak. Pixies – Where Is My Mind?
 
-**4. Czy polecasz jakąś muzykę dobrze oddającą współpracę z API KSeF?**  
-Tak. Pixies – Where Is My Mind? 🤯  
+## Changelog
+
+Pełna historia zmian: [CHANGELOG.md](./CHANGELOG.md)
 
 ## Licencja
 
@@ -369,4 +508,4 @@ MIT
 
 ## Kontrybucja
 
-Zachęcam do kontrybucji, ale założeniem projektu jest praktyczność i minimalizm: rozwijamy wyłącznie te funkcjonalności, które są realnie niezbędne w typowych wdrożeniach KSeF, bez wspierania rozwiązań „wstecz” (tokenów oraz formatu FA(2)).
+Zachęcam do kontrybucji, ale założeniem projektu jest praktyczność i minimalizm: rozwijamy wyłącznie te funkcjonalności, które są realnie niezbędne w typowych wdrożeniach KSeF, bez wspierania rozwiązań „wstecz" (tokenów oraz formatu FA(2)).

@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 
+import { debugLog, debugError } from '../../../utils/logger';
 import { HttpClient, isHttpError } from "../../http.client";
 import { KSefEnvironment, KSEF_QR_BASE_URLS } from "../../types";
 import { generateKSefInvoiceQRCode } from "../qr";
@@ -106,7 +107,7 @@ export class InvoiceService {
         const invoice = await this.fetchSessionInvoice(sessionReferenceNumber, apiTimeoutMs);
 
         if (!invoice) {
-          console.log(`📄 [UPO Poll] Attempt ${attempt}: No invoice yet`);
+          debugLog(`📄 [UPO Poll] Attempt ${attempt}: No invoice yet`);
           await this.sleep(pollingDelayMs);
           continue;
         }
@@ -120,7 +121,7 @@ export class InvoiceService {
         }
 
         if (invoice.upoDownloadUrl) {
-          console.log(`📄 [UPO Poll] Attempt ${attempt}: UPO URL found!`);
+          debugLog(`📄 [UPO Poll] Attempt ${attempt}: UPO URL found!`);
           const { xml, sha256Base64 } = await this.downloadUpoXml(invoice.upoDownloadUrl, downloadTimeoutMs);
 
           return {
@@ -132,7 +133,7 @@ export class InvoiceService {
           };
         }
 
-        console.log(`📄 [UPO Poll] Attempt ${attempt}: Waiting for UPO URL...`);
+        debugLog(`📄 [UPO Poll] Attempt ${attempt}: Waiting for UPO URL...`);
         await this.sleep(pollingDelayMs);
       } catch (error: any) {
 
@@ -248,55 +249,55 @@ export class InvoiceService {
     ksefNumber: string,
     options: GetInvoiceQRCodeOptions = {}
   ): Promise<InvoiceQRCodeResult> {
-    console.log(`🔲 [QR Service] generateQRCodeFromXml START`);
-    console.log(`🔲 [QR Service] ksefNumber: "${ksefNumber}"`);
-    console.log(`🔲 [QR Service] invoiceXml length: ${invoiceXml?.length ?? 'null'}`);
-    console.log(`🔲 [QR Service] options: ${JSON.stringify(options)}`);
+    debugLog(`🔲 [QR Service] generateQRCodeFromXml START`);
+    debugLog(`🔲 [QR Service] ksefNumber: "${ksefNumber}"`);
+    debugLog(`🔲 [QR Service] invoiceXml length: ${invoiceXml?.length ?? 'null'}`);
+    debugLog(`🔲 [QR Service] options: ${JSON.stringify(options)}`);
 
     // Walidacja
     if (!invoiceXml || typeof invoiceXml !== 'string') {
-      console.error(`❌ [QR Service] Invalid invoiceXml!`);
+      debugError(`❌ [QR Service] Invalid invoiceXml!`);
       throw new Error('Invalid invoiceXml');
     }
     if (!ksefNumber || typeof ksefNumber !== 'string') {
-      console.error(`❌ [QR Service] Invalid ksefNumber!`);
+      debugError(`❌ [QR Service] Invalid ksefNumber!`);
       throw new Error('Invalid ksefNumber');
     }
 
     try {
       // Wyciągnij dane z lokalnego XML
-      console.log(`🔲 [QR Service] Extracting seller NIP...`);
+      debugLog(`🔲 [QR Service] Extracting seller NIP...`);
       const sellerNip = this.extractSellerNip(invoiceXml);
-      console.log(`🔲 [QR Service] Seller NIP: ${sellerNip}`);
+      debugLog(`🔲 [QR Service] Seller NIP: ${sellerNip}`);
 
-      console.log(`🔲 [QR Service] Extracting issue date...`);
+      debugLog(`🔲 [QR Service] Extracting issue date...`);
       const issueDateRaw = this.extractIssueDate(invoiceXml);
-      console.log(`🔲 [QR Service] Issue date raw: ${issueDateRaw}`);
+      debugLog(`🔲 [QR Service] Issue date raw: ${issueDateRaw}`);
 
       const issueDateForQr = this.formatDateForQr(issueDateRaw);
-      console.log(`🔲 [QR Service] Issue date for QR: ${issueDateForQr}`);
+      debugLog(`🔲 [QR Service] Issue date for QR: ${issueDateForQr}`);
       
       // Oblicz hash z lokalnego XML
-      console.log(`🔲 [QR Service] Computing SHA256 hash...`);
+      debugLog(`🔲 [QR Service] Computing SHA256 hash...`);
       const invoiceHashBase64Url = this.computeSha256Base64Url(invoiceXml);
-      console.log(`🔲 [QR Service] Hash: ${invoiceHashBase64Url}`);
+      debugLog(`🔲 [QR Service] Hash: ${invoiceHashBase64Url}`);
 
       // Zbuduj URL weryfikacyjny
       const qrBaseUrl = KSEF_QR_BASE_URLS[this.environment];
-      console.log(`🔲 [QR Service] QR base URL: ${qrBaseUrl}`);
+      debugLog(`🔲 [QR Service] QR base URL: ${qrBaseUrl}`);
 
       const url = this.buildVerificationUrl(qrBaseUrl, sellerNip, issueDateForQr, invoiceHashBase64Url);
-      console.log(`🔲 [QR Service] Verification URL: ${url}`);
+      debugLog(`🔲 [QR Service] Verification URL: ${url}`);
 
       // Wygeneruj QR code
-      console.log(`🔲 [QR Service] Generating QR code image...`);
+      debugLog(`🔲 [QR Service] Generating QR code image...`);
       const qrCode = await generateKSefInvoiceQRCode(url, {
         pixelsPerModule: options.pixelsPerModule,
         margin: options.margin,
         errorCorrectionLevel: options.errorCorrectionLevel,
       });
-      console.log(`🔲 [QR Service] QR PNG base64 length: ${qrCode.pngBase64?.length ?? 0}`);
-      console.log(`🔲 [QR Service] QR dataUrl length: ${qrCode.dataUrl?.length ?? 0}`);
+      debugLog(`🔲 [QR Service] QR PNG base64 length: ${qrCode.pngBase64?.length ?? 0}`);
+      debugLog(`🔲 [QR Service] QR dataUrl length: ${qrCode.dataUrl?.length ?? 0}`);
 
       const result: InvoiceQRCodeResult = {
         url,
@@ -312,13 +313,13 @@ export class InvoiceService {
         },
       };
 
-      console.log(`✅ [QR Service] generateQRCodeFromXml SUCCESS`);
-      console.log(`🔲 [QR Service] Result URL: ${result.url}`);
-      console.log(`🔲 [QR Service] Result label: ${result.label}`);
+      debugLog(`✅ [QR Service] generateQRCodeFromXml SUCCESS`);
+      debugLog(`🔲 [QR Service] Result URL: ${result.url}`);
+      debugLog(`🔲 [QR Service] Result label: ${result.label}`);
       
       return result;
     } catch (error) {
-      console.error(`❌ [QR Service] generateQRCodeFromXml FAILED:`, error);
+      debugError(`❌ [QR Service] generateQRCodeFromXml FAILED:`, error);
       throw error;
     }
   }

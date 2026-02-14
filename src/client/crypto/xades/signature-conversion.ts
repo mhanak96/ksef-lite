@@ -1,3 +1,5 @@
+import { debugLog } from "../../../utils/logger";
+
 // Krzywa P-256 order (n) - potrzebne do low-S normalization
 const P256_ORDER = BigInt("0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551");
 const P256_HALF_ORDER = P256_ORDER / 2n;
@@ -50,7 +52,7 @@ export function convertDerToP1363WithLowS(derSignature: Buffer): Buffer {
   // Low-S normalization
   if (sBigInt > P256_HALF_ORDER) {
     sBigInt = P256_ORDER - sBigInt;
-    console.log("📝 Applied low-S normalization");
+    debugLog("📝 Applied low-S normalization");
   }
 
   const componentLength = 32;

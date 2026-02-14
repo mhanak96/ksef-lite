@@ -1,6 +1,7 @@
 import { Fa3InvoiceBuilder } from '../builders/fa3-invoice.builder';
 import { Fa3BuildContext } from '../validators/build-context';
 import { InvoiceCalculator } from '../calculators/invoice.calculator';
+import { debugError, debugWarn } from '../../../utils/logger';
 
 import type { 
   Fa3Invoice, 
@@ -84,19 +85,19 @@ export class FA3InvoiceGenerator {
 
     // 4. RAPORTOWANIE BŁĘDÓW
     if (ctx.hasErrors()) {
-      console.error('❌ FA(3) validation errors:');
+      debugError('❌ FA(3) validation errors:');
       for (const issue of ctx.issues) {
         if (issue.severity === 'error') {
-          console.error(`  [${issue.code}] ${issue.path}: ${issue.message}`);
+          debugError(`  [${issue.code}] ${issue.path}: ${issue.message}`);
         }
       }
     }
 
     const warnings = ctx.issues.filter(i => i.severity === 'warning');
     if (warnings.length > 0) {
-      console.warn('⚠️  FA(3) validation warnings:');
+      debugWarn('⚠️  FA(3) validation warnings:');
       for (const issue of warnings) {
-        console.warn(`  [${issue.code}] ${issue.path}: ${issue.message}`);
+        debugWarn(`  [${issue.code}] ${issue.path}: ${issue.message}`);
       }
     }
 

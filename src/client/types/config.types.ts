@@ -18,15 +18,15 @@ export interface KSefUrls {
 }
 
 export const KSEF_API_URLS: Record<KSefEnvironment, string> = {
-  production: "https://ksef.mf.gov.pl/api/v2",
+  production: "https://api.ksef.mf.gov.pl/v2",
   test: "https://api-test.ksef.mf.gov.pl/v2",
-  demo: "https://ksef-demo.ksef.mf.gov.pl/v2",
+  demo: "https://api-demo.ksef.mf.gov.pl/v2",
 };
 
 export const KSEF_SESSION_URLS: Record<KSefEnvironment, string> = {
-  production: "https://ksef.mf.gov.pl/api/v2",
-  test: "https://ksef-test.mf.gov.pl/api/v2",
-  demo: "https://ksef-demo.mf.gov.pl/api/v2",
+  production: "https://api.ksef.mf.gov.pl/v2",
+  test: "https://api-test.ksef.mf.gov.pl/v2",
+  demo: "https://api-demo.ksef.mf.gov.pl/v2",
 };
 
 export const KSEF_QR_BASE_URLS: Record<KSefEnvironment, string> = {
