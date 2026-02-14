@@ -29,13 +29,22 @@ export class AddressBuilder {
 
     // KodKraju (wymagany)
     if (!data.countryCode) {
-      this.vWarn(ctx, 'MISSING_COUNTRY', 'address.countryCode', 'Brak kodu kraju, użyto domyślnie PL');
+      this.vWarn(
+        ctx,
+        'MISSING_COUNTRY',
+        'address.countryCode',
+        'Brak kodu kraju, użyto domyślnie PL'
+      );
     }
-    elements.push(this.element('KodKraju', data.countryCode ?? 'PL', innerLevel));
+    elements.push(
+      this.element('KodKraju', data.countryCode ?? 'PL', innerLevel)
+    );
 
     // Adres w formacie liniowym (AdresL1, AdresL2) lub strukturalnym
     if (data.address || data.line1) {
-      elements.push(this.element('AdresL1', data.address ?? data.line1, innerLevel));
+      elements.push(
+        this.element('AdresL1', data.address ?? data.line1, innerLevel)
+      );
 
       if (this.hasValue(data.line2)) {
         elements.push(this.element('AdresL2', data.line2, innerLevel));
@@ -44,7 +53,12 @@ export class AddressBuilder {
       const addressLine = this.buildAddressLine(data);
       elements.push(this.element('AdresL1', addressLine, innerLevel));
     } else {
-      this.vError(ctx, 'REQUIRED', 'address.line1', 'Brak pierwszej linii adresu');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'address.line1',
+        'Brak pierwszej linii adresu'
+      );
     }
 
     // GLN (opcjonalny)
@@ -66,12 +80,21 @@ export class AddressBuilder {
     const elements: Array<string | null> = [];
 
     if (!data.countryCode) {
-      this.vWarn(ctx, 'MISSING_COUNTRY', 'correspondenceAddress.countryCode', 'Brak kodu kraju, użyto domyślnie PL');
+      this.vWarn(
+        ctx,
+        'MISSING_COUNTRY',
+        'correspondenceAddress.countryCode',
+        'Brak kodu kraju, użyto domyślnie PL'
+      );
     }
-    elements.push(this.element('KodKraju', data.countryCode ?? 'PL', innerLevel));
+    elements.push(
+      this.element('KodKraju', data.countryCode ?? 'PL', innerLevel)
+    );
 
     if (data.address || data.line1) {
-      elements.push(this.element('AdresL1', data.address ?? data.line1, innerLevel));
+      elements.push(
+        this.element('AdresL1', data.address ?? data.line1, innerLevel)
+      );
 
       if (this.hasValue(data.line2)) {
         elements.push(this.element('AdresL2', data.line2, innerLevel));
@@ -146,15 +169,29 @@ export class AddressBuilder {
     const elements: Array<string | null> = [];
 
     if (!data.countryCode) {
-      this.vWarn(ctx, 'MISSING_COUNTRY', `${tagName}.countryCode`, 'Brak kodu kraju, użyto domyślnie PL');
+      this.vWarn(
+        ctx,
+        'MISSING_COUNTRY',
+        `${tagName}.countryCode`,
+        'Brak kodu kraju, użyto domyślnie PL'
+      );
     }
-    elements.push(this.element('KodKraju', data.countryCode ?? 'PL', innerLevel));
+    elements.push(
+      this.element('KodKraju', data.countryCode ?? 'PL', innerLevel)
+    );
 
     // AdresL1 wymagany
     if (!data.address && !data.line1) {
-      this.vError(ctx, 'REQUIRED', `${tagName}.line1`, 'Brak pierwszej linii adresu dostawy');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${tagName}.line1`,
+        'Brak pierwszej linii adresu dostawy'
+      );
     }
-    elements.push(this.element('AdresL1', data.address ?? data.line1 ?? '', innerLevel));
+    elements.push(
+      this.element('AdresL1', data.address ?? data.line1 ?? '', innerLevel)
+    );
 
     if (this.hasValue(data.line2)) {
       elements.push(this.element('AdresL2', data.line2, innerLevel));
@@ -176,9 +213,16 @@ export class AddressBuilder {
     const elements: Array<string | null> = [];
 
     if (!data.countryCode) {
-      this.vWarn(ctx, 'MISSING_COUNTRY', 'address.countryCode', 'Brak kodu kraju, użyto domyślnie PL');
+      this.vWarn(
+        ctx,
+        'MISSING_COUNTRY',
+        'address.countryCode',
+        'Brak kodu kraju, użyto domyślnie PL'
+      );
     }
-    elements.push(this.element('KodKraju', data.countryCode ?? 'PL', innerLevel));
+    elements.push(
+      this.element('KodKraju', data.countryCode ?? 'PL', innerLevel)
+    );
 
     if (this.hasValue(data.province)) {
       elements.push(this.element('Wojewodztwo', data.province, innerLevel));
@@ -223,12 +267,21 @@ export class AddressBuilder {
     const elements: Array<string | null> = [];
 
     if (!data.countryCode) {
-      this.vWarn(ctx, 'MISSING_COUNTRY', 'address.countryCode', 'Brak kodu kraju dla adresu zagranicznego');
+      this.vWarn(
+        ctx,
+        'MISSING_COUNTRY',
+        'address.countryCode',
+        'Brak kodu kraju dla adresu zagranicznego'
+      );
     }
-    elements.push(this.element('KodKraju', data.countryCode ?? 'PL', innerLevel));
+    elements.push(
+      this.element('KodKraju', data.countryCode ?? 'PL', innerLevel)
+    );
 
     if (data.address || data.line1) {
-      elements.push(this.element('AdresL1', data.address ?? data.line1, innerLevel));
+      elements.push(
+        this.element('AdresL1', data.address ?? data.line1, innerLevel)
+      );
 
       if (this.hasValue(data.line2)) {
         elements.push(this.element('AdresL2', data.line2, innerLevel));
@@ -330,7 +383,11 @@ export class AddressBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

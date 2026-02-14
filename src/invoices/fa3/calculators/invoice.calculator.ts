@@ -1,5 +1,5 @@
 // src/invoices/fa3/calculators/invoice.calculator.ts
-"use strict";
+'use strict';
 
 import type {
   Fa3Invoice,
@@ -9,55 +9,209 @@ import type {
   Fa3InvoiceSummary,
   Fa3OrderItem,
   Fa3Order,
-} from "../types";
+} from '../types';
 
 /**
  * Konfiguracja stawek VAT i ich mapowanie na pola KSeF
  */
-const VAT_RATE_CONFIG: Record<string, {
-  type: 'standard' | 'zero' | 'exempt' | 'reverse' | 'margin' | 'oss' | 'outside';
-  numericRate: number;
-  netField: string;
-  vatField: string | null;
-  vatFieldPLN: string | null;
-}> = {
+const VAT_RATE_CONFIG: Record<
+  string,
+  {
+    type:
+      | 'standard'
+      | 'zero'
+      | 'exempt'
+      | 'reverse'
+      | 'margin'
+      | 'oss'
+      | 'outside';
+    numericRate: number;
+    netField: string;
+    vatField: string | null;
+    vatFieldPLN: string | null;
+  }
+> = {
   // Stawki standardowe (z VAT)
-  '23': { type: 'standard', numericRate: 23, netField: 'P_13_1', vatField: 'P_14_1', vatFieldPLN: 'P_14_1W' },
-  '22': { type: 'standard', numericRate: 22, netField: 'P_13_1', vatField: 'P_14_1', vatFieldPLN: 'P_14_1W' },
-  '8':  { type: 'standard', numericRate: 8,  netField: 'P_13_2', vatField: 'P_14_2', vatFieldPLN: 'P_14_2W' },
-  '7':  { type: 'standard', numericRate: 7,  netField: 'P_13_2', vatField: 'P_14_2', vatFieldPLN: 'P_14_2W' },
-  '5':  { type: 'standard', numericRate: 5,  netField: 'P_13_3', vatField: 'P_14_3', vatFieldPLN: 'P_14_3W' },
-  
+  '23': {
+    type: 'standard',
+    numericRate: 23,
+    netField: 'P_13_1',
+    vatField: 'P_14_1',
+    vatFieldPLN: 'P_14_1W',
+  },
+  '22': {
+    type: 'standard',
+    numericRate: 22,
+    netField: 'P_13_1',
+    vatField: 'P_14_1',
+    vatFieldPLN: 'P_14_1W',
+  },
+  '8': {
+    type: 'standard',
+    numericRate: 8,
+    netField: 'P_13_2',
+    vatField: 'P_14_2',
+    vatFieldPLN: 'P_14_2W',
+  },
+  '7': {
+    type: 'standard',
+    numericRate: 7,
+    netField: 'P_13_2',
+    vatField: 'P_14_2',
+    vatFieldPLN: 'P_14_2W',
+  },
+  '5': {
+    type: 'standard',
+    numericRate: 5,
+    netField: 'P_13_3',
+    vatField: 'P_14_3',
+    vatFieldPLN: 'P_14_3W',
+  },
+
   // Ryczałt dla taksówek
-  '4':  { type: 'standard', numericRate: 4,  netField: 'P_13_4', vatField: 'P_14_4', vatFieldPLN: 'P_14_4W' },
-  '3':  { type: 'standard', numericRate: 3,  netField: 'P_13_4', vatField: 'P_14_4', vatFieldPLN: 'P_14_4W' },
-  
+  '4': {
+    type: 'standard',
+    numericRate: 4,
+    netField: 'P_13_4',
+    vatField: 'P_14_4',
+    vatFieldPLN: 'P_14_4W',
+  },
+  '3': {
+    type: 'standard',
+    numericRate: 3,
+    netField: 'P_13_4',
+    vatField: 'P_14_4',
+    vatFieldPLN: 'P_14_4W',
+  },
+
   // Stawka 0%
-  '0 KR':  { type: 'zero', numericRate: 0, netField: 'P_13_6_1', vatField: null, vatFieldPLN: null },
-  '0KR':   { type: 'zero', numericRate: 0, netField: 'P_13_6_1', vatField: null, vatFieldPLN: null },
-  '0 WDT': { type: 'zero', numericRate: 0, netField: 'P_13_6_2', vatField: null, vatFieldPLN: null },
-  '0WDT':  { type: 'zero', numericRate: 0, netField: 'P_13_6_2', vatField: null, vatFieldPLN: null },
-  '0 EX':  { type: 'zero', numericRate: 0, netField: 'P_13_6_3', vatField: null, vatFieldPLN: null },
-  '0EX':   { type: 'zero', numericRate: 0, netField: 'P_13_6_3', vatField: null, vatFieldPLN: null },
-  
+  '0 KR': {
+    type: 'zero',
+    numericRate: 0,
+    netField: 'P_13_6_1',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  '0KR': {
+    type: 'zero',
+    numericRate: 0,
+    netField: 'P_13_6_1',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  '0 WDT': {
+    type: 'zero',
+    numericRate: 0,
+    netField: 'P_13_6_2',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  '0WDT': {
+    type: 'zero',
+    numericRate: 0,
+    netField: 'P_13_6_2',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  '0 EX': {
+    type: 'zero',
+    numericRate: 0,
+    netField: 'P_13_6_3',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  '0EX': {
+    type: 'zero',
+    numericRate: 0,
+    netField: 'P_13_6_3',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+
   // Zwolnione
-  'zw': { type: 'exempt', numericRate: 0, netField: 'P_13_7', vatField: null, vatFieldPLN: null },
-  'ZW': { type: 'exempt', numericRate: 0, netField: 'P_13_7', vatField: null, vatFieldPLN: null },
-  
+  zw: {
+    type: 'exempt',
+    numericRate: 0,
+    netField: 'P_13_7',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  ZW: {
+    type: 'exempt',
+    numericRate: 0,
+    netField: 'P_13_7',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+
   // Niepodlegające opodatkowaniu
-  'np I':  { type: 'outside', numericRate: 0, netField: 'P_13_8', vatField: null, vatFieldPLN: null },
-  'NP_I':  { type: 'outside', numericRate: 0, netField: 'P_13_8', vatField: null, vatFieldPLN: null },
-  'np II': { type: 'outside', numericRate: 0, netField: 'P_13_9', vatField: null, vatFieldPLN: null },
-  'NP_II': { type: 'outside', numericRate: 0, netField: 'P_13_9', vatField: null, vatFieldPLN: null },
-  
+  'np I': {
+    type: 'outside',
+    numericRate: 0,
+    netField: 'P_13_8',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  NP_I: {
+    type: 'outside',
+    numericRate: 0,
+    netField: 'P_13_8',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  'np II': {
+    type: 'outside',
+    numericRate: 0,
+    netField: 'P_13_9',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  NP_II: {
+    type: 'outside',
+    numericRate: 0,
+    netField: 'P_13_9',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+
   // Odwrotne obciążenie
-  'oo': { type: 'reverse', numericRate: 0, netField: 'P_13_10', vatField: null, vatFieldPLN: null },
-  'OO': { type: 'reverse', numericRate: 0, netField: 'P_13_10', vatField: null, vatFieldPLN: null },
-  
+  oo: {
+    type: 'reverse',
+    numericRate: 0,
+    netField: 'P_13_10',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  OO: {
+    type: 'reverse',
+    numericRate: 0,
+    netField: 'P_13_10',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+
   // Procedura marży
-  'marza':  { type: 'margin', numericRate: 0, netField: 'P_13_11', vatField: null, vatFieldPLN: null },
-  'MARZA':  { type: 'margin', numericRate: 0, netField: 'P_13_11', vatField: null, vatFieldPLN: null },
-  'margin': { type: 'margin', numericRate: 0, netField: 'P_13_11', vatField: null, vatFieldPLN: null },
+  marza: {
+    type: 'margin',
+    numericRate: 0,
+    netField: 'P_13_11',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  MARZA: {
+    type: 'margin',
+    numericRate: 0,
+    netField: 'P_13_11',
+    vatField: null,
+    vatFieldPLN: null,
+  },
+  margin: {
+    type: 'margin',
+    numericRate: 0,
+    netField: 'P_13_11',
+    vatField: null,
+    vatFieldPLN: null,
+  },
 };
 
 /**
@@ -99,7 +253,7 @@ export interface CalculatorOptions {
 
 /**
  * Kompleksowy kalkulator faktur KSeF
- * 
+ *
  * Obsługuje:
  * - Wszystkie stawki VAT (23%, 22%, 8%, 7%, 5%, 4%, 3%)
  * - Stawki zerowe (0 KR, 0 WDT, 0 EX)
@@ -174,105 +328,113 @@ export class InvoiceCalculator {
     });
   }
 
-/**
- * Kalkuluje pojedynczy item
- */
-private calculateSingleItem(
-  item: Fa3InvoiceItem,
-  isForeignCurrency: boolean
-): Fa3InvoiceItem {
-  const quantity = this.toNumber(item.quantity, 1);
-  const netPrice = this.toNumber(item.netPrice, 0);
-  const grossPrice = this.toNumber(item.grossPrice, null);
-  const discount = this.toNumber(item.discount, 0);
-  
-  const vatRate = this.normalizeVatRate(item.vatRate);
-  const rateConfig = VAT_RATE_CONFIG[vatRate];
-  const numericRate = rateConfig?.numericRate ?? this.parseNumericRate(vatRate);
-  
-  const exchangeRate = this.toNumber(item.exchangeRate, null) 
-    ?? this.options.defaultExchangeRate;
+  /**
+   * Kalkuluje pojedynczy item
+   */
+  private calculateSingleItem(
+    item: Fa3InvoiceItem,
+    isForeignCurrency: boolean
+  ): Fa3InvoiceItem {
+    const quantity = this.toNumber(item.quantity, 1);
+    const netPrice = this.toNumber(item.netPrice, 0);
+    const grossPrice = this.toNumber(item.grossPrice, null);
+    const discount = this.toNumber(item.discount, 0);
 
-  let netAmount: number;
-  let vatAmount: number;
-  let grossAmount: number;
-  let vatAmountPLN: number | null = null;
+    const vatRate = this.normalizeVatRate(item.vatRate);
+    const rateConfig = VAT_RATE_CONFIG[vatRate];
+    const numericRate =
+      rateConfig?.numericRate ?? this.parseNumericRate(vatRate);
 
-  // Sprawdź czy to procedura marży (tylko grossAmount)
-  if (item.isMargin || rateConfig?.type === 'margin') {
-    grossAmount = this.toNumber(item.grossAmount, 0);
-    netAmount = grossAmount;  // W marży netto = brutto (VAT jest w marży)
-    vatAmount = 0;
-  }
-  // Sprawdź czy podano cenę brutto (art. 106e ust. 7 i 8)
-  else if (grossPrice !== null && netPrice === 0) {
-    grossAmount = this.round(quantity * grossPrice - discount);
-    vatAmount = this.calculateVatFromGross(grossAmount, numericRate);
-    netAmount = this.round(grossAmount - vatAmount);
-  }
-  // Standardowa kalkulacja od netto
-  else {
-    netAmount = item.netAmount !== undefined && item.netAmount !== null
-      ? this.round(item.netAmount)
-      : this.round(quantity * netPrice - discount);
-    
-    vatAmount = this.calculateVat(netAmount, numericRate);
-    grossAmount = this.round(netAmount + vatAmount);
-  }
+    const exchangeRate =
+      this.toNumber(item.exchangeRate, null) ??
+      this.options.defaultExchangeRate;
 
-  // Przelicz VAT na PLN dla walut obcych
-  if (isForeignCurrency && vatAmount > 0 && exchangeRate && exchangeRate !== 1) {
-    vatAmountPLN = this.round(vatAmount * exchangeRate);
-  }
+    let netAmount: number;
+    let vatAmount: number;
+    let grossAmount: number;
+    let vatAmountPLN: number | null = null;
 
-  // ============================================================
-  // ✅ KLUCZOWA ZMIANA - Auto-detect czy potrzebny breakdown
-  // ============================================================
-  const needsBreakdown = 
-    item.isMargin ||                    // procedura marży
-    item.vatRateOSS !== undefined ||    // OSS
-    grossPrice !== null ||              // cena brutto (B2C)
-    rateConfig?.type === 'margin' ||    // marża z config
-    rateConfig?.type === 'oss';         // OSS z config
-
-  // Buduj wynik bazowy (zawsze)
-  const result: Fa3InvoiceItem = {
-    ...item,
-    quantity,
-    netAmount,
-    vatRate,
-  };
-
-  // Dodaj opcjonalne pola tylko gdy są zdefiniowane
-  if (netPrice > 0) {
-    result.netPrice = netPrice;
-  }
-
-  if (discount > 0) {
-    result.discount = discount;
-  }
-
-  // ✅ Dodaj breakdown TYLKO gdy potrzebny
-  if (needsBreakdown) {
-    if (grossPrice !== null) {
-      result.grossPrice = grossPrice;
+    // Sprawdź czy to procedura marży (tylko grossAmount)
+    if (item.isMargin || rateConfig?.type === 'margin') {
+      grossAmount = this.toNumber(item.grossAmount, 0);
+      netAmount = grossAmount; // W marży netto = brutto (VAT jest w marży)
+      vatAmount = 0;
     }
-    result.vatAmount = vatAmount;
-    result.grossAmount = grossAmount;
-  }
+    // Sprawdź czy podano cenę brutto (art. 106e ust. 7 i 8)
+    else if (grossPrice !== null && netPrice === 0) {
+      grossAmount = this.round(quantity * grossPrice - discount);
+      vatAmount = this.calculateVatFromGross(grossAmount, numericRate);
+      netAmount = this.round(grossAmount - vatAmount);
+    }
+    // Standardowa kalkulacja od netto
+    else {
+      netAmount =
+        item.netAmount !== undefined && item.netAmount !== null
+          ? this.round(item.netAmount)
+          : this.round(quantity * netPrice - discount);
 
-  // Waluta obca - dodaj kurs
-  if (isForeignCurrency && exchangeRate !== 1) {
-    result.exchangeRate = exchangeRate;
-  }
+      vatAmount = this.calculateVat(netAmount, numericRate);
+      grossAmount = this.round(netAmount + vatAmount);
+    }
 
-  // VAT w PLN dla walut obcych
-  if (vatAmountPLN !== null) {
-    result.vatAmountPLN = vatAmountPLN;
-  }
+    // Przelicz VAT na PLN dla walut obcych
+    if (
+      isForeignCurrency &&
+      vatAmount > 0 &&
+      exchangeRate &&
+      exchangeRate !== 1
+    ) {
+      vatAmountPLN = this.round(vatAmount * exchangeRate);
+    }
 
-  return result;
-}
+    // ============================================================
+    // ✅ KLUCZOWA ZMIANA - Auto-detect czy potrzebny breakdown
+    // ============================================================
+    const needsBreakdown =
+      item.isMargin || // procedura marży
+      item.vatRateOSS !== undefined || // OSS
+      grossPrice !== null || // cena brutto (B2C)
+      rateConfig?.type === 'margin' || // marża z config
+      rateConfig?.type === 'oss'; // OSS z config
+
+    // Buduj wynik bazowy (zawsze)
+    const result: Fa3InvoiceItem = {
+      ...item,
+      quantity,
+      netAmount,
+      vatRate,
+    };
+
+    // Dodaj opcjonalne pola tylko gdy są zdefiniowane
+    if (netPrice > 0) {
+      result.netPrice = netPrice;
+    }
+
+    if (discount > 0) {
+      result.discount = discount;
+    }
+
+    // ✅ Dodaj breakdown TYLKO gdy potrzebny
+    if (needsBreakdown) {
+      if (grossPrice !== null) {
+        result.grossPrice = grossPrice;
+      }
+      result.vatAmount = vatAmount;
+      result.grossAmount = grossAmount;
+    }
+
+    // Waluta obca - dodaj kurs
+    if (isForeignCurrency && exchangeRate !== 1) {
+      result.exchangeRate = exchangeRate;
+    }
+
+    // VAT w PLN dla walut obcych
+    if (vatAmountPLN !== null) {
+      result.vatAmountPLN = vatAmountPLN;
+    }
+
+    return result;
+  }
 
   /**
    * Buduje vatSummary - grupowanie po stawkach VAT
@@ -290,7 +452,7 @@ private calculateSingleItem(
 
       const vatRate = this.normalizeVatRate(item.vatRate);
       const rateConfig = VAT_RATE_CONFIG[vatRate];
-      
+
       // Klucz grupowania - używamy pola KSeF (P_13_x)
       const groupKey = rateConfig?.netField ?? `custom_${vatRate}`;
 
@@ -323,7 +485,7 @@ private calculateSingleItem(
 
     // Konwertuj na Fa3VatSummary z zaokrągleniem
     const vatSummary: Fa3VatSummary = {};
-    
+
     for (const [key, group] of Object.entries(groups)) {
       const summaryGroup: Fa3VatSummaryGroup = {
         vatRate: group.vatRate,
@@ -362,7 +524,7 @@ private calculateSingleItem(
     invoice: Fa3Invoice
   ): Fa3InvoiceSummary {
     // Filtruj pozycje "przed korektą" - nie wchodzą do sum
-    const activeItems = items.filter(item => item.beforeCorrection !== 1);
+    const activeItems = items.filter((item) => item.beforeCorrection !== 1);
 
     let totalNet = 0;
     let totalVat = 0;
@@ -376,8 +538,8 @@ private calculateSingleItem(
 
     // Dla faktur korygujących - uwzględnij pozycje "przed korektą" jako ujemne
     if (this.isCorrection(invoice.details?.invoiceType)) {
-      const beforeItems = items.filter(item => item.beforeCorrection === 1);
-      
+      const beforeItems = items.filter((item) => item.beforeCorrection === 1);
+
       for (const item of beforeItems) {
         totalNet -= item.netAmount ?? 0;
         totalVat -= item.vatAmount ?? 0;
@@ -397,27 +559,30 @@ private calculateSingleItem(
    */
   private calculateOrder(
     order: Fa3Order,
-    isForeignCurrency: boolean
+    _isForeignCurrency: boolean
   ): Fa3Order {
     if (!order.items || order.items.length === 0) {
       return order;
     }
 
-    const calculatedItems: Fa3OrderItem[] = order.items.map(item => {
+    const calculatedItems: Fa3OrderItem[] = order.items.map((item) => {
       const quantity = this.toNumber(item.quantity, 1);
       const netPrice = this.toNumber(item.netPrice, 0);
-      
+
       const vatRate = this.normalizeVatRate(item.vatRate);
       const rateConfig = VAT_RATE_CONFIG[vatRate];
-      const numericRate = rateConfig?.numericRate ?? this.parseNumericRate(vatRate);
+      const numericRate =
+        rateConfig?.numericRate ?? this.parseNumericRate(vatRate);
 
-      const netAmount = item.netAmount !== undefined && item.netAmount !== null
-        ? this.round(item.netAmount)
-        : this.round(quantity * netPrice);
+      const netAmount =
+        item.netAmount !== undefined && item.netAmount !== null
+          ? this.round(item.netAmount)
+          : this.round(quantity * netPrice);
 
-      const vatAmount = item.vatAmount !== undefined && item.vatAmount !== null
-        ? this.round(item.vatAmount)
-        : this.calculateVat(netAmount, numericRate);
+      const vatAmount =
+        item.vatAmount !== undefined && item.vatAmount !== null
+          ? this.round(item.vatAmount)
+          : this.calculateVat(netAmount, numericRate);
 
       return {
         ...item,
@@ -430,10 +595,13 @@ private calculateSingleItem(
     });
 
     // Oblicz wartość zamówienia (brutto) jeśli nie podano
-    const totalValue = order.totalValue !== undefined && order.totalValue !== null
-      ? order.totalValue
-      : calculatedItems.reduce((sum, item) => 
-          sum + (item.netAmount ?? 0) + (item.vatAmount ?? 0), 0);
+    const totalValue =
+      order.totalValue !== undefined && order.totalValue !== null
+        ? order.totalValue
+        : calculatedItems.reduce(
+            (sum, item) => sum + (item.netAmount ?? 0) + (item.vatAmount ?? 0),
+            0
+          );
 
     return {
       ...order,
@@ -455,7 +623,7 @@ private calculateSingleItem(
    */
   private calculateVatFromGross(grossAmount: number, rate: number): number {
     if (rate <= 0) return 0;
-    return this.round(grossAmount * rate / (100 + rate));
+    return this.round((grossAmount * rate) / (100 + rate));
   }
 
   /**
@@ -463,9 +631,9 @@ private calculateSingleItem(
    */
   private normalizeVatRate(vatRate: string | number | undefined): string {
     if (vatRate === undefined || vatRate === null) return '23';
-    
+
     const str = String(vatRate).trim();
-    
+
     // Zamień popularne warianty
     const normalized = str
       .replace(/^0\s*KR$/i, '0 KR')
@@ -473,7 +641,7 @@ private calculateSingleItem(
       .replace(/^0\s*EX$/i, '0 EX')
       .replace(/^np\s*I$/i, 'np I')
       .replace(/^np\s*II$/i, 'np II');
-    
+
     return normalized;
   }
 
@@ -498,8 +666,10 @@ private calculateSingleItem(
   private ensureItemHasAllFields(item: Fa3InvoiceItem): Fa3InvoiceItem {
     const netAmount = item.netAmount ?? 0;
     const vatRate = this.normalizeVatRate(item.vatRate);
-    const numericRate = VAT_RATE_CONFIG[vatRate]?.numericRate ?? this.parseNumericRate(vatRate);
-    const vatAmount = item.vatAmount ?? this.calculateVat(netAmount, numericRate);
+    const numericRate =
+      VAT_RATE_CONFIG[vatRate]?.numericRate ?? this.parseNumericRate(vatRate);
+    const vatAmount =
+      item.vatAmount ?? this.calculateVat(netAmount, numericRate);
     const grossAmount = item.grossAmount ?? this.round(netAmount + vatAmount);
 
     return {
@@ -533,7 +703,10 @@ private calculateSingleItem(
   /**
    * Statyczna metoda pomocnicza - szybka kalkulacja
    */
-  static calculate(invoice: Fa3Invoice, options?: CalculatorOptions): InvoiceCalculationResult {
+  static calculate(
+    invoice: Fa3Invoice,
+    options?: CalculatorOptions
+  ): InvoiceCalculationResult {
     const calculator = new InvoiceCalculator(options);
     return calculator.calculate(invoice);
   }
@@ -546,7 +719,7 @@ private calculateSingleItem(
       currency: invoice.details?.currency,
       ...options,
     });
-    
+
     const result = calculator.calculate(invoice);
 
     return {
@@ -565,10 +738,16 @@ private calculateSingleItem(
 /**
  * Eksport funkcji pomocniczych dla prostszego użycia
  */
-export function calculateInvoice(invoice: Fa3Invoice, options?: CalculatorOptions): InvoiceCalculationResult {
+export function calculateInvoice(
+  invoice: Fa3Invoice,
+  options?: CalculatorOptions
+): InvoiceCalculationResult {
   return InvoiceCalculator.calculate(invoice, options);
 }
 
-export function processInvoice(invoice: Fa3Invoice, options?: CalculatorOptions): Fa3Invoice {
+export function processInvoice(
+  invoice: Fa3Invoice,
+  options?: CalculatorOptions
+): Fa3Invoice {
   return InvoiceCalculator.process(invoice, options);
 }

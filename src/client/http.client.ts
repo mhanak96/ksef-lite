@@ -1,4 +1,9 @@
-import { HttpClientOptions, HttpError, TimeoutError, ErrorDetails } from "./types";
+import {
+  HttpClientOptions,
+  HttpError,
+  TimeoutError,
+  ErrorDetails,
+} from './types';
 
 export class HttpClient {
   private baseUrl: string;
@@ -9,8 +14,17 @@ export class HttpClient {
     this.debug = debug;
   }
 
-  async request<T = any>(endpoint: string, options: HttpClientOptions = {}): Promise<T> {
-    const { method = "GET", headers = {}, body, timeoutMs = 20000, responseType = "json" } = options;
+  async request<T = any>(
+    endpoint: string,
+    options: HttpClientOptions = {}
+  ): Promise<T> {
+    const {
+      method = 'GET',
+      headers = {},
+      body,
+      timeoutMs = 20000,
+      responseType = 'json',
+    } = options;
 
     const url = `${this.baseUrl}${endpoint}`;
     const controller = new AbortController();
@@ -18,16 +32,16 @@ export class HttpClient {
     const started = Date.now();
 
     try {
-      const isXml = typeof body === "string" && body.trim().startsWith("<?xml");
+      const isXml = typeof body === 'string' && body.trim().startsWith('<?xml');
       const hasBody = body !== undefined && body !== null;
       const isJson = hasBody && !isXml;
 
       const requestHeaders: Record<string, string> = { ...headers };
 
       if (isXml) {
-        requestHeaders["Content-Type"] = "application/xml";
+        requestHeaders['Content-Type'] = 'application/xml';
       } else if (isJson) {
-        requestHeaders["Content-Type"] = "application/json";
+        requestHeaders['Content-Type'] = 'application/json';
       }
 
       const response = await fetch(url, {
@@ -40,7 +54,9 @@ export class HttpClient {
       const elapsed = Date.now() - started;
 
       if (this.debug) {
-        console.log(`[KSeF HTTP] ${method} ${url} -> ${response.status} (${elapsed}ms)`);
+        console.log(
+          `[KSeF HTTP] ${method} ${url} -> ${response.status} (${elapsed}ms)`
+        );
       }
 
       if (!response.ok) {
@@ -49,8 +65,10 @@ export class HttpClient {
 
       return await this.parseResponse<T>(response, responseType);
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        const timeoutError = new Error(`Request timeout after ${timeoutMs}ms for ${url}`) as TimeoutError;
+      if (error instanceof Error && error.name === 'AbortError') {
+        const timeoutError = new Error(
+          `Request timeout after ${timeoutMs}ms for ${url}`
+        ) as TimeoutError;
         timeoutError.isTimeout = true;
         timeoutError.url = url;
         timeoutError.method = method;
@@ -62,7 +80,11 @@ export class HttpClient {
     }
   }
 
-  private async handleErrorResponse(response: Response, url: string, method: string): Promise<never> {
+  private async handleErrorResponse(
+    response: Response,
+    url: string,
+    method: string
+  ): Promise<never> {
     const text = await response.text();
     let data: any;
 
@@ -77,14 +99,16 @@ export class HttpClient {
       console.error(`📋 Response:`, JSON.stringify(data, null, 2));
     }
 
-    const error = new Error(`HTTP ${response.status} ${response.statusText} for ${url}`) as HttpError;
+    const error = new Error(
+      `HTTP ${response.status} ${response.statusText} for ${url}`
+    ) as HttpError;
     error.status = response.status;
     error.statusText = response.statusText;
     error.data = data;
     error.url = url;
     error.method = method;
 
-    const retryAfter = response.headers.get("Retry-After");
+    const retryAfter = response.headers.get('Retry-After');
     if (retryAfter) {
       const n = Number(retryAfter);
       if (Number.isFinite(n)) error.retryAfterSec = n;
@@ -93,14 +117,17 @@ export class HttpClient {
     throw error;
   }
 
-  private async parseResponse<T>(response: Response, responseType: "json" | "text" | "buffer"): Promise<T> {
+  private async parseResponse<T>(
+    response: Response,
+    responseType: 'json' | 'text' | 'buffer'
+  ): Promise<T> {
     switch (responseType) {
-      case "text":
+      case 'text':
         return (await response.text()) as T;
-      case "buffer":
+      case 'buffer':
         return (await response.arrayBuffer()) as T;
-      case "json":
-      default:
+      case 'json':
+      default: {
         const text = await response.text();
         if (!text) {
           return {} as T;
@@ -110,27 +137,46 @@ export class HttpClient {
         } catch {
           return { raw: text } as T;
         }
+      }
     }
   }
 
-  async get<T = any>(endpoint: string, options: Omit<HttpClientOptions, "method" | "body"> = {}): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: "GET" });
+  async get<T = any>(
+    endpoint: string,
+    options: Omit<HttpClientOptions, 'method' | 'body'> = {}
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T = any>(endpoint: string, body?: any, options: Omit<HttpClientOptions, "method" | "body"> = {}): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: "POST", body });
+  async post<T = any>(
+    endpoint: string,
+    body?: any,
+    options: Omit<HttpClientOptions, 'method' | 'body'> = {}
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'POST', body });
   }
 
-  async put<T = any>(endpoint: string, body?: any, options: Omit<HttpClientOptions, "method" | "body"> = {}): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: "PUT", body });
+  async put<T = any>(
+    endpoint: string,
+    body?: any,
+    options: Omit<HttpClientOptions, 'method' | 'body'> = {}
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'PUT', body });
   }
 
-  async delete<T = any>(endpoint: string, options: Omit<HttpClientOptions, "method" | "body"> = {}): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: "DELETE" });
+  async delete<T = any>(
+    endpoint: string,
+    options: Omit<HttpClientOptions, 'method' | 'body'> = {}
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 
-  async patch<T = any>(endpoint: string, body?: any, options: Omit<HttpClientOptions, "method" | "body"> = {}): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: "PATCH", body });
+  async patch<T = any>(
+    endpoint: string,
+    body?: any,
+    options: Omit<HttpClientOptions, 'method' | 'body'> = {}
+  ): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'PATCH', body });
   }
 
   setBaseUrl(baseUrl: string): void {
@@ -151,18 +197,22 @@ export class HttpClient {
    ========================= */
 
 export function isHttpError(error: unknown): error is HttpError {
-  return error instanceof Error && "status" in error && typeof (error as any).status === "number";
+  return (
+    error instanceof Error &&
+    'status' in error &&
+    typeof (error as any).status === 'number'
+  );
 }
 
 export function isTimeoutError(error: unknown): error is TimeoutError {
-  return error instanceof Error && "isTimeout" in error;
+  return error instanceof Error && 'isTimeout' in error;
 }
 
 export function getErrorDetails(error: unknown): ErrorDetails {
   if (!(error instanceof Error)) {
     return {
       message: String(error),
-      type: "unknown",
+      type: 'unknown',
     };
   }
 
@@ -171,7 +221,7 @@ export function getErrorDetails(error: unknown): ErrorDetails {
       message: error.message,
       url: error.url,
       method: error.method,
-      type: "timeout",
+      type: 'timeout',
     };
   }
 
@@ -183,12 +233,12 @@ export function getErrorDetails(error: unknown): ErrorDetails {
       url: error.url,
       method: error.method,
       data: error.data,
-      type: "http",
+      type: 'http',
     };
   }
 
   return {
     message: error.message,
-    type: "unknown",
+    type: 'unknown',
   };
 }

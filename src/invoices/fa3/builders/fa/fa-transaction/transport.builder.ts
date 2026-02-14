@@ -48,30 +48,42 @@ export class TransportBuilder {
 
     // RodzajTransportu (opcjonalne)
     if (transport.type !== undefined && transport.type !== null) {
-      if (!this.reqOneOf(
-        ctx,
-        `${path}.type`,
-        transport.type,
-        [1, 2, 3, 4, 5, 7, 8] as const,
-        'RodzajTransportu musi być 1-5, 7 lub 8'
-      )) {
+      if (
+        !this.reqOneOf(
+          ctx,
+          `${path}.type`,
+          transport.type,
+          [1, 2, 3, 4, 5, 7, 8] as const,
+          'RodzajTransportu musi być 1-5, 7 lub 8'
+        )
+      ) {
         return null;
       }
-      elements.push(this.element('RodzajTransportu', transport.type, innerLevel));
+      elements.push(
+        this.element('RodzajTransportu', transport.type, innerLevel)
+      );
     }
     // TransportInny + OpisInnegoTransportu (opcjonalne)
     else if (transport.otherType === true) {
       elements.push(this.element('TransportInny', '1', innerLevel));
 
-      if (!this.reqString(
-        ctx,
-        `${path}.typeDescription`,
-        transport.typeDescription,
-        'Brak opisu innego rodzaju transportu'
-      )) {
+      if (
+        !this.reqString(
+          ctx,
+          `${path}.typeDescription`,
+          transport.typeDescription,
+          'Brak opisu innego rodzaju transportu'
+        )
+      ) {
         return null;
       }
-      elements.push(this.element('OpisInnegoTransportu', transport.typeDescription, innerLevel));
+      elements.push(
+        this.element(
+          'OpisInnegoTransportu',
+          transport.typeDescription,
+          innerLevel
+        )
+      );
     }
 
     // Przewoznik (opcjonalne)
@@ -82,55 +94,91 @@ export class TransportBuilder {
 
     // NrZleceniaTransportu (opcjonalne)
     if (this.hasValue(transport.orderNumber)) {
-      elements.push(this.element('NrZleceniaTransportu', transport.orderNumber, innerLevel));
+      elements.push(
+        this.element('NrZleceniaTransportu', transport.orderNumber, innerLevel)
+      );
     }
 
     // OpisLadunku (opcjonalne)
     if (transport.cargoType !== undefined && transport.cargoType !== null) {
-      if (!this.reqOneOf(
-        ctx,
-        `${path}.cargoType`,
-        transport.cargoType,
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const,
-        'OpisLadunku musi być 1-20'
-      )) {
+      if (
+        !this.reqOneOf(
+          ctx,
+          `${path}.cargoType`,
+          transport.cargoType,
+          [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20,
+          ] as const,
+          'OpisLadunku musi być 1-20'
+        )
+      ) {
         return null;
       }
-      elements.push(this.element('OpisLadunku', transport.cargoType, innerLevel));
+      elements.push(
+        this.element('OpisLadunku', transport.cargoType, innerLevel)
+      );
     }
     // LadunekInny + OpisInnegoLadunku (opcjonalne)
     else if (transport.otherCargoType === true) {
       elements.push(this.element('LadunekInny', '1', innerLevel));
 
-      if (!this.reqString(
-        ctx,
-        `${path}.cargoDescription`,
-        transport.cargoDescription,
-        'Brak opisu innego ładunku'
-      )) {
+      if (
+        !this.reqString(
+          ctx,
+          `${path}.cargoDescription`,
+          transport.cargoDescription,
+          'Brak opisu innego ładunku'
+        )
+      ) {
         return null;
       }
-      elements.push(this.element('OpisInnegoLadunku', transport.cargoDescription, innerLevel));
+      elements.push(
+        this.element(
+          'OpisInnegoLadunku',
+          transport.cargoDescription,
+          innerLevel
+        )
+      );
     }
 
     // JednostkaOpakowania (opcjonalne)
     if (this.hasValue(transport.packagingUnit)) {
-      elements.push(this.element('JednostkaOpakowania', transport.packagingUnit, innerLevel));
+      elements.push(
+        this.element('JednostkaOpakowania', transport.packagingUnit, innerLevel)
+      );
     }
 
     // DataGodzRozpTransportu (opcjonalne)
     if (transport.startDateTime) {
-      elements.push(this.dateTimeElement('DataGodzRozpTransportu', transport.startDateTime, innerLevel));
+      elements.push(
+        this.dateTimeElement(
+          'DataGodzRozpTransportu',
+          transport.startDateTime,
+          innerLevel
+        )
+      );
     }
 
     // DataGodzZakTransportu (opcjonalne)
     if (transport.endDateTime) {
-      elements.push(this.dateTimeElement('DataGodzZakTransportu', transport.endDateTime, innerLevel));
+      elements.push(
+        this.dateTimeElement(
+          'DataGodzZakTransportu',
+          transport.endDateTime,
+          innerLevel
+        )
+      );
     }
 
     // WysylkaZ (opcjonalne)
     if (transport.fromAddress) {
-      const fromXml = this.buildTransportAddress(transport.fromAddress, innerLevel, 'WysylkaZ', ctx);
+      const fromXml = this.buildTransportAddress(
+        transport.fromAddress,
+        innerLevel,
+        'WysylkaZ',
+        ctx
+      );
       if (fromXml) elements.push(fromXml);
     }
 
@@ -147,14 +195,24 @@ export class TransportBuilder {
 
       const via = transport.viaAddresses.slice(0, 20);
       for (const addr of via) {
-        const viaXml = this.buildTransportAddress(addr, innerLevel, 'WysylkaPrzez', ctx);
+        const viaXml = this.buildTransportAddress(
+          addr,
+          innerLevel,
+          'WysylkaPrzez',
+          ctx
+        );
         if (viaXml) elements.push(viaXml);
       }
     }
 
     // WysylkaDo (opcjonalne)
     if (transport.toAddress) {
-      const toXml = this.buildTransportAddress(transport.toAddress, innerLevel, 'WysylkaDo', ctx);
+      const toXml = this.buildTransportAddress(
+        transport.toAddress,
+        innerLevel,
+        'WysylkaDo',
+        ctx
+      );
       if (toXml) elements.push(toXml);
     }
 
@@ -179,14 +237,25 @@ export class TransportBuilder {
 
     if (this.hasValue(carrier.nip)) {
       identElements.push(this.element('NIP', carrier.nip, innerLevel + 1));
-    } else if (this.hasValue(carrier.vatUE) && this.hasValue(carrier.countryCodeUE)) {
-      identElements.push(this.element('KodUE', carrier.countryCodeUE, innerLevel + 1));
-      identElements.push(this.element('NrVatUE', carrier.vatUE, innerLevel + 1));
+    } else if (
+      this.hasValue(carrier.vatUE) &&
+      this.hasValue(carrier.countryCodeUE)
+    ) {
+      identElements.push(
+        this.element('KodUE', carrier.countryCodeUE, innerLevel + 1)
+      );
+      identElements.push(
+        this.element('NrVatUE', carrier.vatUE, innerLevel + 1)
+      );
     } else if (this.hasValue(carrier.idNumber)) {
       if (this.hasValue(carrier.idCountryCode)) {
-        identElements.push(this.element('KodKraju', carrier.idCountryCode, innerLevel + 1));
+        identElements.push(
+          this.element('KodKraju', carrier.idCountryCode, innerLevel + 1)
+        );
       }
-      identElements.push(this.element('NrID', carrier.idNumber, innerLevel + 1));
+      identElements.push(
+        this.element('NrID', carrier.idNumber, innerLevel + 1)
+      );
     } else if (carrier.noId === true) {
       identElements.push(this.element('BrakID', '1', innerLevel + 1));
     }
@@ -202,7 +271,12 @@ export class TransportBuilder {
 
     // AdresPrzewoznika
     if (carrier.address) {
-      const addressXml = this.buildTransportAddress(carrier.address, innerLevel, 'AdresPrzewoznika', ctx);
+      const addressXml = this.buildTransportAddress(
+        carrier.address,
+        innerLevel,
+        'AdresPrzewoznika',
+        ctx
+      );
       if (addressXml) elements.push(addressXml);
     }
 
@@ -226,7 +300,12 @@ export class TransportBuilder {
     // AdresL1 (wymagane)
     const line1 = data.address ?? data.line1;
     if (!this.hasValue(line1)) {
-      this.vError(ctx, 'REQUIRED', `${tagName}.line1`, 'Brak pierwszej linii adresu transportowego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${tagName}.line1`,
+        'Brak pierwszej linii adresu transportowego'
+      );
       return null;
     }
     elements.push(this.element('AdresL1', line1, innerLevel));
@@ -286,7 +365,12 @@ export class TransportBuilder {
     message: string
   ): value is T {
     if ((allowed as readonly unknown[]).includes(value)) return true;
-    this.vError(ctx, 'ONE_OF', path, `${message}. Dozwolone wartości: ${allowed.join(', ')}`);
+    this.vError(
+      ctx,
+      'ONE_OF',
+      path,
+      `${message}. Dozwolone wartości: ${allowed.join(', ')}`
+    );
     return false;
   }
 
@@ -298,7 +382,11 @@ export class TransportBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }
@@ -330,7 +418,8 @@ export class TransportBuilder {
     if (!dateTime) return '';
 
     if (typeof dateTime === 'string') {
-      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(dateTime)) return dateTime;
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(dateTime))
+        return dateTime;
       dateTime = new Date(dateTime);
     }
 

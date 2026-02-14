@@ -35,6 +35,6 @@ export interface SendInvoiceResult {
   };
 
   // Opcjonalne (tylko przy sukcesie)
-  upo?: { xml: string; sha256Base64?: string; };
-  qrCode?: { pngBase64: string; label: string; };
+  upo?: { xml: string; sha256Base64?: string };
+  qrCode?: { pngBase64: string; label: string };
 }

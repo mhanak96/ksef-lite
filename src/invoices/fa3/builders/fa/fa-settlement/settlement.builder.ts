@@ -20,10 +20,10 @@ export class SettlementBuilder {
     level: number = 1
   ): string | null {
     if (!settlement) return null;
-  
+
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
-  
+
     // Obciazenia (0-100)
     if (settlement.charges && settlement.charges.length > 0) {
       if (settlement.charges.length > 100) {
@@ -34,19 +34,24 @@ export class SettlementBuilder {
           'Liczba obciążeń przekracza limit 100. Przetworzono tylko pierwsze 100.'
         );
       }
-  
+
       const charges = settlement.charges.slice(0, 100);
       for (let i = 0; i < charges.length; i++) {
         const chargeXml = this.buildCharge(charges[i], innerLevel, ctx, i);
         if (chargeXml) elements.push(chargeXml);
       }
     }
-  
+
     // SumaObciazen (opcjonalne)
-    if (settlement.totalCharges !== undefined && settlement.totalCharges !== null) {
-      elements.push(this.amountElement('SumaObciazen', settlement.totalCharges, innerLevel));
+    if (
+      settlement.totalCharges !== undefined &&
+      settlement.totalCharges !== null
+    ) {
+      elements.push(
+        this.amountElement('SumaObciazen', settlement.totalCharges, innerLevel)
+      );
     }
-  
+
     // Odliczenia (0-100)
     if (settlement.deductions && settlement.deductions.length > 0) {
       if (settlement.deductions.length > 100) {
@@ -57,33 +62,60 @@ export class SettlementBuilder {
           'Liczba odliczeń przekracza limit 100. Przetworzono tylko pierwsze 100.'
         );
       }
-  
+
       const deductions = settlement.deductions.slice(0, 100);
       for (let i = 0; i < deductions.length; i++) {
-        const deductionXml = this.buildDeduction(deductions[i], innerLevel, ctx, i);
+        const deductionXml = this.buildDeduction(
+          deductions[i],
+          innerLevel,
+          ctx,
+          i
+        );
         if (deductionXml) elements.push(deductionXml);
       }
     }
-  
+
     // SumaOdliczen (opcjonalne)
-    if (settlement.totalDeductions !== undefined && settlement.totalDeductions !== null) {
-      elements.push(this.amountElement('SumaOdliczen', settlement.totalDeductions, innerLevel));
+    if (
+      settlement.totalDeductions !== undefined &&
+      settlement.totalDeductions !== null
+    ) {
+      elements.push(
+        this.amountElement(
+          'SumaOdliczen',
+          settlement.totalDeductions,
+          innerLevel
+        )
+      );
     }
-  
+
     // DoZaplaty (opcjonalne)
-    if (settlement.amountToPay !== undefined && settlement.amountToPay !== null) {
-      elements.push(this.amountElement('DoZaplaty', settlement.amountToPay, innerLevel));
+    if (
+      settlement.amountToPay !== undefined &&
+      settlement.amountToPay !== null
+    ) {
+      elements.push(
+        this.amountElement('DoZaplaty', settlement.amountToPay, innerLevel)
+      );
     }
-  
+
     // DoRozliczenia (opcjonalne)
-    if (settlement.amountToSettle !== undefined && settlement.amountToSettle !== null) {
-      elements.push(this.amountElement('DoRozliczenia', settlement.amountToSettle, innerLevel));
+    if (
+      settlement.amountToSettle !== undefined &&
+      settlement.amountToSettle !== null
+    ) {
+      elements.push(
+        this.amountElement(
+          'DoRozliczenia',
+          settlement.amountToSettle,
+          innerLevel
+        )
+      );
     }
-  
+
     const xml = this.joinElements(elements);
     return xml ? this.block('Rozliczenie', xml, level) : null;
   }
-  
 
   // ============================================================
   // PRIVATE BUILDERS
@@ -100,13 +132,27 @@ export class SettlementBuilder {
     const elements: Array<string | null> = [];
 
     // Kwota (wymagane)
-    if (!this.reqNumber(ctx, `${path}.amount`, charge.amount, 'Brak kwoty obciążenia')) {
+    if (
+      !this.reqNumber(
+        ctx,
+        `${path}.amount`,
+        charge.amount,
+        'Brak kwoty obciążenia'
+      )
+    ) {
       return null;
     }
     elements.push(this.amountElement('Kwota', charge.amount, innerLevel));
 
     // Powod (wymagane)
-    if (!this.reqString(ctx, `${path}.reason`, charge.reason, 'Brak powodu obciążenia')) {
+    if (
+      !this.reqString(
+        ctx,
+        `${path}.reason`,
+        charge.reason,
+        'Brak powodu obciążenia'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('Powod', charge.reason, innerLevel));
@@ -125,13 +171,27 @@ export class SettlementBuilder {
     const elements: Array<string | null> = [];
 
     // Kwota (wymagane)
-    if (!this.reqNumber(ctx, `${path}.amount`, deduction.amount, 'Brak kwoty odliczenia')) {
+    if (
+      !this.reqNumber(
+        ctx,
+        `${path}.amount`,
+        deduction.amount,
+        'Brak kwoty odliczenia'
+      )
+    ) {
       return null;
     }
     elements.push(this.amountElement('Kwota', deduction.amount, innerLevel));
 
     // Powod (wymagane)
-    if (!this.reqString(ctx, `${path}.reason`, deduction.reason, 'Brak powodu odliczenia')) {
+    if (
+      !this.reqString(
+        ctx,
+        `${path}.reason`,
+        deduction.reason,
+        'Brak powodu odliczenia'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('Powod', deduction.reason, innerLevel));
@@ -191,7 +251,11 @@ export class SettlementBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

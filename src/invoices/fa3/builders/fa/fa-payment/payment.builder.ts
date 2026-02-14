@@ -22,21 +22,34 @@ export class PaymentBuilder {
     level: number = 1
   ): string | null {
     if (!payment) return null;
-  
+
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
-  
+
     // Zaplacono + DataZaplaty
     if (payment.paid === true && payment.paymentDate) {
       elements.push(this.element('Zaplacono', '1', innerLevel));
-  
-      if (!this.reqDateLike(ctx, 'payment.paymentDate', payment.paymentDate, 'Brak daty zapłaty')) {
+
+      if (
+        !this.reqDateLike(
+          ctx,
+          'payment.paymentDate',
+          payment.paymentDate,
+          'Brak daty zapłaty'
+        )
+      ) {
         return null;
       }
-      elements.push(this.dateElement('DataZaplaty', payment.paymentDate, innerLevel));
+      elements.push(
+        this.dateElement('DataZaplaty', payment.paymentDate, innerLevel)
+      );
     }
     // ZnacznikZaplatyCzesciowej + ZaplataCzesciowa (deleguj do PaymentPartsBuilder)
-    else if (payment.partialPaymentFlag && payment.partialPayments && payment.partialPayments.length > 0) {
+    else if (
+      payment.partialPaymentFlag &&
+      payment.partialPayments &&
+      payment.partialPayments.length > 0
+    ) {
       if (
         !this.reqOneOf(
           ctx,
@@ -48,8 +61,14 @@ export class PaymentBuilder {
       ) {
         return null;
       }
-      elements.push(this.element('ZnacznikZaplatyCzesciowej', payment.partialPaymentFlag, innerLevel));
-  
+      elements.push(
+        this.element(
+          'ZnacznikZaplatyCzesciowej',
+          payment.partialPaymentFlag,
+          innerLevel
+        )
+      );
+
       const partialPaymentsXml = this.paymentPartsBuilder.buildPartialPayments(
         payment.partialPayments,
         innerLevel,
@@ -57,7 +76,7 @@ export class PaymentBuilder {
       );
       if (partialPaymentsXml) elements.push(partialPaymentsXml);
     }
-  
+
     // TerminPlatnosci (deleguj do PaymentPartsBuilder)
     const dueDatesXml = this.paymentPartsBuilder.buildDueDates(
       payment.dueDates,
@@ -67,7 +86,7 @@ export class PaymentBuilder {
       ctx
     );
     if (dueDatesXml) elements.push(dueDatesXml);
-  
+
     // FormaPlatnosci
     if (typeof payment.method === 'number') {
       if (
@@ -83,11 +102,11 @@ export class PaymentBuilder {
       }
       elements.push(this.element('FormaPlatnosci', payment.method, innerLevel));
     }
-  
+
     // PlatnoscInna + OpisPlatnosci
     if (payment.otherMethod === true) {
       elements.push(this.element('PlatnoscInna', '1', innerLevel));
-  
+
       if (
         !this.reqString(
           ctx,
@@ -98,9 +117,11 @@ export class PaymentBuilder {
       ) {
         return null;
       }
-      elements.push(this.element('OpisPlatnosci', payment.methodDescription, innerLevel));
+      elements.push(
+        this.element('OpisPlatnosci', payment.methodDescription, innerLevel)
+      );
     }
-  
+
     // RachunekBankowy (deleguj do PaymentPartsBuilder)
     const bankAccountsXml = this.paymentPartsBuilder.buildBankAccounts(
       payment.bankAccounts,
@@ -109,7 +130,7 @@ export class PaymentBuilder {
       ctx
     );
     if (bankAccountsXml) elements.push(bankAccountsXml);
-  
+
     // RachunekBankowyFaktora (deleguj do PaymentPartsBuilder)
     const factorAccountsXml = this.paymentPartsBuilder.buildFactorAccounts(
       payment.factorAccounts,
@@ -117,27 +138,32 @@ export class PaymentBuilder {
       ctx
     );
     if (factorAccountsXml) elements.push(factorAccountsXml);
-  
+
     // Skonto (deleguj do PaymentPartsBuilder)
     if (payment.discount) {
-      const discountXml = this.paymentPartsBuilder.buildDiscount(payment.discount, innerLevel, ctx);
+      const discountXml = this.paymentPartsBuilder.buildDiscount(
+        payment.discount,
+        innerLevel,
+        ctx
+      );
       if (discountXml) elements.push(discountXml);
     }
-  
+
     // LinkDoPlatnosci
     if (this.hasValue(payment.paymentLink)) {
-      elements.push(this.element('LinkDoPlatnosci', payment.paymentLink, innerLevel));
+      elements.push(
+        this.element('LinkDoPlatnosci', payment.paymentLink, innerLevel)
+      );
     }
-  
+
     // IPKSeF
     if (this.hasValue(payment.ksefPaymentId)) {
       elements.push(this.element('IPKSeF', payment.ksefPaymentId, innerLevel));
     }
-  
+
     const xml = this.joinElements(elements);
     return xml ? this.block('Platnosc', xml, level) : null;
   }
-  
 
   // ============================================================
   // VALIDATION HELPERS
@@ -189,7 +215,12 @@ export class PaymentBuilder {
     message: string
   ): value is T {
     if ((allowed as readonly unknown[]).includes(value)) return true;
-    this.vError(ctx, 'ONE_OF', path, `${message}. Dozwolone wartości: ${allowed.join(', ')}`);
+    this.vError(
+      ctx,
+      'ONE_OF',
+      path,
+      `${message}. Dozwolone wartości: ${allowed.join(', ')}`
+    );
     return false;
   }
 
@@ -201,7 +232,11 @@ export class PaymentBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

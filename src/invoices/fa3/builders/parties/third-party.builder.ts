@@ -23,7 +23,7 @@ export class ThirdPartyBuilder {
 
     // Maksymalnie 100 podmiotów trzecich
     const limited = parties.slice(0, 100);
-    
+
     const elements: string[] = [];
     for (const party of limited) {
       const xml = this.build(party, ctx);
@@ -38,7 +38,12 @@ export class ThirdPartyBuilder {
     const innerLevel = level + 1;
 
     if (!party) {
-      this.vError(ctx, 'REQUIRED', 'thirdParty', 'Brak danych podmiotu trzeciego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'thirdParty',
+        'Brak danych podmiotu trzeciego'
+      );
       return null;
     }
 
@@ -60,7 +65,12 @@ export class ThirdPartyBuilder {
 
     // Adres (opcjonalny)
     if (party.address) {
-      const addressXml = this.buildAddress(party.address, 'thirdParty.address', innerLevel + 1, ctx);
+      const addressXml = this.buildAddress(
+        party.address,
+        'thirdParty.address',
+        innerLevel + 1,
+        ctx
+      );
       if (addressXml) {
         elements.push(this.block('Adres', addressXml, innerLevel));
       }
@@ -94,7 +104,9 @@ export class ThirdPartyBuilder {
 
     // NrKlienta (opcjonalny)
     if (this.hasValue(party.customerNumber)) {
-      elements.push(this.element('NrKlienta', party.customerNumber, innerLevel));
+      elements.push(
+        this.element('NrKlienta', party.customerNumber, innerLevel)
+      );
     }
 
     return this.block('Podmiot3', this.joinElements(elements), level);
@@ -123,7 +135,9 @@ export class ThirdPartyBuilder {
       elements.push(this.element('NIP', party.nip, elementLevel));
     } else if (party.idNumber) {
       if (party.countryCode) {
-        elements.push(this.element('KodKraju', party.countryCode, elementLevel));
+        elements.push(
+          this.element('KodKraju', party.countryCode, elementLevel)
+        );
       }
       elements.push(this.element('NrID', party.idNumber, elementLevel));
     } else {
@@ -140,7 +154,11 @@ export class ThirdPartyBuilder {
       elements.push(this.element('Nazwa', party.name, elementLevel));
     }
 
-    return this.block('DaneIdentyfikacyjne', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneIdentyfikacyjne',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
   private buildAddress(
@@ -156,14 +174,22 @@ export class ThirdPartyBuilder {
     const elements: Array<string | null> = [];
 
     if (typeof address === 'string') {
-      const lines = address.split(',').map(l => l.trim()).filter(Boolean);
+      const lines = address
+        .split(',')
+        .map((l) => l.trim())
+        .filter(Boolean);
 
       elements.push(this.element('KodKraju', 'PL', elementLevel));
 
       if (lines[0]) {
         elements.push(this.element('AdresL1', lines[0], elementLevel));
       } else {
-        this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+        this.vError(
+          ctx,
+          'REQUIRED',
+          `${path}.line1`,
+          'Brak pierwszej linii adresu'
+        );
       }
 
       if (lines[1]) {
@@ -174,12 +200,24 @@ export class ThirdPartyBuilder {
     }
 
     if (!address.countryCode) {
-      this.vError(ctx, 'REQUIRED', `${path}.countryCode`, 'Brak kodu kraju w adresie');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.countryCode`,
+        'Brak kodu kraju w adresie'
+      );
     }
-    elements.push(this.element('KodKraju', address.countryCode ?? 'PL', elementLevel));
+    elements.push(
+      this.element('KodKraju', address.countryCode ?? 'PL', elementLevel)
+    );
 
     if (!address.line1) {
-      this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.line1`,
+        'Brak pierwszej linii adresu'
+      );
     }
     elements.push(this.element('AdresL1', address.line1 ?? '', elementLevel));
 
@@ -195,7 +233,10 @@ export class ThirdPartyBuilder {
     return this.joinElements(elements);
   }
 
-  private buildContact(party: Fa3ThirdParty, blockLevel: number): string | null {
+  private buildContact(
+    party: Fa3ThirdParty,
+    blockLevel: number
+  ): string | null {
     if (!party.email && !party.phone) return null;
 
     const elementLevel = blockLevel + 1;
@@ -208,16 +249,26 @@ export class ThirdPartyBuilder {
       elements.push(this.element('Telefon', party.phone, elementLevel));
     }
 
-    return this.block('DaneKontaktowe', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneKontaktowe',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
-  private buildRole(party: Fa3ThirdParty, level: number, ctx?: Fa3BuildContext): string | null {
+  private buildRole(
+    party: Fa3ThirdParty,
+    level: number,
+    ctx?: Fa3BuildContext
+  ): string | null {
     const elements: Array<string | null> = [];
 
     if (party.customRole && party.customRoleDescription) {
       // RolaInna + OpisRoli
       elements.push(this.element('RolaInna', '1', level));
-      elements.push(this.element('OpisRoli', party.customRoleDescription, level));
+      elements.push(
+        this.element('OpisRoli', party.customRoleDescription, level)
+      );
     } else if (party.role) {
       // Rola (1-11)
       const allowedRoles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
@@ -231,7 +282,12 @@ export class ThirdPartyBuilder {
       }
       elements.push(this.element('Rola', String(party.role), level));
     } else {
-      this.vError(ctx, 'REQUIRED', 'thirdParty.role', 'Brak roli podmiotu trzeciego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'thirdParty.role',
+        'Brak roli podmiotu trzeciego'
+      );
     }
 
     return this.joinElements(elements);
@@ -267,7 +323,11 @@ export class ThirdPartyBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

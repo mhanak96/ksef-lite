@@ -41,7 +41,12 @@ export class BuyerBuilder {
     const identXml = this.buildIdentification(buyer, innerLevel, ctx);
     if (identXml) elements.push(identXml);
 
-    const addressXml = this.buildAddress(buyer.address, 'buyer.address', innerLevel + 1, ctx);
+    const addressXml = this.buildAddress(
+      buyer.address,
+      'buyer.address',
+      innerLevel + 1,
+      ctx
+    );
     if (addressXml) {
       elements.push(this.block('Adres', addressXml, innerLevel));
     }
@@ -94,7 +99,11 @@ export class BuyerBuilder {
       elements.push(this.element('Nazwa', bAny.name, elementLevel));
     }
 
-    return this.block('DaneIdentyfikacyjne', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneIdentyfikacyjne',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
   private buildAddress(
@@ -120,7 +129,12 @@ export class BuyerBuilder {
       if (lines[0]) {
         elements.push(this.element('AdresL1', lines[0], elementLevel));
       } else {
-        this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+        this.vError(
+          ctx,
+          'REQUIRED',
+          `${path}.line1`,
+          'Brak pierwszej linii adresu'
+        );
       }
 
       if (lines[1]) {
@@ -131,12 +145,24 @@ export class BuyerBuilder {
     }
 
     if (!address.countryCode) {
-      this.vError(ctx, 'REQUIRED', `${path}.countryCode`, 'Brak kodu kraju w adresie');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.countryCode`,
+        'Brak kodu kraju w adresie'
+      );
     }
-    elements.push(this.element('KodKraju', address.countryCode ?? 'PL', elementLevel));
+    elements.push(
+      this.element('KodKraju', address.countryCode ?? 'PL', elementLevel)
+    );
 
     if (!address.line1) {
-      this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.line1`,
+        'Brak pierwszej linii adresu'
+      );
     }
     elements.push(this.element('AdresL1', address.line1 ?? '', elementLevel));
 
@@ -147,7 +173,10 @@ export class BuyerBuilder {
     return this.joinElements(elements);
   }
 
-  private buildContact(buyer: Fa3Buyer | Fa3CorrectedBuyer, blockLevel: number): string | null {
+  private buildContact(
+    buyer: Fa3Buyer | Fa3CorrectedBuyer,
+    blockLevel: number
+  ): string | null {
     const bAny = buyer as any;
 
     if (!bAny.email && !bAny.phone) return null;
@@ -162,10 +191,18 @@ export class BuyerBuilder {
       elements.push(this.element('Telefon', bAny.phone, elementLevel));
     }
 
-    return this.block('DaneKontaktowe', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneKontaktowe',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
-  private buildJstAndGv(buyer: Fa3Buyer, level: number, ctx?: Fa3BuildContext): Array<string | null> {
+  private buildJstAndGv(
+    buyer: Fa3Buyer,
+    level: number,
+    ctx?: Fa3BuildContext
+  ): Array<string | null> {
     const jstValue = buyer.isJstSubordinate ? '1' : '2';
     const gvValue = buyer.isVatGroupMember ? '1' : '2';
 
@@ -176,7 +213,10 @@ export class BuyerBuilder {
       this.vError(ctx, 'REQUIRED', 'buyer.GV', 'Brak pola GV dla nabywcy');
     }
 
-    return [this.element('JST', jstValue, level), this.element('GV', gvValue, level)];
+    return [
+      this.element('JST', jstValue, level),
+      this.element('GV', gvValue, level),
+    ];
   }
 
   // ============================================================
@@ -209,7 +249,11 @@ export class BuyerBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

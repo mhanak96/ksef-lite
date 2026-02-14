@@ -1,5 +1,9 @@
 import type { Fa3BuildContext } from '../../../validators/build-context';
-import type { Fa3InvoiceDetails, Fa3CorrectedSeller, Fa3CorrectedBuyer } from '../../../types';
+import type {
+  Fa3InvoiceDetails,
+  Fa3CorrectedSeller,
+  Fa3CorrectedBuyer,
+} from '../../../types';
 
 import { SellerBuilder } from '../../parties/seller.builder';
 import { BuyerBuilder } from '../../parties/buyer.builder';
@@ -14,12 +18,11 @@ export class CorrectedPartiesBuilder {
   private readonly indentChar: string;
   private sellerBuilder: SellerBuilder;
   private buyerBuilder: BuyerBuilder;
-  
 
   constructor(options: CorrectedPartiesBuilderOptions = {}) {
     this.indentSize = options.indentSize ?? 2;
     this.indentChar = options.indentChar ?? ' ';
-    
+
     this.sellerBuilder = new SellerBuilder(options);
     this.buyerBuilder = new BuyerBuilder(options);
   }
@@ -43,9 +46,12 @@ export class CorrectedPartiesBuilder {
     }
 
     // Podmiot2K - Korygowani nabywcy (0-101)
-    if ((details as any).correctedBuyers && Array.isArray((details as any).correctedBuyers)) {
+    if (
+      (details as any).correctedBuyers &&
+      Array.isArray((details as any).correctedBuyers)
+    ) {
       const buyers = (details as any).correctedBuyers as Fa3CorrectedBuyer[];
-      
+
       if (buyers.length > 101) {
         this.vWarn(
           ctx,
@@ -57,7 +63,12 @@ export class CorrectedPartiesBuilder {
 
       const limited = buyers.slice(0, 101);
       for (const buyer of limited) {
-        const buyerXml = this.buyerBuilder.buildAs('Podmiot2K', buyer, ctx, level);
+        const buyerXml = this.buyerBuilder.buildAs(
+          'Podmiot2K',
+          buyer,
+          ctx,
+          level
+        );
         if (buyerXml) elements.push(buyerXml);
       }
     }

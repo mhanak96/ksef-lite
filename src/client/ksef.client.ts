@@ -4,17 +4,11 @@ import {
   OpenSessionOptions,
   SessionStatusResponse,
 } from './auth/session/types';
-import {
-  KSefCryptoOperations,
-  AuthResult,
-} from './auth/types';
+import { KSefCryptoOperations, AuthResult } from './auth/types';
 import { ksefCrypto } from './index';
 import { AuthService, SessionManager } from './index';
 import { InvoiceService } from './retrieval/invoice/invoice.service';
-import {
-  KSefEnvironment,
-  KSEF_API_URLS,
-} from './types';
+import { KSefEnvironment, KSEF_API_URLS } from './types';
 import type {
   KSefClientConfigWithCrypto,
   SendInvoiceOptions,
@@ -31,7 +25,12 @@ import {
   DownloadedInvoice,
   DownloadInvoiceOptions,
 } from './retrieval/invoice/types';
-import { debugLog, debugWarn, debugError, setDebugEnabled } from '../utils/logger';
+import {
+  debugLog,
+  debugWarn,
+  debugError,
+  setDebugEnabled,
+} from '../utils/logger';
 import {
   extractSellerNip,
   extractIssueDate,
@@ -39,21 +38,15 @@ import {
   computeSha256Base64Url,
 } from './xml-extract.utils';
 
-export type { KSefClientConfigWithCrypto, SendInvoiceOptions, SendInvoiceResult };
+export type {
+  KSefClientConfigWithCrypto,
+  SendInvoiceOptions,
+  SendInvoiceResult,
+};
 
 /* =========================
    ERROR STATUSES - do przerwania pętli
    ========================= */
-
-const TERMINAL_ERROR_CODES = [
-  400, // Bad request
-  401, // Unauthorized  
-  403, // Forbidden
-  404, // Not found 
-  409, // Conflict - DUPLIKAT FAKTURY!
-  422, // Unprocessable entity
-  500, // Server error
-];
 
 const SESSION_ERROR_DESCRIPTIONS = [
   'duplikat',
@@ -141,9 +134,13 @@ export class KSefClient {
   ): Promise<InvoiceQRCodeResult> {
     debugLog(`🔲 [QR] generateQRCodeFromXml called`);
     debugLog(`🔲 [QR] ksefNumber: ${ksefNumber}`);
-    
+
     try {
-      const result = await this.invoiceService.generateQRCodeFromXml(invoiceXml, ksefNumber, options);
+      const result = await this.invoiceService.generateQRCodeFromXml(
+        invoiceXml,
+        ksefNumber,
+        options
+      );
       debugLog(`✅ [QR] Generated successfully`);
       debugLog(`🔲 [QR] URL: ${result.url}`);
       debugLog(`🔲 [QR] PNG base64 length: ${result.qrPngBase64?.length ?? 0}`);
@@ -162,196 +159,210 @@ export class KSefClient {
     return this.invoiceService.getInvoiceQRCode(ksefNumber, options);
   }
 
-/**
- * Wysyła fakturę do KSeF
- */
-async sendInvoice(
-  invoiceXml: string,
-  options: SendInvoiceOptions = {}
-): Promise<SendInvoiceResult> {
-  const { upo = false, qr = false } = options;
-  
-  debugLog(`📤 [sendInvoice] Starting...`);
-  debugLog(`📤 [sendInvoice] Options: upo=${upo}, qr=${qr}`);
+  /**
+   * Wysyła fakturę do KSeF
+   */
+  async sendInvoice(
+    invoiceXml: string,
+    options: SendInvoiceOptions = {}
+  ): Promise<SendInvoiceResult> {
+    const { upo = false, qr = false } = options;
 
-  await this.ensureAuthenticated();
+    debugLog(`📤 [sendInvoice] Starting...`);
+    debugLog(`📤 [sendInvoice] Options: upo=${upo}, qr=${qr}`);
 
-  // Otwórz sesję
-  const openResponse = await this.openSession();
-  const sessionReferenceNumber = openResponse.referenceNumber;
-  debugLog(`📤 [sendInvoice] Session opened: ${sessionReferenceNumber}`);
+    await this.ensureAuthenticated();
 
-  let invoiceReferenceNumber: string = '';
-  let invoiceHash: string = '';
-  let invoiceSize: number = 0;
-  let errorMessage: string | null = null;
-  let statusCode: number = 200;
+    // Otwórz sesję
+    const openResponse = await this.openSession();
+    const sessionReferenceNumber = openResponse.referenceNumber;
+    debugLog(`📤 [sendInvoice] Session opened: ${sessionReferenceNumber}`);
 
-  try {
-    // Wyślij fakturę
-    const invoiceResponse = await this.sessionManager!.sendInvoiceToSession(
-      invoiceXml,
-      false
-    );
-    invoiceReferenceNumber = invoiceResponse.referenceNumber;
-    invoiceHash = invoiceResponse.invoiceHash;
-    invoiceSize = invoiceResponse.invoiceSize;
-    debugLog(`📤 [sendInvoice] Invoice sent: ${invoiceReferenceNumber}`);
+    let invoiceReferenceNumber: string = '';
+    let invoiceHash: string = '';
+    let invoiceSize: number = 0;
+    let errorMessage: string | null = null;
+    let statusCode: number = 200;
 
-    // Zamknij sesję
-    await this.safeCloseSession();
+    try {
+      // Wyślij fakturę
+      const invoiceResponse = await this.sessionManager!.sendInvoiceToSession(
+        invoiceXml,
+        false
+      );
+      invoiceReferenceNumber = invoiceResponse.referenceNumber;
+      invoiceHash = invoiceResponse.invoiceHash;
+      invoiceSize = invoiceResponse.invoiceSize;
+      debugLog(`📤 [sendInvoice] Invoice sent: ${invoiceReferenceNumber}`);
 
-  } catch (error: any) {
-    debugError(`❌ [sendInvoice] Error during send/close:`, error);
-    await this.emergencyCloseSession();
-    // Nie rzucamy - kontynuujemy żeby zebrać dane
-    errorMessage = error?.message ?? String(error);
-    statusCode = 500;
-  }
-
-  // ✅ Poll status sesji (nawet przy błędzie wysyłki)
-  let sessionStatus: SessionStatusResponse | null = null;
-  try {
-    sessionStatus = await this.pollSessionStatusWithErrorHandling(sessionReferenceNumber);
-    
-    debugLog(`📤 [sendInvoice] Session status code: ${sessionStatus.status?.code}`);
-    debugLog(`📤 [sendInvoice] Session status desc: ${sessionStatus.status?.description}`);
-
-    // Ustaw kod błędu z sesji jeśli jest
-    if (sessionStatus.status?.code && sessionStatus.status.code >= 400) {
-      statusCode = sessionStatus.status.code;
-      errorMessage = sessionStatus.status.description ?? `Error code: ${statusCode}`;
-    }
-  } catch (error: any) {
-    debugError(`❌ [sendInvoice] Error polling session:`, error);
-    if (!errorMessage) {
+      // Zamknij sesję
+      await this.safeCloseSession();
+    } catch (error: any) {
+      debugError(`❌ [sendInvoice] Error during send/close:`, error);
+      await this.emergencyCloseSession();
+      // Nie rzucamy - kontynuujemy żeby zebrać dane
       errorMessage = error?.message ?? String(error);
       statusCode = 500;
     }
-  }
 
-  // ✅ Pobierz metadata (nawet przy błędzie)
-  let ksefNumber: string | null = null;
-  try {
-    const invoiceMetadata = await this.fetchInvoiceMetadataWithErrorHandling(sessionReferenceNumber);
-    ksefNumber = invoiceMetadata?.ksefNumber || null;
-    debugLog(`📤 [sendInvoice] ksefNumber: ${ksefNumber}`);
-  } catch (error: any) {
-    debugError(`❌ [sendInvoice] Error fetching metadata:`, error);
-    // Nie nadpisujemy statusCode - metadata to tylko dodatkowe info
-  }
-
-  // ✅ ZAWSZE wyciągamy dane z XML dla meta
-  let sellerNip = '';
-  let issueDate = '';
-  let invoiceHashBase64Url = '';
-  let qrVerificationUrl = '';
-  
-  try {
-    sellerNip = extractSellerNip(invoiceXml);
-    issueDate = extractIssueDate(invoiceXml);
-    invoiceHashBase64Url = computeSha256Base64Url(invoiceXml);
-    const qrBaseUrl = this.mode === 'production'
-      ? 'https://qr.ksef.mf.gov.pl'
-      : 'https://qr-test.ksef.mf.gov.pl';
-    const issueDateForQr = formatDateForQr(issueDate);
-    qrVerificationUrl = `${qrBaseUrl}/invoice/${sellerNip}/${issueDateForQr}/${invoiceHashBase64Url}`;
-  } catch (error: any) {
-    debugError(`❌ [sendInvoice] Error extracting XML data:`, error);
-  }
-
-  // UPO - tylko jeśli sukces i mamy ksefNumber
-  let invoiceUpo: InvoiceUpoResult | undefined;
-  if (upo && statusCode < 400 && ksefNumber) {
-    debugLog(`📄 [UPO] Fetching UPO...`);
+    // ✅ Poll status sesji (nawet przy błędzie wysyłki)
+    let sessionStatus: SessionStatusResponse | null = null;
     try {
-      invoiceUpo = await this.invoiceService.getInvoiceUpo(sessionReferenceNumber, {
-        pollingDelayMs: this.DEFAULTS.PROCESSING_DELAY_MS,
-        timeoutMs: this.DEFAULTS.UPO_TIMEOUT_MS,
-        apiTimeoutMs: this.DEFAULTS.UPO_API_TIMEOUT_MS,
-        downloadTimeoutMs: this.DEFAULTS.UPO_DOWNLOAD_TIMEOUT_MS,
-      });
-      debugLog(`✅ [UPO] Fetched successfully`);
-    } catch (error) {
-      debugError(`❌ [UPO] Failed:`, error);
-    }
-  }
-
-  // QR - tylko jeśli sukces i mamy ksefNumber
-  let qrPngBase64: string | undefined;
-  if (qr && statusCode < 400 && ksefNumber) {
-    debugLog(`🔲 [QR] Generating QR code...`);
-    try {
-      const invoiceQrCode = await this.invoiceService.generateQRCodeFromXml(
-        invoiceXml,
-        ksefNumber,
-        { apiTimeoutMs: this.DEFAULTS.QR_API_TIMEOUT_MS }
+      sessionStatus = await this.pollSessionStatusWithErrorHandling(
+        sessionReferenceNumber
       );
-      qrPngBase64 = invoiceQrCode.qrPngBase64;
-      debugLog(`✅ [QR] Generated successfully!`);
-    } catch (error) {
-      debugError(`❌ [QR] Generation FAILED:`, error);
+
+      debugLog(
+        `📤 [sendInvoice] Session status code: ${sessionStatus.status?.code}`
+      );
+      debugLog(
+        `📤 [sendInvoice] Session status desc: ${sessionStatus.status?.description}`
+      );
+
+      // Ustaw kod błędu z sesji jeśli jest
+      if (sessionStatus.status?.code && sessionStatus.status.code >= 400) {
+        statusCode = sessionStatus.status.code;
+        errorMessage =
+          sessionStatus.status.description ?? `Error code: ${statusCode}`;
+      }
+    } catch (error: any) {
+      debugError(`❌ [sendInvoice] Error polling session:`, error);
+      if (!errorMessage) {
+        errorMessage = error?.message ?? String(error);
+        statusCode = 500;
+      }
     }
+
+    // ✅ Pobierz metadata (nawet przy błędzie)
+    let ksefNumber: string | null = null;
+    try {
+      const invoiceMetadata = await this.fetchInvoiceMetadataWithErrorHandling(
+        sessionReferenceNumber
+      );
+      ksefNumber = invoiceMetadata?.ksefNumber || null;
+      debugLog(`📤 [sendInvoice] ksefNumber: ${ksefNumber}`);
+    } catch (error: any) {
+      debugError(`❌ [sendInvoice] Error fetching metadata:`, error);
+      // Nie nadpisujemy statusCode - metadata to tylko dodatkowe info
+    }
+
+    // ✅ ZAWSZE wyciągamy dane z XML dla meta
+    let sellerNip = '';
+    let issueDate = '';
+    let invoiceHashBase64Url = '';
+    let qrVerificationUrl = '';
+
+    try {
+      sellerNip = extractSellerNip(invoiceXml);
+      issueDate = extractIssueDate(invoiceXml);
+      invoiceHashBase64Url = computeSha256Base64Url(invoiceXml);
+      const qrBaseUrl =
+        this.mode === 'production'
+          ? 'https://qr.ksef.mf.gov.pl'
+          : 'https://qr-test.ksef.mf.gov.pl';
+      const issueDateForQr = formatDateForQr(issueDate);
+      qrVerificationUrl = `${qrBaseUrl}/invoice/${sellerNip}/${issueDateForQr}/${invoiceHashBase64Url}`;
+    } catch (error: any) {
+      debugError(`❌ [sendInvoice] Error extracting XML data:`, error);
+    }
+
+    // UPO - tylko jeśli sukces i mamy ksefNumber
+    let invoiceUpo: InvoiceUpoResult | undefined;
+    if (upo && statusCode < 400 && ksefNumber) {
+      debugLog(`📄 [UPO] Fetching UPO...`);
+      try {
+        invoiceUpo = await this.invoiceService.getInvoiceUpo(
+          sessionReferenceNumber,
+          {
+            pollingDelayMs: this.DEFAULTS.PROCESSING_DELAY_MS,
+            timeoutMs: this.DEFAULTS.UPO_TIMEOUT_MS,
+            apiTimeoutMs: this.DEFAULTS.UPO_API_TIMEOUT_MS,
+            downloadTimeoutMs: this.DEFAULTS.UPO_DOWNLOAD_TIMEOUT_MS,
+          }
+        );
+        debugLog(`✅ [UPO] Fetched successfully`);
+      } catch (error) {
+        debugError(`❌ [UPO] Failed:`, error);
+      }
+    }
+
+    // QR - tylko jeśli sukces i mamy ksefNumber
+    let qrPngBase64: string | undefined;
+    if (qr && statusCode < 400 && ksefNumber) {
+      debugLog(`🔲 [QR] Generating QR code...`);
+      try {
+        const invoiceQrCode = await this.invoiceService.generateQRCodeFromXml(
+          invoiceXml,
+          ksefNumber,
+          { apiTimeoutMs: this.DEFAULTS.QR_API_TIMEOUT_MS }
+        );
+        qrPngBase64 = invoiceQrCode.qrPngBase64;
+        debugLog(`✅ [QR] Generated successfully!`);
+      } catch (error) {
+        debugError(`❌ [QR] Generation FAILED:`, error);
+      }
+    }
+
+    const result: SendInvoiceResult = {
+      // Status i ewentualny błąd
+      status: statusCode,
+      ...(errorMessage ? { error: errorMessage } : {}),
+
+      // Numer KSeF (null jeśli błąd)
+      invoiceKsefNumber: ksefNumber,
+
+      // Referencje - zawsze dostępne
+      invoiceReferenceNumber,
+      sessionReferenceNumber,
+
+      // Dane faktury
+      invoiceHash,
+      invoiceSize,
+
+      // Meta - zawsze obecne (jeśli udało się wyciągnąć z XML)
+      meta: {
+        sellerNip,
+        issueDate,
+        invoiceHashBase64Url,
+        qrVerificationUrl,
+      },
+
+      // Opcjonalne - tylko przy sukcesie
+      ...(invoiceUpo
+        ? {
+            upo: {
+              xml: invoiceUpo.xml,
+              sha256Base64: invoiceUpo.sha256Base64,
+            },
+          }
+        : {}),
+
+      ...(qrPngBase64
+        ? {
+            qrCode: {
+              pngBase64: qrPngBase64,
+              label: ksefNumber!,
+            },
+          }
+        : {}),
+    };
+
+    debugLog(`${statusCode < 400 ? '✅' : '❌'} [sendInvoice] Complete!`);
+    debugLog(`📤 [sendInvoice] status: ${result.status}`);
+    debugLog(`📤 [sendInvoice] error: ${errorMessage ?? 'none'}`);
+    debugLog(`📤 [sendInvoice] invoiceKsefNumber: ${result.invoiceKsefNumber}`);
+
+    return result;
   }
-
-  const result: SendInvoiceResult = {
-    // Status i ewentualny błąd
-    status: statusCode,
-    ...(errorMessage ? { error: errorMessage } : {}),
-    
-    // Numer KSeF (null jeśli błąd)
-    invoiceKsefNumber: ksefNumber,
-    
-    // Referencje - zawsze dostępne
-    invoiceReferenceNumber,
-    sessionReferenceNumber,
-    
-    // Dane faktury
-    invoiceHash,
-    invoiceSize,
-    
-    // Meta - zawsze obecne (jeśli udało się wyciągnąć z XML)
-    meta: {
-      sellerNip,
-      issueDate,
-      invoiceHashBase64Url,
-      qrVerificationUrl,
-    },
-    
-    // Opcjonalne - tylko przy sukcesie
-    ...(invoiceUpo ? { 
-      upo: {
-        xml: invoiceUpo.xml,
-        sha256Base64: invoiceUpo.sha256Base64,
-      }
-    } : {}),
-    
-    ...(qrPngBase64 ? { 
-      qrCode: {
-        pngBase64: qrPngBase64,
-        label: ksefNumber!,
-      }
-    } : {}),
-  };
-
-  debugLog(`${statusCode < 400 ? '✅' : '❌'} [sendInvoice] Complete!`);
-  debugLog(`📤 [sendInvoice] status: ${result.status}`);
-  debugLog(`📤 [sendInvoice] error: ${errorMessage ?? 'none'}`);
-  debugLog(`📤 [sendInvoice] invoiceKsefNumber: ${result.invoiceKsefNumber}`);
-  
-  return result;
-}
 
   /* =========================
      PRIVATE - ERROR HANDLING
      ========================= */
 
-
   private checkForSessionError(status: SessionStatusResponse): void {
     const code = status.status?.code;
     const description = status.status?.description?.toLowerCase() ?? '';
 
- 
     if (code && code >= 400) {
       throw new Error(
         `Session error: code=${code}, description=${status.status?.description}`
@@ -369,7 +380,7 @@ async sendInvoice(
     // Sprawdź czy są nieudane faktury
     const totalCount = status.invoiceCount ?? 0;
     const successCount = status.successfulInvoiceCount ?? 0;
-    
+
     if (totalCount > 0 && successCount === 0) {
       throw new Error(
         `All invoices failed: ${totalCount} sent, 0 successful. Status: ${status.status?.description}`
@@ -377,14 +388,15 @@ async sendInvoice(
     }
   }
 
-
   private async pollSessionStatusWithErrorHandling(
     sessionReferenceNumber: string
   ): Promise<SessionStatusResponse> {
     const maxAttempts = this.DEFAULTS.MAX_POLLING_ATTEMPTS;
     const delayMs = this.DEFAULTS.PROCESSING_DELAY_MS;
-    
-    debugLog(`⏳ [Poll] Starting session status polling (max ${maxAttempts} attempts)...`);
+
+    debugLog(
+      `⏳ [Poll] Starting session status polling (max ${maxAttempts} attempts)...`
+    );
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -400,10 +412,11 @@ async sendInvoice(
 
         const code = response.status?.code;
         const desc = response.status?.description ?? '';
-        
-        debugLog(`⏳ [Poll] Attempt ${attempt}/${maxAttempts}: code=${code}, desc="${desc}"`);
 
- 
+        debugLog(
+          `⏳ [Poll] Attempt ${attempt}/${maxAttempts}: code=${code}, desc="${desc}"`
+        );
+
         if (code && code >= 400) {
           debugError(`❌ [Poll] Error status detected! Stopping.`);
           return response;
@@ -414,19 +427,23 @@ async sendInvoice(
           return response;
         }
 
-
         await this.sleep(delayMs);
       } catch (error: any) {
-        debugError(`❌ [Poll] Attempt ${attempt} failed:`, error?.message ?? error);
-        
+        debugError(
+          `❌ [Poll] Attempt ${attempt} failed:`,
+          error?.message ?? error
+        );
+
         if (error?.status && error.status >= 400) {
-          throw new Error(`Session polling failed with HTTP ${error.status}: ${error.message}`);
+          throw new Error(
+            `Session polling failed with HTTP ${error.status}: ${error.message}`
+          );
         }
-        
+
         if (attempt === maxAttempts) {
           throw error;
         }
-        
+
         await this.sleep(delayMs);
       }
     }
@@ -438,49 +455,49 @@ async sendInvoice(
 
   private isTerminalStatus(status: SessionStatusResponse): boolean {
     const code = status.status?.code;
-    
+
     // Sukces
     if (code === 200) return true;
-    
+
     // Błędy są też terminalne
     if (code && code >= 400) return true;
-    
+
     // Sprawdź czy są przetworzone faktury
-    const hasProcessedInvoices = 
-      (status.invoiceCount ?? 0) > 0 && 
+    const hasProcessedInvoices =
+      (status.invoiceCount ?? 0) > 0 &&
       (status.successfulInvoiceCount ?? 0) > 0;
-    
+
     if (hasProcessedInvoices) return true;
-    
 
     const desc = status.status?.description?.toLowerCase() ?? '';
     const terminalPhrases = [
-      'zakończon', 
-      'przetworzon', 
+      'zakończon',
+      'przetworzon',
       'completed',
       'finished',
       'success',
       'error',
       'failed',
-      'odrzucon', 
+      'odrzucon',
       'rejected',
     ];
-    
+
     for (const phrase of terminalPhrases) {
       if (desc.includes(phrase)) return true;
     }
-    
+
     return false;
   }
-
 
   private async fetchInvoiceMetadataWithErrorHandling(
     sessionReferenceNumber: string
   ): Promise<any> {
     const maxAttempts = this.DEFAULTS.MAX_POLLING_ATTEMPTS;
     const delayMs = this.DEFAULTS.PROCESSING_DELAY_MS;
-    
-    debugLog(`📋 [Metadata] Fetching invoice metadata (max ${maxAttempts} attempts)...`);
+
+    debugLog(
+      `📋 [Metadata] Fetching invoice metadata (max ${maxAttempts} attempts)...`
+    );
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -495,24 +512,28 @@ async sendInvoice(
         );
 
         const invoice = response.invoices?.[0];
-        
+
         debugLog(`📋 [Metadata] Attempt ${attempt}/${maxAttempts}`);
-        debugLog(`📋 [Metadata] Invoices count: ${response.invoices?.length ?? 0}`);
-        
+        debugLog(
+          `📋 [Metadata] Invoices count: ${response.invoices?.length ?? 0}`
+        );
+
         if (invoice) {
-          debugLog(`📋 [Metadata] Invoice referenceNumber: ${invoice.referenceNumber}`);
+          debugLog(
+            `📋 [Metadata] Invoice referenceNumber: ${invoice.referenceNumber}`
+          );
           debugLog(`📋 [Metadata] Invoice ksefNumber: ${invoice.ksefNumber}`);
-          debugLog(`📋 [Metadata] Invoice status: ${JSON.stringify(invoice.status)}`);
-          
-         
+          debugLog(
+            `📋 [Metadata] Invoice status: ${JSON.stringify(invoice.status)}`
+          );
+
           const invoiceStatus = invoice.status?.code;
           if (invoiceStatus && invoiceStatus >= 400) {
             throw new Error(
               `Invoice error: code=${invoiceStatus}, description=${invoice.status?.description}`
             );
           }
-          
-       
+
           if (invoice.ksefNumber) {
             debugLog(`✅ [Metadata] Got ksefNumber: ${invoice.ksefNumber}`);
             return invoice;
@@ -521,23 +542,28 @@ async sendInvoice(
 
         await this.sleep(delayMs);
       } catch (error: any) {
-        debugError(`❌ [Metadata] Attempt ${attempt} failed:`, error?.message ?? error);
-        
+        debugError(
+          `❌ [Metadata] Attempt ${attempt} failed:`,
+          error?.message ?? error
+        );
+
         // ✅ Jeśli to błąd faktury - przerwij
         if (error?.message?.includes('Invoice error')) {
           throw error;
         }
-        
+
         if (attempt === maxAttempts) {
           debugWarn(`⚠️ [Metadata] Max attempts reached, returning null`);
           return null;
         }
-        
+
         await this.sleep(delayMs);
       }
     }
 
-    debugWarn(`⚠️ [Metadata] Could not fetch ksefNumber after ${maxAttempts} attempts`);
+    debugWarn(
+      `⚠️ [Metadata] Could not fetch ksefNumber after ${maxAttempts} attempts`
+    );
     return null;
   }
 
@@ -647,7 +673,7 @@ async sendInvoice(
       try {
         await this.closeSession();
       } catch {
-
+        // Emergency close - ignore errors
       }
     }
   }

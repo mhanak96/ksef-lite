@@ -3,4 +3,3 @@
 export { FA3InvoiceGenerator } from './generators/FA3InvoiceGenerator';
 
 export * from './types';
-

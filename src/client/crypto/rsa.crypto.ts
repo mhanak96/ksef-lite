@@ -1,5 +1,5 @@
-import crypto from "crypto";
-import { pemFromBase64Cert } from "./hash.utils";
+import crypto from 'crypto';
+import { pemFromBase64Cert } from './hash.utils';
 
 export class RsaCrypto {
   /**
@@ -11,21 +11,28 @@ export class RsaCrypto {
         {
           key: publicKeyPem,
           padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-          oaepHash: "sha256",
+          oaepHash: 'sha256',
         },
         data
       );
     } catch (error) {
-      throw new Error(`RSA encryption failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `RSA encryption failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
   /**
    * Szyfruje klucz symetryczny AES certyfikatem KSeF
    */
-  static encryptSymmetricKey(symmetricKey: Buffer, certificateBase64: string): Buffer {
+  static encryptSymmetricKey(
+    symmetricKey: Buffer,
+    certificateBase64: string
+  ): Buffer {
     if (symmetricKey.length !== 32) {
-      throw new Error(`Symmetric key must be 32 bytes (AES-256), got ${symmetricKey.length}`);
+      throw new Error(
+        `Symmetric key must be 32 bytes (AES-256), got ${symmetricKey.length}`
+      );
     }
 
     const publicKeyPem = pemFromBase64Cert(certificateBase64);
@@ -35,18 +42,23 @@ export class RsaCrypto {
   /**
    * Deszyfruje dane kluczem prywatnym RSA używając OAEP + SHA-256
    */
-  static decryptWithPrivateKey(encryptedData: Buffer, privateKeyPem: string): Buffer {
+  static decryptWithPrivateKey(
+    encryptedData: Buffer,
+    privateKeyPem: string
+  ): Buffer {
     try {
       return crypto.privateDecrypt(
         {
           key: privateKeyPem,
           padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-          oaepHash: "sha256",
+          oaepHash: 'sha256',
         },
         encryptedData
       );
     } catch (error) {
-      throw new Error(`RSA decryption failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `RSA decryption failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 }

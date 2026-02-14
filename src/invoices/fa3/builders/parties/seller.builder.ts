@@ -46,10 +46,19 @@ export class SellerBuilder {
 
     const elements: Array<string | null> = [];
 
-    const identXml = this.buildIdentification(seller as SellerLike, innerLevel, ctx);
+    const identXml = this.buildIdentification(
+      seller as SellerLike,
+      innerLevel,
+      ctx
+    );
     if (identXml) elements.push(identXml);
 
-    const addressXml = this.buildAddress((seller as SellerLike).address, 'seller.address', innerLevel, ctx);
+    const addressXml = this.buildAddress(
+      (seller as SellerLike).address,
+      'seller.address',
+      innerLevel,
+      ctx
+    );
     if (addressXml) {
       elements.push(this.block('Adres', addressXml, innerLevel));
     } else {
@@ -80,7 +89,11 @@ export class SellerBuilder {
     }
     elements.push(this.element('Nazwa', seller.name, elementLevel));
 
-    return this.block('DaneIdentyfikacyjne', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneIdentyfikacyjne',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
   private buildAddress(
@@ -97,14 +110,22 @@ export class SellerBuilder {
     const elements: Array<string | null> = [];
 
     if (typeof address === 'string') {
-      const lines = address.split(',').map(l => l.trim()).filter(Boolean);
+      const lines = address
+        .split(',')
+        .map((l) => l.trim())
+        .filter(Boolean);
 
       elements.push(this.element('KodKraju', 'PL', elementLevel));
 
       if (lines[0]) {
         elements.push(this.element('AdresL1', lines[0], elementLevel));
       } else {
-        this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+        this.vError(
+          ctx,
+          'REQUIRED',
+          `${path}.line1`,
+          'Brak pierwszej linii adresu'
+        );
       }
 
       if (lines[1]) {
@@ -115,12 +136,24 @@ export class SellerBuilder {
     }
 
     if (!address.countryCode) {
-      this.vError(ctx, 'REQUIRED', `${path}.countryCode`, 'Brak kodu kraju w adresie');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.countryCode`,
+        'Brak kodu kraju w adresie'
+      );
     }
-    elements.push(this.element('KodKraju', address.countryCode ?? 'PL', elementLevel));
+    elements.push(
+      this.element('KodKraju', address.countryCode ?? 'PL', elementLevel)
+    );
 
     if (!address.line1) {
-      this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.line1`,
+        'Brak pierwszej linii adresu'
+      );
     }
     elements.push(this.element('AdresL1', address.line1 ?? '', elementLevel));
 
@@ -144,7 +177,11 @@ export class SellerBuilder {
       elements.push(this.element('Telefon', seller.phone, elementLevel));
     }
 
-    return this.block('DaneKontaktowe', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneKontaktowe',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
   // ============================================================
@@ -177,7 +214,11 @@ export class SellerBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

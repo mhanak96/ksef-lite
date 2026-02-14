@@ -22,30 +22,44 @@ export class OrderBuilder {
     level: number = 1
   ): string | null {
     if (!order) return null;
-  
+
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
-  
+
     // WartoscZamowienia (wymagane)
-    if (!this.reqNumber(ctx, 'order.totalValue', order.totalValue, 'Brak wartości zamówienia')) {
+    if (
+      !this.reqNumber(
+        ctx,
+        'order.totalValue',
+        order.totalValue,
+        'Brak wartości zamówienia'
+      )
+    ) {
       return null;
     }
-    elements.push(this.amountElement('WartoscZamowienia', order.totalValue, innerLevel));
-  
+    elements.push(
+      this.amountElement('WartoscZamowienia', order.totalValue, innerLevel)
+    );
+
     // ZamowienieWiersz (wymagane, min 1) - deleguj do OrderItemBuilder
-    if (!this.reqArray(ctx, 'order.items', order.items, 'Brak pozycji zamówienia')) {
+    if (
+      !this.reqArray(ctx, 'order.items', order.items, 'Brak pozycji zamówienia')
+    ) {
       return null;
     }
-  
+
     // UWAGA: items siedzą w <Zamowienie>, więc ich level powinien być innerLevel
     // (OrderItemBuilder powinien robić blok <ZamowienieWiersz> na level=innerLevel)
-    const itemsXml = this.orderItemBuilder.buildAll(order.items, innerLevel, ctx);
+    const itemsXml = this.orderItemBuilder.buildAll(
+      order.items,
+      innerLevel,
+      ctx
+    );
     if (itemsXml) elements.push(itemsXml);
-  
+
     const xml = this.joinElements(elements);
     return xml ? this.block('Zamowienie', xml, level) : null;
   }
-  
 
   // ============================================================
   // VALIDATION HELPERS
@@ -90,7 +104,11 @@ export class OrderBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

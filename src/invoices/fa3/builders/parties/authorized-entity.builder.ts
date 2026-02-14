@@ -36,11 +36,21 @@ export class AuthorizedEntityBuilder {
     if (identXml) elements.push(identXml);
 
     // Adres (wymagany!)
-    const addressXml = this.buildAddress(entity.address, 'authorizedEntity.address', innerLevel + 1, ctx);
+    const addressXml = this.buildAddress(
+      entity.address,
+      'authorizedEntity.address',
+      innerLevel + 1,
+      ctx
+    );
     if (addressXml) {
       elements.push(this.block('Adres', addressXml, innerLevel));
     } else {
-      this.vError(ctx, 'REQUIRED', 'authorizedEntity.address', 'Brak adresu podmiotu upoważnionego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'authorizedEntity.address',
+        'Brak adresu podmiotu upoważnionego'
+      );
     }
 
     // AdresKoresp (opcjonalny)
@@ -62,7 +72,12 @@ export class AuthorizedEntityBuilder {
 
     // RolaPU (wymagane: 1, 2, lub 3)
     if (!entity.role) {
-      this.vError(ctx, 'REQUIRED', 'authorizedEntity.role', 'Brak roli podmiotu upoważnionego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'authorizedEntity.role',
+        'Brak roli podmiotu upoważnionego'
+      );
     } else {
       const allowedRoles = [1, 2, 3] as const;
       if (!allowedRoles.includes(entity.role as any)) {
@@ -89,17 +104,31 @@ export class AuthorizedEntityBuilder {
 
     // NIP (wymagany)
     if (!entity.nip) {
-      this.vError(ctx, 'REQUIRED', 'authorizedEntity.nip', 'Brak numeru NIP podmiotu upoważnionego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'authorizedEntity.nip',
+        'Brak numeru NIP podmiotu upoważnionego'
+      );
     }
     elements.push(this.element('NIP', entity.nip, elementLevel));
 
     // Nazwa (wymagana)
     if (!entity.name) {
-      this.vError(ctx, 'REQUIRED', 'authorizedEntity.name', 'Brak nazwy podmiotu upoważnionego');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'authorizedEntity.name',
+        'Brak nazwy podmiotu upoważnionego'
+      );
     }
     elements.push(this.element('Nazwa', entity.name, elementLevel));
 
-    return this.block('DaneIdentyfikacyjne', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneIdentyfikacyjne',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
   private buildAddress(
@@ -116,14 +145,22 @@ export class AuthorizedEntityBuilder {
     const elements: Array<string | null> = [];
 
     if (typeof address === 'string') {
-      const lines = address.split(',').map(l => l.trim()).filter(Boolean);
+      const lines = address
+        .split(',')
+        .map((l) => l.trim())
+        .filter(Boolean);
 
       elements.push(this.element('KodKraju', 'PL', elementLevel));
 
       if (lines[0]) {
         elements.push(this.element('AdresL1', lines[0], elementLevel));
       } else {
-        this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+        this.vError(
+          ctx,
+          'REQUIRED',
+          `${path}.line1`,
+          'Brak pierwszej linii adresu'
+        );
       }
 
       if (lines[1]) {
@@ -134,12 +171,24 @@ export class AuthorizedEntityBuilder {
     }
 
     if (!address.countryCode) {
-      this.vError(ctx, 'REQUIRED', `${path}.countryCode`, 'Brak kodu kraju w adresie');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.countryCode`,
+        'Brak kodu kraju w adresie'
+      );
     }
-    elements.push(this.element('KodKraju', address.countryCode ?? 'PL', elementLevel));
+    elements.push(
+      this.element('KodKraju', address.countryCode ?? 'PL', elementLevel)
+    );
 
     if (!address.line1) {
-      this.vError(ctx, 'REQUIRED', `${path}.line1`, 'Brak pierwszej linii adresu');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        `${path}.line1`,
+        'Brak pierwszej linii adresu'
+      );
     }
     elements.push(this.element('AdresL1', address.line1 ?? '', elementLevel));
 
@@ -155,7 +204,10 @@ export class AuthorizedEntityBuilder {
     return this.joinElements(elements);
   }
 
-  private buildContact(entity: Fa3AuthorizedEntity, blockLevel: number): string | null {
+  private buildContact(
+    entity: Fa3AuthorizedEntity,
+    blockLevel: number
+  ): string | null {
     if (!entity.email && !entity.phone) return null;
 
     const elementLevel = blockLevel + 1;
@@ -169,7 +221,11 @@ export class AuthorizedEntityBuilder {
       elements.push(this.element('TelefonPU', entity.phone, elementLevel));
     }
 
-    return this.block('DaneKontaktowe', this.joinElements(elements), blockLevel);
+    return this.block(
+      'DaneKontaktowe',
+      this.joinElements(elements),
+      blockLevel
+    );
   }
 
   // ============================================================
@@ -202,7 +258,11 @@ export class AuthorizedEntityBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

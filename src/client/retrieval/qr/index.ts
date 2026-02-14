@@ -1,2 +1,2 @@
-export * from "./qr.generator";
-export * from "./types";
+export * from './qr.generator';
+export * from './types';

@@ -26,10 +26,10 @@ export class TransactionBuilder {
     level: number = 1
   ): string | null {
     if (!conditions) return null;
-  
+
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
-  
+
     // Umowy (0-100)
     if (conditions.contracts && conditions.contracts.length > 0) {
       if (conditions.contracts.length > 100) {
@@ -40,14 +40,14 @@ export class TransactionBuilder {
           'Liczba umów przekracza limit 100. Przetworzono tylko pierwsze 100.'
         );
       }
-  
+
       const contracts = conditions.contracts.slice(0, 100);
       for (const contract of contracts) {
         const contractXml = this.buildContract(contract, innerLevel, ctx);
         if (contractXml) elements.push(contractXml);
       }
     }
-  
+
     // Zamowienia (0-100)
     if (conditions.orders && conditions.orders.length > 0) {
       if (conditions.orders.length > 100) {
@@ -58,14 +58,14 @@ export class TransactionBuilder {
           'Liczba zamówień przekracza limit 100. Przetworzono tylko pierwsze 100.'
         );
       }
-  
+
       const orders = conditions.orders.slice(0, 100);
       for (const order of orders) {
         const orderXml = this.buildOrder(order, innerLevel, ctx);
         if (orderXml) elements.push(orderXml);
       }
     }
-  
+
     // NrPartiiTowaru (0-1000)
     if (conditions.batchNumbers && conditions.batchNumbers.length > 0) {
       if (conditions.batchNumbers.length > 1000) {
@@ -76,42 +76,60 @@ export class TransactionBuilder {
           'Liczba numerów partii przekracza limit 1000. Przetworzono tylko pierwsze 1000.'
         );
       }
-  
+
       const batches = conditions.batchNumbers.slice(0, 1000);
       for (const batch of batches) {
         elements.push(this.element('NrPartiiTowaru', batch, innerLevel));
       }
     }
-  
+
     // WarunkiDostawy (opcjonalne)
     if (this.hasValue(conditions.deliveryTerms)) {
-      elements.push(this.element('WarunkiDostawy', conditions.deliveryTerms, innerLevel));
+      elements.push(
+        this.element('WarunkiDostawy', conditions.deliveryTerms, innerLevel)
+      );
     }
-  
+
     // KursUmowny + WalutaUmowna (opcjonalne, razem)
     if (
       conditions.contractualRate !== undefined &&
       conditions.contractualRate !== null &&
       this.hasValue(conditions.contractualCurrency)
     ) {
-      elements.push(this.quantityElement('KursUmowny', conditions.contractualRate, innerLevel));
-      elements.push(this.element('WalutaUmowna', conditions.contractualCurrency!, innerLevel));
+      elements.push(
+        this.quantityElement(
+          'KursUmowny',
+          conditions.contractualRate,
+          innerLevel
+        )
+      );
+      elements.push(
+        this.element(
+          'WalutaUmowna',
+          conditions.contractualCurrency!,
+          innerLevel
+        )
+      );
     }
-  
+
     // Transport (0-20) - deleguj do TransportBuilder
     if (conditions.transport && conditions.transport.length > 0) {
-      const transportsXml = this.transportBuilder.buildAll(conditions.transport, innerLevel, ctx);
+      const transportsXml = this.transportBuilder.buildAll(
+        conditions.transport,
+        innerLevel,
+        ctx
+      );
       if (transportsXml) elements.push(transportsXml);
     }
-  
+
     // PodmiotPosredniczacy (opcjonalne)
     if (conditions.intermediary === true) {
       elements.push(this.element('PodmiotPosredniczacy', '1', innerLevel));
     }
-  
+
     const xml = this.joinElements(elements);
     if (!xml) return null;
-  
+
     return this.block('WarunkiTransakcji', xml, level);
   }
 
@@ -122,7 +140,7 @@ export class TransactionBuilder {
   private buildContract(
     contract: Fa3TransactionContractRef,
     level: number,
-    ctx?: Fa3BuildContext
+    _ctx?: Fa3BuildContext
   ): string | null {
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
@@ -144,7 +162,7 @@ export class TransactionBuilder {
   private buildOrder(
     order: Fa3TransactionOrderRef,
     level: number,
-    ctx?: Fa3BuildContext
+    _ctx?: Fa3BuildContext
   ): string | null {
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
@@ -193,7 +211,11 @@ export class TransactionBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

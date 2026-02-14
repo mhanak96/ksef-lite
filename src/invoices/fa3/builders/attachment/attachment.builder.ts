@@ -34,7 +34,12 @@ export class AttachmentBuilder {
 
     // BlokDanych (1-1000)
     if (!attachment.blocks || attachment.blocks.length === 0) {
-      this.vError(ctx, 'REQUIRED', 'attachment.blocks', 'Załącznik wymaga co najmniej jednego bloku danych');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'attachment.blocks',
+        'Załącznik wymaga co najmniej jednego bloku danych'
+      );
       return null;
     }
 
@@ -142,7 +147,12 @@ export class AttachmentBuilder {
 
     // ZWartosc (wymagane)
     if (!this.hasValue(meta.value)) {
-      this.vError(ctx, 'REQUIRED', 'metadata.value', 'Brak wartości w metadanych');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'metadata.value',
+        'Brak wartości w metadanych'
+      );
       return null;
     }
     elements.push(this.element('ZWartosc', meta.value, innerLevel));
@@ -222,7 +232,12 @@ export class AttachmentBuilder {
 
     // TNaglowek (wymagane)
     if (!table.header) {
-      this.vError(ctx, 'REQUIRED', 'attachment.table.header', 'Brak nagłówka tabeli');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'attachment.table.header',
+        'Brak nagłówka tabeli'
+      );
       return null;
     }
     const headerXml = this.buildTableHeader(table.header, innerLevel, ctx);
@@ -230,7 +245,12 @@ export class AttachmentBuilder {
 
     // Wiersz (1-1000)
     if (!table.rows || table.rows.length === 0) {
-      this.vError(ctx, 'REQUIRED', 'attachment.table.rows', 'Tabela wymaga co najmniej jednego wiersza');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'attachment.table.rows',
+        'Tabela wymaga co najmniej jednego wiersza'
+      );
       return null;
     }
 
@@ -268,14 +288,24 @@ export class AttachmentBuilder {
 
     // TKlucz (wymagane)
     if (!this.hasValue(meta.key)) {
-      this.vError(ctx, 'REQUIRED', 'table.metadata.key', 'Brak klucza w metadanych tabeli');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'table.metadata.key',
+        'Brak klucza w metadanych tabeli'
+      );
       return null;
     }
     elements.push(this.element('TKlucz', meta.key, innerLevel));
 
     // TWartosc (wymagane)
     if (!this.hasValue(meta.value)) {
-      this.vError(ctx, 'REQUIRED', 'table.metadata.value', 'Brak wartości w metadanych tabeli');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'table.metadata.value',
+        'Brak wartości w metadanych tabeli'
+      );
       return null;
     }
     elements.push(this.element('TWartosc', meta.value, innerLevel));
@@ -297,7 +327,12 @@ export class AttachmentBuilder {
       : header?.columns || [];
 
     if (columns.length === 0) {
-      this.vError(ctx, 'REQUIRED', 'table.header.columns', 'Nagłówek tabeli wymaga co najmniej jednej kolumny');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'table.header.columns',
+        'Nagłówek tabeli wymaga co najmniej jednej kolumny'
+      );
       return null;
     }
 
@@ -343,10 +378,17 @@ export class AttachmentBuilder {
     const elements: Array<string | null> = [];
 
     // WKom (1-20)
-    const cells: Fa3AttachmentTableCell[] = Array.isArray(row) ? row : row?.cells || [];
+    const cells: Fa3AttachmentTableCell[] = Array.isArray(row)
+      ? row
+      : row?.cells || [];
 
     if (cells.length === 0) {
-      this.vError(ctx, 'REQUIRED', 'table.row.cells', 'Wiersz tabeli wymaga co najmniej jednej komórki');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'table.row.cells',
+        'Wiersz tabeli wymaga co najmniej jednej komórki'
+      );
       return null;
     }
 
@@ -362,7 +404,10 @@ export class AttachmentBuilder {
     const limitedCells = cells.slice(0, 20);
 
     for (const cell of limitedCells) {
-      const value = typeof cell === 'object' && cell !== null ? (cell as any).value ?? '' : cell;
+      const value =
+        typeof cell === 'object' && cell !== null
+          ? ((cell as any).value ?? '')
+          : cell;
       elements.push(this.element('WKom', value, innerLevel));
     }
 
@@ -378,10 +423,17 @@ export class AttachmentBuilder {
     const elements: Array<string | null> = [];
 
     // SKom (1-20)
-    const cells: Fa3AttachmentTableCell[] = Array.isArray(summary) ? summary : summary?.cells || [];
+    const cells: Fa3AttachmentTableCell[] = Array.isArray(summary)
+      ? summary
+      : summary?.cells || [];
 
     if (cells.length === 0) {
-      this.vError(ctx, 'REQUIRED', 'table.summary.cells', 'Suma tabeli wymaga co najmniej jednej komórki');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'table.summary.cells',
+        'Suma tabeli wymaga co najmniej jednej komórki'
+      );
       return null;
     }
 
@@ -397,7 +449,10 @@ export class AttachmentBuilder {
     const limitedCells = cells.slice(0, 20);
 
     for (const cell of limitedCells) {
-      const value = typeof cell === 'object' && cell !== null ? (cell as any).value ?? '' : cell;
+      const value =
+        typeof cell === 'object' && cell !== null
+          ? ((cell as any).value ?? '')
+          : cell;
       elements.push(this.element('SKom', value, innerLevel));
     }
 
@@ -434,7 +489,11 @@ export class AttachmentBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

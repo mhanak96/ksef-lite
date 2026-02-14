@@ -1,1 +1,1 @@
-export { CertificateInfo } from "./xades.types";
+export { CertificateInfo } from './xades.types';

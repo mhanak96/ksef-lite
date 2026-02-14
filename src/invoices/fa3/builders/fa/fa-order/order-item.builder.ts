@@ -48,7 +48,14 @@ export class OrderItemBuilder {
     const elements: Array<string | null> = [];
 
     // NrWierszaZam (wymagane)
-    if (!this.reqNumber(ctx, `${path}.lineNumber`, lineNumber, 'Brak numeru wiersza zamówienia')) {
+    if (
+      !this.reqNumber(
+        ctx,
+        `${path}.lineNumber`,
+        lineNumber,
+        'Brak numeru wiersza zamówienia'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('NrWierszaZam', lineNumber, innerLevel));
@@ -105,7 +112,9 @@ export class OrderItemBuilder {
 
     // P_11NettoZ - wartość netto (opcjonalne)
     if (item.netAmount !== undefined && item.netAmount !== null) {
-      elements.push(this.amountElement('P_11NettoZ', item.netAmount, innerLevel));
+      elements.push(
+        this.amountElement('P_11NettoZ', item.netAmount, innerLevel)
+      );
     }
 
     // P_11VatZ - kwota VAT (opcjonalne)
@@ -140,7 +149,9 @@ export class OrderItemBuilder {
 
     // KwotaAkcyzyZ (opcjonalne)
     if (item.exciseAmount !== undefined && item.exciseAmount !== null) {
-      elements.push(this.amountElement('KwotaAkcyzyZ', item.exciseAmount, innerLevel));
+      elements.push(
+        this.amountElement('KwotaAkcyzyZ', item.exciseAmount, innerLevel)
+      );
     }
 
     // StanPrzedZ - dla faktur korygujących (opcjonalne)
@@ -192,7 +203,11 @@ export class OrderItemBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

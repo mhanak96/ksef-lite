@@ -7,8 +7,6 @@ export type HeaderBuilderOptions = {
   baseLevel?: number;
 };
 
-type XmlAttributes = Record<string, string | number | boolean | null | undefined>;
-
 export class HeaderBuilder {
   private indentSize: number;
   private indentChar: string;
@@ -84,7 +82,11 @@ export class HeaderBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }
@@ -106,7 +108,8 @@ export class HeaderBuilder {
     if (!dateTime) return '';
 
     if (typeof dateTime === 'string') {
-      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(dateTime)) return dateTime;
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(dateTime))
+        return dateTime;
       dateTime = new Date(dateTime);
     }
 

@@ -1,9 +1,9 @@
 export interface HttpClientOptions {
-  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: any;
   timeoutMs?: number;
-  responseType?: "json" | "text" | "buffer";
+  responseType?: 'json' | 'text' | 'buffer';
 }
 
 export interface HttpError extends Error {
@@ -23,7 +23,7 @@ export interface TimeoutError extends Error {
 
 export interface ErrorDetails {
   message: string;
-  type: "http" | "timeout" | "unknown";
+  type: 'http' | 'timeout' | 'unknown';
   status?: number;
   statusText?: string;
   url?: string;

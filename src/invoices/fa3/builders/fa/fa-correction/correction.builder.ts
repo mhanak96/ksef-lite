@@ -24,35 +24,50 @@ export class CorrectionBuilder {
 
     // PrzyczynaKorekty (opcjonalne)
     if (this.hasValue((details as any).correctionReason)) {
-      elements.push(this.element('PrzyczynaKorekty', (details as any).correctionReason, level));
+      elements.push(
+        this.element(
+          'PrzyczynaKorekty',
+          (details as any).correctionReason,
+          level
+        )
+      );
     }
 
     // TypKorekty (opcjonalne, ale jeśli podane to musi być 1, 2 lub 3)
     if ((details as any).correctionType !== undefined) {
-      if (!this.reqOneOf(
-        ctx,
-        'details.correctionType',
-        (details as any).correctionType,
-        [1, 2, 3] as const,
-        'TypKorekty musi być 1, 2 lub 3'
-      )) {
+      if (
+        !this.reqOneOf(
+          ctx,
+          'details.correctionType',
+          (details as any).correctionType,
+          [1, 2, 3] as const,
+          'TypKorekty musi być 1, 2 lub 3'
+        )
+      ) {
         // Kontynuuj mimo błędu
       } else {
-        elements.push(this.element('TypKorekty', (details as any).correctionType, level));
+        elements.push(
+          this.element('TypKorekty', (details as any).correctionType, level)
+        );
       }
     }
 
     // DaneFaKorygowanej (wymagane - minimum 1, maksimum 50000)
-    if (!this.reqArray(
-      ctx,
-      'details.correctedInvoices',
-      (details as any).correctedInvoices,
-      'Brak listy faktur korygowanych dla faktury korygującej'
-    )) {
+    if (
+      !this.reqArray(
+        ctx,
+        'details.correctedInvoices',
+        (details as any).correctedInvoices,
+        'Brak listy faktur korygowanych dla faktury korygującej'
+      )
+    ) {
       return null;
     }
 
-    if ((details as any).correctedInvoices && (details as any).correctedInvoices.length > 0) {
+    if (
+      (details as any).correctedInvoices &&
+      (details as any).correctedInvoices.length > 0
+    ) {
       if ((details as any).correctedInvoices.length > 50000) {
         this.vWarn(
           ctx,
@@ -61,7 +76,9 @@ export class CorrectionBuilder {
           'Liczba faktur korygowanych przekracza limit 50000. Przetworzono tylko pierwsze 50000.'
         );
       }
-      const invoices = ((details as any).correctedInvoices as Fa3CorrectedInvoiceRef[]).slice(0, 50000);
+      const invoices = (
+        (details as any).correctedInvoices as Fa3CorrectedInvoiceRef[]
+      ).slice(0, 50000);
       for (const inv of invoices) {
         const invXml = this.buildCorrectedInvoice(inv, level, ctx);
         if (invXml) elements.push(invXml);
@@ -70,20 +87,44 @@ export class CorrectionBuilder {
 
     // OkresFaKorygowanej (opcjonalne)
     if (this.hasValue((details as any).correctedInvoicePeriod)) {
-      elements.push(this.element('OkresFaKorygowanej', (details as any).correctedInvoicePeriod, level));
+      elements.push(
+        this.element(
+          'OkresFaKorygowanej',
+          (details as any).correctedInvoicePeriod,
+          level
+        )
+      );
     }
 
     // NrFaKorygowany (opcjonalne - poprawny numer faktury korygowanej)
     if (this.hasValue((details as any).correctedInvoiceNumber)) {
-      elements.push(this.element('NrFaKorygowany', (details as any).correctedInvoiceNumber, level));
+      elements.push(
+        this.element(
+          'NrFaKorygowany',
+          (details as any).correctedInvoiceNumber,
+          level
+        )
+      );
     }
 
     // P_15ZK i KursWalutyZK (opcjonalne - dla faktur zaliczkowych)
     if ((details as any).amountBeforeCorrection !== undefined) {
-      elements.push(this.amountElement('P_15ZK', (details as any).amountBeforeCorrection, level));
-      
+      elements.push(
+        this.amountElement(
+          'P_15ZK',
+          (details as any).amountBeforeCorrection,
+          level
+        )
+      );
+
       if ((details as any).exchangeRateBeforeCorrection !== undefined) {
-        elements.push(this.quantityElement('KursWalutyZK', (details as any).exchangeRateBeforeCorrection, level));
+        elements.push(
+          this.quantityElement(
+            'KursWalutyZK',
+            (details as any).exchangeRateBeforeCorrection,
+            level
+          )
+        );
       }
     }
 
@@ -99,23 +140,29 @@ export class CorrectionBuilder {
     const elements: Array<string | null> = [];
 
     // DataWystFaKorygowanej (wymagana)
-    if (!this.reqDateLike(
-      ctx,
-      'correctedInvoice.issueDate',
-      inv?.issueDate,
-      'Brak daty wystawienia faktury korygowanej'
-    )) {
+    if (
+      !this.reqDateLike(
+        ctx,
+        'correctedInvoice.issueDate',
+        inv?.issueDate,
+        'Brak daty wystawienia faktury korygowanej'
+      )
+    ) {
       return null;
     }
-    elements.push(this.dateElement('DataWystFaKorygowanej', inv.issueDate, innerLevel));
+    elements.push(
+      this.dateElement('DataWystFaKorygowanej', inv.issueDate, innerLevel)
+    );
 
     // NrFaKorygowanej (wymagany)
-    if (!this.reqString(
-      ctx,
-      'correctedInvoice.number',
-      inv?.number,
-      'Brak numeru faktury korygowanej'
-    )) {
+    if (
+      !this.reqString(
+        ctx,
+        'correctedInvoice.number',
+        inv?.number,
+        'Brak numeru faktury korygowanej'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('NrFaKorygowanej', inv.number, innerLevel));
@@ -124,7 +171,9 @@ export class CorrectionBuilder {
     if (this.hasValue(inv.ksefNumber)) {
       // Faktura korygowana wystawiona w KSeF
       elements.push(this.element('NrKSeF', '1', innerLevel));
-      elements.push(this.element('NrKSeFFaKorygowanej', inv.ksefNumber, innerLevel));
+      elements.push(
+        this.element('NrKSeFFaKorygowanej', inv.ksefNumber, innerLevel)
+      );
     } else {
       // Faktura korygowana poza KSeF
       elements.push(this.element('NrKSeFN', '1', innerLevel));
@@ -184,7 +233,11 @@ export class CorrectionBuilder {
     message: string
   ): value is Date | string {
     if (value instanceof Date && !Number.isNaN(value.getTime())) return true;
-    if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(new Date(value).getTime())) {
+    if (
+      typeof value === 'string' &&
+      value.trim() !== '' &&
+      !Number.isNaN(new Date(value).getTime())
+    ) {
       return true;
     }
     this.vError(ctx, 'REQUIRED_DATE', path, message);
@@ -199,7 +252,12 @@ export class CorrectionBuilder {
     message: string
   ): value is T {
     if ((allowed as readonly unknown[]).includes(value)) return true;
-    this.vError(ctx, 'ONE_OF', path, `${message}. Dozwolone wartości: ${allowed.join(', ')}`);
+    this.vError(
+      ctx,
+      'ONE_OF',
+      path,
+      `${message}. Dozwolone wartości: ${allowed.join(', ')}`
+    );
     return false;
   }
 
@@ -211,7 +269,11 @@ export class CorrectionBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

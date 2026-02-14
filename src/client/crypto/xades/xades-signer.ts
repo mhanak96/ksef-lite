@@ -1,24 +1,33 @@
-import crypto from "crypto";
-import { DOMParser } from "@xmldom/xmldom";
+import crypto from 'crypto';
+import { DOMParser } from '@xmldom/xmldom';
 
-import { debugLog, debugError } from "../../../utils/logger";
-import { exclusiveCanonicalizeNode, canonicalizeNode } from "./canonicalization";
-import { verifyKeyMatchesCert, parseCertificateInfo, formatSigningTime } from "./certificate.utils";
-import { convertDerToP1363WithLowS } from "./signature-conversion";
-import { sha256Base64Buffer } from "../hash.utils";
-import { AuthTokenRequestData } from "../../auth/types";
+import { debugLog, debugError } from '../../../utils/logger';
+import {
+  exclusiveCanonicalizeNode,
+  canonicalizeNode,
+} from './canonicalization';
+import {
+  verifyKeyMatchesCert,
+  parseCertificateInfo,
+  formatSigningTime,
+} from './certificate.utils';
+import { convertDerToP1363WithLowS } from './signature-conversion';
+import { sha256Base64Buffer } from '../hash.utils';
+import { AuthTokenRequestData } from '../../auth/types';
 
-const NS_XMLDSIG = "http://www.w3.org/2000/09/xmldsig#";
-const NS_XADES = "http://uri.etsi.org/01903/v1.3.2#";
+const NS_XMLDSIG = 'http://www.w3.org/2000/09/xmldsig#';
+const NS_XADES = 'http://uri.etsi.org/01903/v1.3.2#';
 
 function sha256Base64(data: string): string {
-  return crypto.createHash("sha256").update(data, "utf8").digest("base64");
+  return crypto.createHash('sha256').update(data, 'utf8').digest('base64');
 }
 
 /**
  * Generuje XML AuthTokenRequest
  */
-export function generateAuthTokenRequestXml(data: AuthTokenRequestData): string {
+export function generateAuthTokenRequestXml(
+  data: AuthTokenRequestData
+): string {
   const { challenge, contextType, contextValue, subjectIdentifierType } = data;
 
   return (
@@ -43,39 +52,43 @@ export async function signXmlSimple(
 ): Promise<string> {
   try {
     if (!verifyKeyMatchesCert(certPem, privateKeyPem)) {
-      throw new Error("Private key does not match certificate!");
+      throw new Error('Private key does not match certificate!');
     }
 
-    const isECDSA = privateKeyPem.includes("EC PRIVATE KEY");
+    const isECDSA = privateKeyPem.includes('EC PRIVATE KEY');
     const signatureAlgorithm = isECDSA
-      ? "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"
-      : "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+      ? 'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256'
+      : 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
-    debugLog(`🔐 Detected key type: ${isECDSA ? "ECDSA" : "RSA"}`);
-    debugLog(`🔐 Using XAdES format (matching official KSeF C# implementation)`);
+    debugLog(`🔐 Detected key type: ${isECDSA ? 'ECDSA' : 'RSA'}`);
+    debugLog(
+      `🔐 Using XAdES format (matching official KSeF C# implementation)`
+    );
 
     const certBase64 = certPem
-      .replace(/-----BEGIN CERTIFICATE-----/g, "")
-      .replace(/-----END CERTIFICATE-----/g, "")
-      .replace(/\s/g, "");
+      .replace(/-----BEGIN CERTIFICATE-----/g, '')
+      .replace(/-----END CERTIFICATE-----/g, '')
+      .replace(/\s/g, '');
 
-    const certDer = Buffer.from(certBase64, "base64");
+    const certDer = Buffer.from(certBase64, 'base64');
     const certDigest = sha256Base64Buffer(certDer);
     const { issuer, serialNumber } = parseCertificateInfo(certPem);
 
-    debugLog("📝 Certificate digest:", certDigest);
+    debugLog('📝 Certificate digest:', certDigest);
 
-    const signatureId = "Signature";
-    const signedPropertiesId = "SignedProperties";
+    const signatureId = 'Signature';
+    const signedPropertiesId = 'SignedProperties';
     const signingTime = formatSigningTime();
 
-    debugLog("📝 Signing time:", signingTime);
+    debugLog('📝 Signing time:', signingTime);
 
     // === Reference 1: Dokument główny z Exclusive C14N ===
-    const docForDigest = new DOMParser().parseFromString(xmlString, "text/xml");
-    const canonicalDoc = exclusiveCanonicalizeNode(docForDigest.documentElement);
+    const docForDigest = new DOMParser().parseFromString(xmlString, 'text/xml');
+    const canonicalDoc = exclusiveCanonicalizeNode(
+      docForDigest.documentElement
+    );
     const documentDigest = sha256Base64(canonicalDoc);
-    debugLog("📝 Document digest:", documentDigest);
+    debugLog('📝 Document digest:', documentDigest);
 
     // === QualifyingProperties z SignedProperties ===
     const qualifyingPropertiesXml =
@@ -100,12 +113,22 @@ export async function signXmlSimple(
       `</xades:QualifyingProperties>`;
 
     // === Reference 2: SignedProperties z Exclusive C14N ===
-    const qpDoc = new DOMParser().parseFromString(qualifyingPropertiesXml, "text/xml");
-    const signedPropertiesElement = qpDoc.getElementsByTagName("xades:SignedProperties")[0];
-    const canonicalSignedProperties = exclusiveCanonicalizeNode(signedPropertiesElement);
-    debugLog("📝 Canonical SignedProperties:", canonicalSignedProperties.substring(0, 300));
+    const qpDoc = new DOMParser().parseFromString(
+      qualifyingPropertiesXml,
+      'text/xml'
+    );
+    const signedPropertiesElement = qpDoc.getElementsByTagName(
+      'xades:SignedProperties'
+    )[0];
+    const canonicalSignedProperties = exclusiveCanonicalizeNode(
+      signedPropertiesElement
+    );
+    debugLog(
+      '📝 Canonical SignedProperties:',
+      canonicalSignedProperties.substring(0, 300)
+    );
     const signedPropertiesDigest = sha256Base64(canonicalSignedProperties);
-    debugLog("📝 SignedProperties digest:", signedPropertiesDigest);
+    debugLog('📝 SignedProperties digest:', signedPropertiesDigest);
 
     // === SignedInfo ===
     const signedInfoXml =
@@ -130,24 +153,27 @@ export async function signXmlSimple(
       `</SignedInfo>`;
 
     // Kanonizuj SignedInfo (zwykła C14N, nie Exclusive)
-    const signedInfoDoc = new DOMParser().parseFromString(signedInfoXml, "text/xml");
+    const signedInfoDoc = new DOMParser().parseFromString(
+      signedInfoXml,
+      'text/xml'
+    );
     const canonicalSignedInfo = canonicalizeNode(signedInfoDoc.documentElement);
-    debugLog("📝 Canonical SignedInfo length:", canonicalSignedInfo.length);
+    debugLog('📝 Canonical SignedInfo length:', canonicalSignedInfo.length);
 
     // === Podpisz ===
-    const sign = crypto.createSign("SHA256");
-    sign.update(canonicalSignedInfo, "utf8");
+    const sign = crypto.createSign('SHA256');
+    sign.update(canonicalSignedInfo, 'utf8');
     sign.end();
 
     let signatureValue: string;
     if (isECDSA) {
       const derSignature = sign.sign(privateKeyPem);
       const p1363Signature = convertDerToP1363WithLowS(derSignature);
-      signatureValue = p1363Signature.toString("base64");
+      signatureValue = p1363Signature.toString('base64');
     } else {
-      signatureValue = sign.sign(privateKeyPem, "base64");
+      signatureValue = sign.sign(privateKeyPem, 'base64');
     }
-    debugLog("📝 SignatureValue length:", signatureValue.length);
+    debugLog('📝 SignatureValue length:', signatureValue.length);
 
     // === Złóż kompletny Signature ===
     const signatureXml =
@@ -164,17 +190,25 @@ export async function signXmlSimple(
       `</Object>` +
       `</Signature>`;
 
-    const signedXml = xmlString.replace("</AuthTokenRequest>", signatureXml + "</AuthTokenRequest>");
+    const signedXml = xmlString.replace(
+      '</AuthTokenRequest>',
+      signatureXml + '</AuthTokenRequest>'
+    );
 
-    debugLog("✅ XML signed successfully (XAdES)");
-    debugLog("📝 Signed XML length:", signedXml.length);
+    debugLog('✅ XML signed successfully (XAdES)');
+    debugLog('📝 Signed XML length:', signedXml.length);
 
     return signedXml;
   } catch (error) {
-    debugError("🔴 Signing error:", error instanceof Error ? error.message : String(error));
+    debugError(
+      '🔴 Signing error:',
+      error instanceof Error ? error.message : String(error)
+    );
     if (error instanceof Error && error.stack) {
-      debugError("🔴 Stack:", error.stack);
+      debugError('🔴 Stack:', error.stack);
     }
-    throw new Error(`XML signing failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `XML signing failed: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { debugLog } from '../../../utils/logger';
-import { HttpClient, isHttpError } from "../../http.client";
-import { EncryptionService } from "./encryption.service";
+import { HttpClient, isHttpError } from '../../http.client';
+import { EncryptionService } from './encryption.service';
 import {
   SessionState,
   SessionFormCode,
@@ -13,12 +13,12 @@ import {
   SessionCryptoOperations,
   PublicKeyCertificatesResponse,
   isTerminalSessionStatus,
-} from "./types";
+} from './types';
 
 const DEFAULT_FORM_CODE: SessionFormCode = {
-  systemCode: "FA (3)",
-  schemaVersion: "1-0E",
-  value: "FA",
+  systemCode: 'FA (3)',
+  schemaVersion: '1-0E',
+  value: 'FA',
 };
 
 export class SessionManager {
@@ -43,24 +43,27 @@ export class SessionManager {
     this.accessToken = token;
   }
 
-  async openSession(options: OpenSessionOptions = {}): Promise<OpenSessionResponse> {
+  async openSession(
+    options: OpenSessionOptions = {}
+  ): Promise<OpenSessionResponse> {
     if (!this.accessToken) {
-      throw new Error("Not authenticated. Access token required.");
+      throw new Error('Not authenticated. Access token required.');
     }
 
     if (this.state.isActive) {
-      debugLog("⚠️  Session already active:", this.state.referenceNumber);
+      debugLog('⚠️  Session already active:', this.state.referenceNumber);
       return {
         referenceNumber: this.state.referenceNumber!,
         timestamp: new Date().toISOString(),
       };
     }
 
-    debugLog("🔓 Opening session...");
+    debugLog('🔓 Opening session...');
 
     const certificatesResponse = await this.getPublicCertificates();
 
-    const keys = this.encryptionService.prepareSessionEncryption(certificatesResponse);
+    const keys =
+      this.encryptionService.prepareSessionEncryption(certificatesResponse);
 
     this.state.symmetricKey = keys.symmetricKey;
     this.state.iv = keys.iv;
@@ -71,28 +74,33 @@ export class SessionManager {
       value: options.value ?? DEFAULT_FORM_CODE.value,
     };
 
-    const encryption = this.encryptionService.createSessionEncryptionPayload(keys);
+    const encryption =
+      this.encryptionService.createSessionEncryptionPayload(keys);
 
     const requestBody: OpenSessionRequest = {
       formCode,
       encryption,
     };
 
-    const response = await this.httpClient.post<OpenSessionResponse>("/sessions/online", requestBody, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+    const response = await this.httpClient.post<OpenSessionResponse>(
+      '/sessions/online',
+      requestBody,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      }
+    );
 
     if (!response.referenceNumber) {
-      throw new Error("Missing session referenceNumber in response");
+      throw new Error('Missing session referenceNumber in response');
     }
 
     this.state.referenceNumber = response.referenceNumber;
     this.state.isActive = true;
 
-    debugLog("✅ Session opened:", response.referenceNumber);
+    debugLog('✅ Session opened:', response.referenceNumber);
 
     return response;
   }
@@ -100,16 +108,18 @@ export class SessionManager {
   async sendInvoiceToSession(
     invoiceXml: string,
     offlineMode = false
-  ): Promise<SendInvoiceResponse & { invoiceHash: string; invoiceSize: number }> {
+  ): Promise<
+    SendInvoiceResponse & { invoiceHash: string; invoiceSize: number }
+  > {
     if (!this.state.isActive || !this.state.referenceNumber) {
-      throw new Error("No active session. Call openSession() first.");
+      throw new Error('No active session. Call openSession() first.');
     }
 
     if (!this.state.symmetricKey || !this.state.iv) {
-      throw new Error("Encryption keys not initialized");
+      throw new Error('Encryption keys not initialized');
     }
 
-    debugLog("📤 Sending invoice...");
+    debugLog('📤 Sending invoice...');
 
     const encrypted = this.encryptionService.encryptInvoice(
       invoiceXml,
@@ -131,17 +141,17 @@ export class SessionManager {
       payload,
       {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${this.accessToken}`,
         },
       }
     );
 
     if (!response.referenceNumber) {
-      throw new Error("Missing invoice referenceNumber in response");
+      throw new Error('Missing invoice referenceNumber in response');
     }
 
-    debugLog("✅ Invoice sent:", response.referenceNumber);
+    debugLog('✅ Invoice sent:', response.referenceNumber);
 
     return {
       ...response,
@@ -152,10 +162,10 @@ export class SessionManager {
 
   async closeSession(): Promise<void> {
     if (!this.state.isActive || !this.state.referenceNumber) {
-      throw new Error("No active session to close");
+      throw new Error('No active session to close');
     }
 
-    debugLog("🔒 Closing session...");
+    debugLog('🔒 Closing session...');
 
     await this.httpClient.post(
       `/sessions/online/${encodeURIComponent(this.state.referenceNumber)}/close`,
@@ -170,13 +180,13 @@ export class SessionManager {
     this.state.isActive = false;
     this.state.symmetricKey = null;
     this.state.iv = null;
-  
-    debugLog("✅ Session closed:", this.state.referenceNumber);
+
+    debugLog('✅ Session closed:', this.state.referenceNumber);
   }
 
   async getStatus(): Promise<SessionStatusResponse> {
     if (!this.state.referenceNumber) {
-      throw new Error("No session reference number");
+      throw new Error('No session reference number');
     }
 
     return this.httpClient.get<SessionStatusResponse>(
@@ -188,7 +198,10 @@ export class SessionManager {
     );
   }
 
-  async pollUntilTerminal(intervalMs: number, timeoutMs: number): Promise<SessionStatusResponse> {
+  async pollUntilTerminal(
+    intervalMs: number,
+    timeoutMs: number
+  ): Promise<SessionStatusResponse> {
     const started = Date.now();
     let lastStatus: SessionStatusResponse | null = null;
 
@@ -221,7 +234,9 @@ export class SessionManager {
       return lastStatus;
     }
 
-    throw new Error(`Timeout waiting for session terminal status: ${this.state.referenceNumber}`);
+    throw new Error(
+      `Timeout waiting for session terminal status: ${this.state.referenceNumber}`
+    );
   }
 
   isSessionActive(): boolean {
@@ -234,15 +249,20 @@ export class SessionManager {
 
   forceCloseSession(): void {
     this.resetState();
-    debugLog("⚠️  Session force closed (no API call)");
+    debugLog('⚠️  Session force closed (no API call)');
   }
 
   private async getPublicCertificates(): Promise<PublicKeyCertificatesResponse> {
-    debugLog("🔐 Fetching public certificates...");
+    debugLog('🔐 Fetching public certificates...');
 
-    const response = await this.httpClient.get<PublicKeyCertificatesResponse>("/security/public-key-certificates");
+    const response = await this.httpClient.get<PublicKeyCertificatesResponse>(
+      '/security/public-key-certificates'
+    );
 
-    debugLog("📋 Full certificates response:", JSON.stringify(response, null, 2));
+    debugLog(
+      '📋 Full certificates response:',
+      JSON.stringify(response, null, 2)
+    );
 
     return response;
   }
@@ -250,7 +270,7 @@ export class SessionManager {
   private authHeaders(): Record<string, string> {
     return {
       Authorization: `Bearer ${this.accessToken}`,
-      Accept: "application/json",
+      Accept: 'application/json',
     };
   }
 

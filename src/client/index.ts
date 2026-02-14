@@ -6,25 +6,17 @@ export {
   SendInvoiceResult,
 } from './ksef.client';
 
-
 export * from './types';
 
 export {
-
   AuthService,
   ChallengeService,
-
-
   AuthResult,
   AuthServiceConfig,
   AuthCryptoOperations,
   KSefCryptoOperations,
-
-
   SessionManager,
   EncryptionService,
-
-
   SessionState,
   SessionFormCode,
   SessionEncryption,
@@ -41,26 +33,17 @@ export {
   EncryptionKeys,
   EncryptedInvoice,
   isTerminalSessionStatus,
-
-
   ksefCrypto,
-
-
   generateAuthTokenRequestXml,
   signXmlSimple,
   verifyKeyMatchesCert,
   parseCertificateInfo,
   formatSigningTime,
-
-
   sha256Base64,
   sha256Base64Buffer,
   pemFromBase64Cert,
-
-
   CertificateInfo,
 } from './auth';
-
 
 export {
   InvoiceService,
@@ -79,13 +62,11 @@ export {
   InvoiceDateRange,
 } from './retrieval/invoice';
 
-
 export {
   generateKSefInvoiceQRCode,
   QRGeneratorOptions,
   QRCodeResult,
 } from './retrieval/qr';
-
 
 export {
   HttpClient,

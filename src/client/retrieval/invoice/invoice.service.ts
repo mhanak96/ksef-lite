@@ -1,9 +1,9 @@
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
 import { debugLog, debugError } from '../../../utils/logger';
-import { HttpClient, isHttpError } from "../../http.client";
-import { KSefEnvironment, KSEF_QR_BASE_URLS } from "../../types";
-import { generateKSefInvoiceQRCode } from "../qr";
+import { HttpClient, isHttpError } from '../../http.client';
+import { KSefEnvironment, KSEF_QR_BASE_URLS } from '../../types';
+import { generateKSefInvoiceQRCode } from '../qr';
 import {
   InvoiceUpoResult,
   GetInvoiceUpoOptions,
@@ -18,7 +18,7 @@ import {
   DateType,
   InvoiceMetadataApiResponse,
   SessionInvoicesListResponse,
-} from "./types";
+} from './types';
 
 const DEFAULT_TIMEOUT_MS = 20_000;
 const DEFAULT_POLLING_DELAY_MS = 3_000;
@@ -55,18 +55,20 @@ export class InvoiceService {
       url,
       {
         ...this.authHeaders(),
-        Accept: "application/xml",
+        Accept: 'application/xml',
       },
       timeoutMs
     );
 
     if (status < 200 || status >= 300) {
-      throw new Error(`Invoice download failed HTTP ${status}: ${text || statusText}`);
+      throw new Error(
+        `Invoice download failed HTTP ${status}: ${text || statusText}`
+      );
     }
 
     return {
       xml: text,
-      sha256Base64: headers.get("x-ms-meta-hash") ?? undefined,
+      sha256Base64: headers.get('x-ms-meta-hash') ?? undefined,
     };
   }
 
@@ -87,7 +89,13 @@ export class InvoiceService {
     const apiTimeoutMs = options.apiTimeoutMs ?? DEFAULT_TIMEOUT_MS;
     const downloadTimeoutMs = options.downloadTimeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-    return this.pollForInvoiceUpo(cleanRef, pollingDelayMs, timeoutMs, apiTimeoutMs, downloadTimeoutMs);
+    return this.pollForInvoiceUpo(
+      cleanRef,
+      pollingDelayMs,
+      timeoutMs,
+      apiTimeoutMs,
+      downloadTimeoutMs
+    );
   }
 
   private async pollForInvoiceUpo(
@@ -102,9 +110,12 @@ export class InvoiceService {
 
     while (Date.now() - started < timeoutMs && attempt < MAX_POLLING_ATTEMPTS) {
       attempt++;
-      
+
       try {
-        const invoice = await this.fetchSessionInvoice(sessionReferenceNumber, apiTimeoutMs);
+        const invoice = await this.fetchSessionInvoice(
+          sessionReferenceNumber,
+          apiTimeoutMs
+        );
 
         if (!invoice) {
           debugLog(`📄 [UPO Poll] Attempt ${attempt}: No invoice yet`);
@@ -112,7 +123,6 @@ export class InvoiceService {
           continue;
         }
 
-  
         const invoiceStatus = invoice.status?.code;
         if (invoiceStatus && invoiceStatus >= 400) {
           throw new Error(
@@ -122,12 +132,16 @@ export class InvoiceService {
 
         if (invoice.upoDownloadUrl) {
           debugLog(`📄 [UPO Poll] Attempt ${attempt}: UPO URL found!`);
-          const { xml, sha256Base64 } = await this.downloadUpoXml(invoice.upoDownloadUrl, downloadTimeoutMs);
+          const { xml, sha256Base64 } = await this.downloadUpoXml(
+            invoice.upoDownloadUrl,
+            downloadTimeoutMs
+          );
 
           return {
             invoiceReferenceNumber: invoice.referenceNumber,
             ksefNumber: invoice.ksefNumber ?? null,
-            upoDownloadUrlExpirationDate: invoice.upoDownloadUrlExpirationDate ?? null,
+            upoDownloadUrlExpirationDate:
+              invoice.upoDownloadUrlExpirationDate ?? null,
             xml,
             sha256Base64,
           };
@@ -136,11 +150,10 @@ export class InvoiceService {
         debugLog(`📄 [UPO Poll] Attempt ${attempt}: Waiting for UPO URL...`);
         await this.sleep(pollingDelayMs);
       } catch (error: any) {
-
         if (error?.message?.includes('error status')) {
           throw error;
         }
-        
+
         if (this.shouldRetryAfterError(error)) {
           await this.handleRetryableError(error, pollingDelayMs);
           continue;
@@ -149,10 +162,15 @@ export class InvoiceService {
       }
     }
 
-    throw new Error(`Timeout waiting for invoice UPO: session=${sessionReferenceNumber}, attempts=${attempt}`);
+    throw new Error(
+      `Timeout waiting for invoice UPO: session=${sessionReferenceNumber}, attempts=${attempt}`
+    );
   }
 
-  private async fetchSessionInvoice(sessionReferenceNumber: string, timeoutMs: number) {
+  private async fetchSessionInvoice(
+    sessionReferenceNumber: string,
+    timeoutMs: number
+  ) {
     const response = await this.httpClient.get<SessionInvoicesListResponse>(
       `/sessions/${encodeURIComponent(sessionReferenceNumber)}/invoices?pageSize=10`,
       { headers: this.authHeaders(), timeoutMs }
@@ -170,18 +188,20 @@ export class InvoiceService {
 
     try {
       const response = await fetch(downloadUrl, {
-        method: "GET",
+        method: 'GET',
         signal: controller.signal,
       });
 
       if (!response.ok) {
-        const text = await response.text().catch(() => "");
-        throw new Error(`UPO download failed HTTP ${response.status}: ${text || response.statusText}`);
+        const text = await response.text().catch(() => '');
+        throw new Error(
+          `UPO download failed HTTP ${response.status}: ${text || response.statusText}`
+        );
       }
 
       return {
         xml: await response.text(),
-        sha256Base64: response.headers.get("x-ms-meta-hash") ?? undefined,
+        sha256Base64: response.headers.get('x-ms-meta-hash') ?? undefined,
       };
     } finally {
       clearTimeout(timeoutId);
@@ -191,7 +211,6 @@ export class InvoiceService {
   /* =========================
      QR CODE
      ========================= */
-
 
   async getInvoiceQRCode(
     ksefNumber: string,
@@ -212,7 +231,12 @@ export class InvoiceService {
       : this.computeSha256Base64Url(invoice.xml);
 
     const qrBaseUrl = KSEF_QR_BASE_URLS[this.environment];
-    const url = this.buildVerificationUrl(qrBaseUrl, sellerNip, issueDateForQr, invoiceHashBase64Url);
+    const url = this.buildVerificationUrl(
+      qrBaseUrl,
+      sellerNip,
+      issueDateForQr,
+      invoiceHashBase64Url
+    );
 
     const qrCode = await generateKSefInvoiceQRCode(url, {
       pixelsPerModule: options.pixelsPerModule,
@@ -221,7 +245,7 @@ export class InvoiceService {
     });
 
     const labelUsesKsefNumber = options.labelUsesKsefNumber !== false;
-    const label = labelUsesKsefNumber ? cleanKsefNumber : "OFFLINE";
+    const label = labelUsesKsefNumber ? cleanKsefNumber : 'OFFLINE';
 
     return {
       url,
@@ -240,7 +264,7 @@ export class InvoiceService {
 
   /**
    * Generuje QR code z lokalnego XML faktury + ksefNumber (BEZ pobierania z API)
-   * 
+   *
    * @param invoiceXml - XML faktury (lokalny)
    * @param ksefNumber - Numer KSeF faktury (z metadanych sesji)
    */
@@ -251,7 +275,9 @@ export class InvoiceService {
   ): Promise<InvoiceQRCodeResult> {
     debugLog(`🔲 [QR Service] generateQRCodeFromXml START`);
     debugLog(`🔲 [QR Service] ksefNumber: "${ksefNumber}"`);
-    debugLog(`🔲 [QR Service] invoiceXml length: ${invoiceXml?.length ?? 'null'}`);
+    debugLog(
+      `🔲 [QR Service] invoiceXml length: ${invoiceXml?.length ?? 'null'}`
+    );
     debugLog(`🔲 [QR Service] options: ${JSON.stringify(options)}`);
 
     // Walidacja
@@ -276,7 +302,7 @@ export class InvoiceService {
 
       const issueDateForQr = this.formatDateForQr(issueDateRaw);
       debugLog(`🔲 [QR Service] Issue date for QR: ${issueDateForQr}`);
-      
+
       // Oblicz hash z lokalnego XML
       debugLog(`🔲 [QR Service] Computing SHA256 hash...`);
       const invoiceHashBase64Url = this.computeSha256Base64Url(invoiceXml);
@@ -286,7 +312,12 @@ export class InvoiceService {
       const qrBaseUrl = KSEF_QR_BASE_URLS[this.environment];
       debugLog(`🔲 [QR Service] QR base URL: ${qrBaseUrl}`);
 
-      const url = this.buildVerificationUrl(qrBaseUrl, sellerNip, issueDateForQr, invoiceHashBase64Url);
+      const url = this.buildVerificationUrl(
+        qrBaseUrl,
+        sellerNip,
+        issueDateForQr,
+        invoiceHashBase64Url
+      );
       debugLog(`🔲 [QR Service] Verification URL: ${url}`);
 
       // Wygeneruj QR code
@@ -296,8 +327,12 @@ export class InvoiceService {
         margin: options.margin,
         errorCorrectionLevel: options.errorCorrectionLevel,
       });
-      debugLog(`🔲 [QR Service] QR PNG base64 length: ${qrCode.pngBase64?.length ?? 0}`);
-      debugLog(`🔲 [QR Service] QR dataUrl length: ${qrCode.dataUrl?.length ?? 0}`);
+      debugLog(
+        `🔲 [QR Service] QR PNG base64 length: ${qrCode.pngBase64?.length ?? 0}`
+      );
+      debugLog(
+        `🔲 [QR Service] QR dataUrl length: ${qrCode.dataUrl?.length ?? 0}`
+      );
 
       const result: InvoiceQRCodeResult = {
         url,
@@ -316,7 +351,7 @@ export class InvoiceService {
       debugLog(`✅ [QR Service] generateQRCodeFromXml SUCCESS`);
       debugLog(`🔲 [QR Service] Result URL: ${result.url}`);
       debugLog(`🔲 [QR Service] Result label: ${result.label}`);
-      
+
       return result;
     } catch (error) {
       debugError(`❌ [QR Service] generateQRCodeFromXml FAILED:`, error);
@@ -335,7 +370,7 @@ export class InvoiceService {
     this.ensureAuthenticated();
     this.validateGetInvoicesQuery(query);
 
-    const sortOrder: SortOrder = options.sortOrder ?? "Asc";
+    const sortOrder: SortOrder = options.sortOrder ?? 'Asc';
     const pageSize = this.clampPageSize(options.pageSize ?? MAX_PAGE_SIZE);
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maxRequests = options.maxRequests ?? 2000;
@@ -354,7 +389,13 @@ export class InvoiceService {
 
   private async fetchAllInvoiceMetadata(
     query: GetInvoicesQuery,
-    config: { sortOrder: SortOrder; pageSize: number; timeoutMs: number; maxRequests: number; dedupe: boolean }
+    config: {
+      sortOrder: SortOrder;
+      pageSize: number;
+      timeoutMs: number;
+      maxRequests: number;
+      dedupe: boolean;
+    }
   ): Promise<GetInvoicesResult> {
     const { sortOrder, pageSize, timeoutMs, maxRequests, dedupe } = config;
     const sortField = this.getSortFieldForDateType(query.dateRange.dateType);
@@ -374,7 +415,13 @@ export class InvoiceService {
 
       try {
         requests++;
-        response = await this.fetchMetadataPage(query, sortOrder, pageOffset, pageSize, timeoutMs);
+        response = await this.fetchMetadataPage(
+          query,
+          sortOrder,
+          pageOffset,
+          pageSize,
+          timeoutMs
+        );
         pages++;
       } catch (error) {
         if (isHttpError(error) && error.status === 429) {
@@ -385,10 +432,11 @@ export class InvoiceService {
         throw error;
       }
 
-      permanentStorageHwmDate = response.permanentStorageHwmDate ?? permanentStorageHwmDate;
+      permanentStorageHwmDate =
+        response.permanentStorageHwmDate ?? permanentStorageHwmDate;
 
       for (const invoice of response.invoices ?? []) {
-        const ksefNumber = String(invoice.ksefNumber ?? "");
+        const ksefNumber = String(invoice.ksefNumber ?? '');
 
         if (dedupe && ksefNumber && seenKsefNumbers.has(ksefNumber)) {
           deduped++;
@@ -414,10 +462,17 @@ export class InvoiceService {
       // Window shift required (isTruncated = true)
       const lastInvoice = response.invoices?.[response.invoices.length - 1];
       if (!lastInvoice) {
-        throw new Error("isTruncated=true but no invoices returned - cannot advance window");
+        throw new Error(
+          'isTruncated=true but no invoices returned - cannot advance window'
+        );
       }
 
-      query = this.shiftDateRangeWindow(query, lastInvoice, sortField, sortOrder);
+      query = this.shiftDateRangeWindow(
+        query,
+        lastInvoice,
+        sortField,
+        sortOrder
+      );
       windows++;
       pageOffset = 0;
     }
@@ -430,7 +485,12 @@ export class InvoiceService {
       invoices: results,
       permanentStorageHwmDate,
       stats: { requests, pages, windows, deduped },
-      cursor: { sortOrder, pageSize, pageOffset, dateRange: { ...query.dateRange } },
+      cursor: {
+        sortOrder,
+        pageSize,
+        pageOffset,
+        dateRange: { ...query.dateRange },
+      },
     };
   }
 
@@ -455,32 +515,32 @@ export class InvoiceService {
 
   private ensureAuthenticated(): void {
     if (!this.getAccessToken()) {
-      throw new Error("Not authenticated");
+      throw new Error('Not authenticated');
     }
   }
 
   private validateKsefNumber(ksefNumber: string): string {
-    const clean = String(ksefNumber ?? "").trim();
+    const clean = String(ksefNumber ?? '').trim();
     if (!clean) {
-      throw new Error("Missing ksefNumber");
+      throw new Error('Missing ksefNumber');
     }
     return clean;
   }
 
   private validateSessionReference(ref: string): string {
-    const clean = String(ref ?? "").trim();
+    const clean = String(ref ?? '').trim();
     if (!clean) {
-      throw new Error("Missing sessionReferenceNumber");
+      throw new Error('Missing sessionReferenceNumber');
     }
     return clean;
   }
 
   private validateGetInvoicesQuery(query: GetInvoicesQuery): void {
     if (!query?.subjectType) {
-      throw new Error("Missing query.subjectType");
+      throw new Error('Missing query.subjectType');
     }
     if (!query.dateRange?.dateType || !query.dateRange?.from) {
-      throw new Error("Missing query.dateRange.dateType or from");
+      throw new Error('Missing query.dateRange.dateType or from');
     }
   }
 
@@ -488,14 +548,20 @@ export class InvoiceService {
     const fromDate = new Date(from);
     const toDate = new Date(to);
 
-    if (!Number.isFinite(fromDate.getTime()) || !Number.isFinite(toDate.getTime())) {
+    if (
+      !Number.isFinite(fromDate.getTime()) ||
+      !Number.isFinite(toDate.getTime())
+    ) {
       return;
     }
 
-    const diffDays = Math.abs(toDate.getTime() - fromDate.getTime()) / (24 * 60 * 60 * 1000);
+    const diffDays =
+      Math.abs(toDate.getTime() - fromDate.getTime()) / (24 * 60 * 60 * 1000);
 
     if (diffDays > MAX_DATE_RANGE_DAYS) {
-      throw new Error(`Invalid dateRange: max 3 months allowed (got ~${diffDays.toFixed(1)} days)`);
+      throw new Error(
+        `Invalid dateRange: max 3 months allowed (got ~${diffDays.toFixed(1)} days)`
+      );
     }
   }
 
@@ -514,7 +580,7 @@ export class InvoiceService {
       return anyNipMatch[1];
     }
 
-    throw new Error("Cannot extract seller NIP from XML");
+    throw new Error('Cannot extract seller NIP from XML');
   }
 
   private extractIssueDate(xml: string): string {
@@ -522,7 +588,7 @@ export class InvoiceService {
     const raw = match?.[1]?.trim();
 
     if (!raw) {
-      throw new Error("Cannot extract issue date (P_1) from XML");
+      throw new Error('Cannot extract issue date (P_1) from XML');
     }
 
     return raw;
@@ -541,14 +607,14 @@ export class InvoiceService {
 
     const isoDatePart = s.slice(0, 10);
     if (/^\d{4}-\d{2}-\d{2}$/.test(isoDatePart)) {
-      const [yyyy, mm, dd] = isoDatePart.split("-");
+      const [yyyy, mm, dd] = isoDatePart.split('-');
       return `${dd}-${mm}-${yyyy}`;
     }
 
     const date = new Date(s);
     if (Number.isFinite(date.getTime())) {
-      const dd = String(date.getUTCDate()).padStart(2, "0");
-      const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(date.getUTCDate()).padStart(2, '0');
+      const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
       const yyyy = String(date.getUTCFullYear());
       return `${dd}-${mm}-${yyyy}`;
     }
@@ -560,34 +626,38 @@ export class InvoiceService {
     const v = String(hash).trim();
 
     if (!v) {
-      throw new Error("Empty hash");
+      throw new Error('Empty hash');
     }
 
     if (/^[A-Za-z0-9\-_]+$/.test(v)) {
-      return v.replace(/=+$/g, "");
+      return v.replace(/=+$/g, '');
     }
 
     if (/^[A-Za-z0-9+/=]+$/.test(v)) {
-      return v.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      return v.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
     }
 
     if (/^[a-f0-9]{64}$/i.test(v)) {
-      return Buffer.from(v, "hex")
-        .toString("base64")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/g, "");
+      return Buffer.from(v, 'hex')
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
     }
 
-    throw new Error("Unsupported hash format");
+    throw new Error('Unsupported hash format');
   }
 
   private computeSha256Base64Url(xml: string): string {
     try {
-      return createHash("sha256").update(Buffer.from(xml, "utf8")).digest("base64url");
+      return createHash('sha256')
+        .update(Buffer.from(xml, 'utf8'))
+        .digest('base64url');
     } catch {
-      const b64 = createHash("sha256").update(Buffer.from(xml, "utf8")).digest("base64");
-      return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      const b64 = createHash('sha256')
+        .update(Buffer.from(xml, 'utf8'))
+        .digest('base64');
+      return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
     }
   }
 
@@ -613,11 +683,11 @@ export class InvoiceService {
 
   private getSortFieldForDateType(dateType: DateType): string {
     const mapping: Record<DateType, string> = {
-      PermanentStorage: "permanentStorageDate",
-      Invoicing: "invoicingDate",
-      Issue: "issueDate",
+      PermanentStorage: 'permanentStorageDate',
+      Invoicing: 'invoicingDate',
+      Issue: 'issueDate',
     };
-    return mapping[dateType] ?? "issueDate";
+    return mapping[dateType] ?? 'issueDate';
   }
 
   private prepareWorkingQuery(query: GetInvoicesQuery): GetInvoicesQuery {
@@ -630,7 +700,10 @@ export class InvoiceService {
       workingQuery.dateRange.to = new Date().toISOString();
     }
 
-    this.validateDateRangeMax3Months(workingQuery.dateRange.from, workingQuery.dateRange.to);
+    this.validateDateRangeMax3Months(
+      workingQuery.dateRange.from,
+      workingQuery.dateRange.to
+    );
 
     return workingQuery;
   }
@@ -643,22 +716,29 @@ export class InvoiceService {
   ): GetInvoicesQuery {
     const lastDateRaw = lastInvoice[sortField];
 
-    if (typeof lastDateRaw !== "string" || !lastDateRaw.trim()) {
-      throw new Error(`Cannot shift window: missing ${sortField} in last invoice`);
+    if (typeof lastDateRaw !== 'string' || !lastDateRaw.trim()) {
+      throw new Error(
+        `Cannot shift window: missing ${sortField} in last invoice`
+      );
     }
 
     const lastDate = lastDateRaw.trim();
     const newQuery = { ...query, dateRange: { ...query.dateRange } };
 
-    if (sortOrder === "Asc") {
+    if (sortOrder === 'Asc') {
       const prevFrom = String(newQuery.dateRange.from);
-      newQuery.dateRange.from = prevFrom === lastDate ? this.addMilliseconds(lastDate, 1) : lastDate;
+      newQuery.dateRange.from =
+        prevFrom === lastDate ? this.addMilliseconds(lastDate, 1) : lastDate;
     } else {
-      const prevTo = String(newQuery.dateRange.to ?? "");
-      newQuery.dateRange.to = prevTo === lastDate ? this.addMilliseconds(lastDate, -1) : lastDate;
+      const prevTo = String(newQuery.dateRange.to ?? '');
+      newQuery.dateRange.to =
+        prevTo === lastDate ? this.addMilliseconds(lastDate, -1) : lastDate;
     }
 
-    this.validateDateRangeMax3Months(newQuery.dateRange.from, String(newQuery.dateRange.to));
+    this.validateDateRangeMax3Months(
+      newQuery.dateRange.from,
+      String(newQuery.dateRange.to)
+    );
 
     return newQuery;
   }
@@ -678,7 +758,7 @@ export class InvoiceService {
   private authHeaders(): Record<string, string> {
     return {
       Authorization: `Bearer ${this.getAccessToken()}`,
-      Accept: "application/json",
+      Accept: 'application/json',
     };
   }
 
@@ -687,7 +767,12 @@ export class InvoiceService {
     path: string,
     headers: Record<string, string>,
     timeoutMs: number
-  ): Promise<{ text: string; headers: Headers; status: number; statusText: string }> {
+  ): Promise<{
+    text: string;
+    headers: Headers;
+    status: number;
+    statusText: string;
+  }> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -696,7 +781,7 @@ export class InvoiceService {
       const url = `${baseUrl}${path}`;
 
       const response = await fetch(url, {
-        method: "GET",
+        method: 'GET',
         headers,
         signal: controller.signal,
       });
@@ -720,7 +805,10 @@ export class InvoiceService {
     return isHttpError(error) && (error.status === 429 || error.status === 404);
   }
 
-  private async handleRetryableError(error: unknown, defaultDelayMs: number): Promise<void> {
+  private async handleRetryableError(
+    error: unknown,
+    defaultDelayMs: number
+  ): Promise<void> {
     if (isHttpError(error) && error.status === 429) {
       const waitSec = error.retryAfterSec ?? 30;
       await this.sleep(waitSec * 1000);

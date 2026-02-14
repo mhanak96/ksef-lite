@@ -1,7 +1,16 @@
 import type { Fa3Header } from './header.types';
-import type { Fa3Seller, Fa3Buyer, Fa3ThirdParty, Fa3AuthorizedEntity } from './party.types';
+import type {
+  Fa3Seller,
+  Fa3Buyer,
+  Fa3ThirdParty,
+  Fa3AuthorizedEntity,
+} from './party.types';
 import type { Fa3InvoiceDetails } from './invoice-details.types';
-import type { Fa3InvoiceItem, Fa3VatSummary, Fa3InvoiceSummary } from './item.types';
+import type {
+  Fa3InvoiceItem,
+  Fa3VatSummary,
+  Fa3InvoiceSummary,
+} from './item.types';
 import type { Fa3Footer, Fa3Attachment } from './footer.types';
 
 /**
@@ -57,7 +66,14 @@ export interface Fa3InvoiceInput {
   thirdParties?: Fa3ThirdParty[];
   authorizedEntity?: Fa3AuthorizedEntity;
   details: Omit<Fa3InvoiceDetails, 'items'> & {
-    items: Array<Partial<Fa3InvoiceItem> & { name: string; quantity: number; netPrice: number; vatRate: string | number }>;
+    items: Array<
+      Partial<Fa3InvoiceItem> & {
+        name: string;
+        quantity: number;
+        netPrice: number;
+        vatRate: string | number;
+      }
+    >;
   };
   /** Opcjonalne - obliczane automatycznie */
   vatSummary?: Fa3VatSummary;

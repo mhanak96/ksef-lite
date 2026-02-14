@@ -3,11 +3,7 @@ import { Fa3BuildContext } from '../validators/build-context';
 import { InvoiceCalculator } from '../calculators/invoice.calculator';
 import { debugError, debugWarn } from '../../../utils/logger';
 
-import type { 
-  Fa3Invoice, 
-  Fa3InvoiceInput,
-  Fa3Header,
-} from '../types';
+import type { Fa3Invoice, Fa3InvoiceInput, Fa3Header } from '../types';
 
 function validateNip(nip: string): boolean {
   const cleaned = nip.replace(/[\s-]/g, '');
@@ -16,10 +12,12 @@ function validateNip(nip: string): boolean {
   const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7];
   const digits = cleaned.split('').map(Number);
   const checksum = digits[9];
-  
-  const sum = digits.slice(0, 9).reduce((acc, digit, i) => acc + digit * weights[i], 0);
+
+  const sum = digits
+    .slice(0, 9)
+    .reduce((acc, digit, i) => acc + digit * weights[i], 0);
   const calculatedChecksum = sum % 11;
-  
+
   return calculatedChecksum === checksum;
 }
 
@@ -54,7 +52,6 @@ function normalizeInvoice(input: Fa3InvoiceInput | Fa3Invoice): Fa3Invoice {
     footer: input.footer,
     attachment: input.attachment,
   };
-  
 }
 
 export class FA3InvoiceGenerator {
@@ -76,10 +73,7 @@ export class FA3InvoiceGenerator {
     });
 
     // 3. WALIDACJA I BUILD - generowanie XML
-    const ctx = new Fa3BuildContext(
-      { mode: 'collect' },
-      validateNip
-    );
+    const ctx = new Fa3BuildContext({ mode: 'collect' }, validateNip);
 
     const xml = this.fa3InvoiceBuilder.build(normalizedInvoice, ctx);
 
@@ -93,7 +87,7 @@ export class FA3InvoiceGenerator {
       }
     }
 
-    const warnings = ctx.issues.filter(i => i.severity === 'warning');
+    const warnings = ctx.issues.filter((i) => i.severity === 'warning');
     if (warnings.length > 0) {
       debugWarn('⚠️  FA(3) validation warnings:');
       for (const issue of warnings) {

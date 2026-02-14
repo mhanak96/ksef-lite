@@ -1,9 +1,5 @@
 import type { Fa3BuildContext } from '../../validators/build-context';
-import type {
-  Fa3Footer,
-  Fa3FooterInfo,
-  Fa3FooterRegistry,
-} from '../../types';
+import type { Fa3Footer, Fa3FooterInfo, Fa3FooterRegistry } from '../../types';
 
 export class FooterBuilder {
   private indentSize: number = 2;
@@ -73,7 +69,7 @@ export class FooterBuilder {
   private buildInfo(
     info: Fa3FooterInfo,
     level: number,
-    ctx?: Fa3BuildContext
+    _ctx?: Fa3BuildContext
   ): string | null {
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
@@ -92,7 +88,7 @@ export class FooterBuilder {
   private buildRegistry(
     registry: Fa3FooterRegistry,
     level: number,
-    ctx?: Fa3BuildContext
+    _ctx?: Fa3BuildContext
   ): string | null {
     const innerLevel = level + 1;
     const elements: Array<string | null> = [];
@@ -144,7 +140,11 @@ export class FooterBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

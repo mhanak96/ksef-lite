@@ -1,4 +1,8 @@
-import type { Fa3InvoiceItem, Fa3VatSummary, Fa3InvoiceSummary } from './item.types';
+import type {
+  Fa3InvoiceItem,
+  Fa3VatSummary,
+  Fa3InvoiceSummary,
+} from './item.types';
 import type { Fa3Order } from './order.types';
 
 /**

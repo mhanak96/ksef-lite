@@ -1,27 +1,33 @@
-import crypto from "crypto";
-import { debugLog, debugError } from "../../../utils/logger";
-import { CertificateInfo } from "../types";
+import crypto from 'crypto';
+import { debugLog, debugError } from '../../../utils/logger';
+import { CertificateInfo } from '../types';
 
 /**
  * Sprawdza czy klucz prywatny pasuje do certyfikatu
  */
-export function verifyKeyMatchesCert(certPem: string, privateKeyPem: string): boolean {
+export function verifyKeyMatchesCert(
+  certPem: string,
+  privateKeyPem: string
+): boolean {
   try {
-    const testData = "test message for key verification";
+    const testData = 'test message for key verification';
 
-    const sign = crypto.createSign("SHA256");
+    const sign = crypto.createSign('SHA256');
     sign.update(testData);
     const signature = sign.sign(privateKeyPem);
 
-    const verify = crypto.createVerify("SHA256");
+    const verify = crypto.createVerify('SHA256');
     verify.update(testData);
     const isValid = verify.verify(certPem, signature);
 
-    debugLog("🔍 Key-certificate match:", isValid ? "✅ OK" : "❌ MISMATCH");
+    debugLog('🔍 Key-certificate match:', isValid ? '✅ OK' : '❌ MISMATCH');
 
     return isValid;
   } catch (error) {
-    debugError("🔴 Key verification error:", error instanceof Error ? error.message : String(error));
+    debugError(
+      '🔴 Key verification error:',
+      error instanceof Error ? error.message : String(error)
+    );
     return false;
   }
 }
@@ -35,17 +41,17 @@ export function parseCertificateInfo(certPem: string): CertificateInfo {
   const issuer = x509.issuer;
 
   const serialHex = x509.serialNumber;
-  const serialBigInt = BigInt("0x" + serialHex);
+  const serialBigInt = BigInt('0x' + serialHex);
   const serialNumber = serialBigInt.toString(10);
 
-  debugLog("📝 Certificate Issuer:", issuer);
-  debugLog("📝 Certificate SerialNumber:", serialNumber);
+  debugLog('📝 Certificate Issuer:', issuer);
+  debugLog('📝 Certificate SerialNumber:', serialNumber);
 
   return { issuer, serialNumber };
 }
 
 /**
- * Formatuje datę ISO dla XAdES 
+ * Formatuje datę ISO dla XAdES
  */
 export function formatSigningTime(): string {
   const date = new Date();

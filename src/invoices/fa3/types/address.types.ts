@@ -29,7 +29,6 @@ export interface Fa3Address {
 
   region?: string;
 
-
   gln?: string;
 }
 

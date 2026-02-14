@@ -1,8 +1,6 @@
 import type { Fa3BuildContext } from '../../../validators/build-context';
 import type { Fa3InvoiceItem } from '../../../types';
 
-type XmlAttributes = Record<string, string | number | boolean | null | undefined>;
-
 export class InvoiceItemBuilder {
   private indentSize: number = 2;
   private indentChar: string = ' ';
@@ -20,7 +18,7 @@ export class InvoiceItemBuilder {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return null;
     }
-  
+
     if (items.length > 10000) {
       this.vWarn(
         ctx,
@@ -29,16 +27,15 @@ export class InvoiceItemBuilder {
         'Liczba pozycji przekracza limit 10000. Przetworzono tylko pierwsze 10000 pozycji.'
       );
     }
-  
+
     const limitedItems = items.slice(0, 10000);
-  
+
     const elements: Array<string | null> = limitedItems.map((item, index) =>
       this.build(item, index + 1, level, ctx)
     );
-  
+
     return this.joinElements(elements);
   }
-  
 
   public build(
     item: Fa3InvoiceItem,
@@ -51,7 +48,14 @@ export class InvoiceItemBuilder {
     const elements: Array<string | null> = [];
 
     // NrWierszaFa (wymagane)
-    if (!this.reqNumber(ctx, `${path}.lineNumber`, lineNumber, 'Brak numeru wiersza faktury')) {
+    if (
+      !this.reqNumber(
+        ctx,
+        `${path}.lineNumber`,
+        lineNumber,
+        'Brak numeru wiersza faktury'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('NrWierszaFa', lineNumber, innerLevel));
@@ -153,7 +157,9 @@ export class InvoiceItemBuilder {
 
     // KwotaAkcyzy (opcjonalne)
     if (item.exciseAmount !== undefined && item.exciseAmount !== null) {
-      elements.push(this.amountElement('KwotaAkcyzy', item.exciseAmount, innerLevel));
+      elements.push(
+        this.amountElement('KwotaAkcyzy', item.exciseAmount, innerLevel)
+      );
     }
 
     // GTU (opcjonalne)
@@ -168,7 +174,9 @@ export class InvoiceItemBuilder {
 
     // KursWaluty (opcjonalne)
     if (item.exchangeRate !== undefined && item.exchangeRate !== null) {
-      elements.push(this.quantityElement('KursWaluty', item.exchangeRate, innerLevel));
+      elements.push(
+        this.quantityElement('KursWaluty', item.exchangeRate, innerLevel)
+      );
     }
 
     // StanPrzed - dla faktur korygujących (opcjonalne)
@@ -220,7 +228,11 @@ export class InvoiceItemBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

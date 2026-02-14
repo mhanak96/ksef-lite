@@ -32,28 +32,60 @@ export class AnnotationsBuilder {
 
     // P_16 - Metoda kasowa (wymagane: 1 lub 2)
     const p_16 = anno.p_16 ?? 2;
-    if (!this.reqOneOf(ctx, 'annotations.p_16', p_16, [1, 2] as const, 'P_16 musi być 1 lub 2')) {
+    if (
+      !this.reqOneOf(
+        ctx,
+        'annotations.p_16',
+        p_16,
+        [1, 2] as const,
+        'P_16 musi być 1 lub 2'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('P_16', p_16, innerLevel));
 
     // P_17 - Samofakturowanie (wymagane: 1 lub 2)
     const p_17 = anno.p_17 ?? 2;
-    if (!this.reqOneOf(ctx, 'annotations.p_17', p_17, [1, 2] as const, 'P_17 musi być 1 lub 2')) {
+    if (
+      !this.reqOneOf(
+        ctx,
+        'annotations.p_17',
+        p_17,
+        [1, 2] as const,
+        'P_17 musi być 1 lub 2'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('P_17', p_17, innerLevel));
 
     // P_18 - Odwrotne obciążenie (wymagane: 1 lub 2)
     const p_18 = anno.p_18 ?? 2;
-    if (!this.reqOneOf(ctx, 'annotations.p_18', p_18, [1, 2] as const, 'P_18 musi być 1 lub 2')) {
+    if (
+      !this.reqOneOf(
+        ctx,
+        'annotations.p_18',
+        p_18,
+        [1, 2] as const,
+        'P_18 musi być 1 lub 2'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('P_18', p_18, innerLevel));
 
     // P_18A - Mechanizm podzielonej płatności (wymagane: 1 lub 2)
     const p_18a = anno.p_18a ?? 2;
-    if (!this.reqOneOf(ctx, 'annotations.p_18a', p_18a, [1, 2] as const, 'P_18A musi być 1 lub 2')) {
+    if (
+      !this.reqOneOf(
+        ctx,
+        'annotations.p_18a',
+        p_18a,
+        [1, 2] as const,
+        'P_18A musi być 1 lub 2'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('P_18A', p_18a, innerLevel));
@@ -68,7 +100,15 @@ export class AnnotationsBuilder {
 
     // P_23 - Procedura uproszczona (wymagane: 1 lub 2)
     const p_23 = anno.p_23 ?? 2;
-    if (!this.reqOneOf(ctx, 'annotations.p_23', p_23, [1, 2] as const, 'P_23 musi być 1 lub 2')) {
+    if (
+      !this.reqOneOf(
+        ctx,
+        'annotations.p_23',
+        p_23,
+        [1, 2] as const,
+        'P_23 musi być 1 lub 2'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('P_23', p_23, innerLevel));
@@ -171,7 +211,12 @@ export class AnnotationsBuilder {
         // Max 10000
         const means = list!.slice(0, 10000);
         for (let i = 0; i < means.length; i++) {
-          const transportXml = this.buildNewTransportMeansItem(means[i], innerLevel, ctx, i);
+          const transportXml = this.buildNewTransportMeansItem(
+            means[i],
+            innerLevel,
+            ctx,
+            i
+          );
           if (transportXml) elements.push(transportXml);
         }
       }
@@ -179,7 +224,11 @@ export class AnnotationsBuilder {
       elements.push(this.element('P_22N', '1', innerLevel));
     }
 
-    return this.block('NoweSrodkiTransportu', this.joinElements(elements), level);
+    return this.block(
+      'NoweSrodkiTransportu',
+      this.joinElements(elements),
+      level
+    );
   }
 
   private buildNewTransportMeansItem(
@@ -203,7 +252,9 @@ export class AnnotationsBuilder {
     ) {
       return null;
     }
-    elements.push(this.dateElement('P_22A', transport.firstUseDate, innerLevel));
+    elements.push(
+      this.dateElement('P_22A', transport.firstUseDate, innerLevel)
+    );
 
     // P_NrWierszaNST - Numer wiersza faktury (wymagany)
     if (
@@ -216,7 +267,9 @@ export class AnnotationsBuilder {
     ) {
       return null;
     }
-    elements.push(this.element('P_NrWierszaNST', transport.lineNumber, innerLevel));
+    elements.push(
+      this.element('P_NrWierszaNST', transport.lineNumber, innerLevel)
+    );
 
     // Opcjonalne dane środka transportu
     if (this.hasValue(transport.brand)) {
@@ -229,19 +282,31 @@ export class AnnotationsBuilder {
       elements.push(this.element('P_22BK', transport.color, innerLevel));
     }
     if (this.hasValue(transport.registrationNumber)) {
-      elements.push(this.element('P_22BNR', transport.registrationNumber, innerLevel));
+      elements.push(
+        this.element('P_22BNR', transport.registrationNumber, innerLevel)
+      );
     }
     if (this.hasValue(transport.productionYear)) {
-      elements.push(this.element('P_22BRP', transport.productionYear, innerLevel));
+      elements.push(
+        this.element('P_22BRP', transport.productionYear, innerLevel)
+      );
     }
 
     // P_22BT - "Typ/rodzaj" (opis) – UWAGA: w typach masz też `type: 1|2|3`.
     // Jeśli Twoje typy mają pole stringowe na P_22BT jako `transportType`, użyj go.
     // Jeżeli nadal trzymasz to w `vehicleType?: string`, to też to obsłużymy.
-    const anyT = transport as unknown as { transportType?: string; vehicleType?: string; type?: unknown };
+    const anyT = transport as unknown as {
+      transportType?: string;
+      vehicleType?: string;
+      type?: unknown;
+    };
     const transportTypeDesc =
-      (typeof anyT.transportType === 'string' && anyT.transportType.trim() ? anyT.transportType : undefined) ??
-      (typeof anyT.vehicleType === 'string' && anyT.vehicleType.trim() ? anyT.vehicleType : undefined);
+      (typeof anyT.transportType === 'string' && anyT.transportType.trim()
+        ? anyT.transportType
+        : undefined) ??
+      (typeof anyT.vehicleType === 'string' && anyT.vehicleType.trim()
+        ? anyT.vehicleType
+        : undefined);
     if (this.hasValue(transportTypeDesc)) {
       elements.push(this.element('P_22BT', transportTypeDesc, innerLevel));
     }
@@ -268,11 +333,14 @@ export class AnnotationsBuilder {
       } else if (this.hasValue(transport.bodyNumber)) {
         elements.push(this.element('P_22B2', transport.bodyNumber, innerLevel));
       } else if (this.hasValue(transport.chassisNumber)) {
-        elements.push(this.element('P_22B3', transport.chassisNumber, innerLevel));
+        elements.push(
+          this.element('P_22B3', transport.chassisNumber, innerLevel)
+        );
       } else if (this.hasValue(transport.frameNumber)) {
-        elements.push(this.element('P_22B4', transport.frameNumber, innerLevel));
+        elements.push(
+          this.element('P_22B4', transport.frameNumber, innerLevel)
+        );
       }
-
     } else if (transport.type === 2) {
       // Jednostka pływająca - wymagane godziny
       if (
@@ -285,12 +353,13 @@ export class AnnotationsBuilder {
       ) {
         return null;
       }
-      elements.push(this.element('P_22C', transport.operatingHours, innerLevel));
+      elements.push(
+        this.element('P_22C', transport.operatingHours, innerLevel)
+      );
 
       if (this.hasValue(transport.hullNumber)) {
         elements.push(this.element('P_22C1', transport.hullNumber, innerLevel));
       }
-
     } else if (transport.type === 3) {
       // Statek powietrzny - wymagane godziny
       if (
@@ -303,16 +372,20 @@ export class AnnotationsBuilder {
       ) {
         return null;
       }
-      elements.push(this.element('P_22D', transport.operatingHours, innerLevel));
+      elements.push(
+        this.element('P_22D', transport.operatingHours, innerLevel)
+      );
 
       // W Twoich typach było `factoryNumber`. Część kodu używa `serialNumber`.
       // Obsłużymy oba bez błędów TS.
-      const anyA = transport as unknown as { serialNumber?: string; factoryNumber?: string };
+      const anyA = transport as unknown as {
+        serialNumber?: string;
+        factoryNumber?: string;
+      };
       const serial = anyA.serialNumber ?? anyA.factoryNumber;
       if (this.hasValue(serial)) {
         elements.push(this.element('P_22D1', serial, innerLevel));
       }
-
     } else {
       this.vError(
         ctx,
@@ -322,7 +395,11 @@ export class AnnotationsBuilder {
       );
     }
 
-    return this.block('NowySrodekTransportu', this.joinElements(elements), level);
+    return this.block(
+      'NowySrodekTransportu',
+      this.joinElements(elements),
+      level
+    );
   }
 
   // ============================================================
@@ -378,7 +455,9 @@ export class AnnotationsBuilder {
   // AUTO-DETECTION UTILITY
   // ============================================================
 
-  public autoDetectAnnotations(invoice: Fa3InvoiceForAnnotations): Fa3Annotations {
+  public autoDetectAnnotations(
+    invoice: Fa3InvoiceForAnnotations
+  ): Fa3Annotations {
     const annotations: Fa3Annotations = {
       ...(invoice.details?.annotations || {}),
     };
@@ -386,25 +465,33 @@ export class AnnotationsBuilder {
     const items: Fa3InvoiceItemForAnnotations[] = invoice.details?.items || [];
 
     // odwrotne obciążenie
-    const hasReverseCharge = items.some((item) => item.vatRate === 'oo' || item.vatRate === 'OO');
+    const hasReverseCharge = items.some(
+      (item) => item.vatRate === 'oo' || item.vatRate === 'OO'
+    );
     if (hasReverseCharge && annotations.p_18 === undefined) {
       annotations.p_18 = 1;
     }
 
     // split payment (załącznik 15)
-    const hasSplitPayment = items.some((item) => item.attachment15 === 1 || item.attachment15 === true);
+    const hasSplitPayment = items.some(
+      (item) => item.attachment15 === 1 || item.attachment15 === true
+    );
     if (hasSplitPayment && annotations.p_18a === undefined) {
       annotations.p_18a = 1;
     }
 
     // zwolnienie z VAT
-    const hasExemption = items.some((item) => item.vatRate === 'zw' || item.vatRate === 'ZW');
+    const hasExemption = items.some(
+      (item) => item.vatRate === 'zw' || item.vatRate === 'ZW'
+    );
     if (hasExemption && annotations.p_19 === undefined) {
       annotations.p_19 = 1;
     }
 
     // procedura marży
-    const hasMargin = items.some((item) => item.vatRate === 'marza' || item.isMargin === true);
+    const hasMargin = items.some(
+      (item) => item.vatRate === 'marza' || item.isMargin === true
+    );
     if (hasMargin && annotations.p_pMarzy === undefined) {
       annotations.p_pMarzy = 1;
       if (annotations.p_pMarzy_3_1 === undefined) {
@@ -445,7 +532,12 @@ export class AnnotationsBuilder {
     message: string
   ): value is T {
     if ((allowed as readonly unknown[]).includes(value)) return true;
-    this.vError(ctx, 'ONE_OF', path, `${message}. Dozwolone wartości: ${allowed.join(', ')}`);
+    this.vError(
+      ctx,
+      'ONE_OF',
+      path,
+      `${message}. Dozwolone wartości: ${allowed.join(', ')}`
+    );
     return false;
   }
 
@@ -478,7 +570,11 @@ export class AnnotationsBuilder {
     message: string
   ): value is Date | string {
     if (value instanceof Date && !Number.isNaN(value.getTime())) return true;
-    if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(new Date(value).getTime())) {
+    if (
+      typeof value === 'string' &&
+      value.trim() !== '' &&
+      !Number.isNaN(new Date(value).getTime())
+    ) {
       return true;
     }
     this.vError(ctx, 'REQUIRED_DATE', path, message);
@@ -493,17 +589,29 @@ export class AnnotationsBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }
 
-  protected block(tagName: string, content: string | null | undefined, level: number): string | null {
+  protected block(
+    tagName: string,
+    content: string | null | undefined,
+    level: number
+  ): string | null {
     if (!content || content.trim() === '') return null;
     return `${this.indent(level)}<${tagName}>\n${content}\n${this.indent(level)}</${tagName}>`;
   }
 
-  protected dateElement(tagName: string, date: Date | string | null | undefined, level: number): string | null {
+  protected dateElement(
+    tagName: string,
+    date: Date | string | null | undefined,
+    level: number
+  ): string | null {
     if (!date) return null;
     const formatted = this.formatDate(date);
     return this.element(tagName, formatted, level);

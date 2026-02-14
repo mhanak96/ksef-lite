@@ -37,7 +37,9 @@ export class PaymentPartsBuilder {
     }
 
     const limited = payments.slice(0, 100);
-    const elements = limited.map((p, i) => this.buildPartialPayment(p, level, ctx, i));
+    const elements = limited.map((p, i) =>
+      this.buildPartialPayment(p, level, ctx, i)
+    );
 
     return this.joinElements(elements);
   }
@@ -53,26 +55,46 @@ export class PaymentPartsBuilder {
     const elements: Array<string | null> = [];
 
     // KwotaZaplatyCzesciowej (wymagane)
-    if (!this.reqNumber(ctx, `${path}.amount`, partial.amount, 'Brak kwoty zapłaty częściowej')) {
+    if (
+      !this.reqNumber(
+        ctx,
+        `${path}.amount`,
+        partial.amount,
+        'Brak kwoty zapłaty częściowej'
+      )
+    ) {
       return null;
     }
-    elements.push(this.amountElement('KwotaZaplatyCzesciowej', partial.amount, innerLevel));
+    elements.push(
+      this.amountElement('KwotaZaplatyCzesciowej', partial.amount, innerLevel)
+    );
 
     // DataZaplatyCzesciowej (wymagane)
-    if (!this.reqDateLike(ctx, `${path}.date`, partial.date, 'Brak daty zapłaty częściowej')) {
+    if (
+      !this.reqDateLike(
+        ctx,
+        `${path}.date`,
+        partial.date,
+        'Brak daty zapłaty częściowej'
+      )
+    ) {
       return null;
     }
-    elements.push(this.dateElement('DataZaplatyCzesciowej', partial.date, innerLevel));
+    elements.push(
+      this.dateElement('DataZaplatyCzesciowej', partial.date, innerLevel)
+    );
 
     // FormaPlatnosci (opcjonalne)
     if (typeof partial.method === 'number') {
-      if (!this.reqOneOf(
-        ctx,
-        `${path}.method`,
-        partial.method,
-        [1, 2, 3, 4, 5, 6, 7] as const,
-        'FormaPlatnosci musi być 1-7'
-      )) {
+      if (
+        !this.reqOneOf(
+          ctx,
+          `${path}.method`,
+          partial.method,
+          [1, 2, 3, 4, 5, 6, 7] as const,
+          'FormaPlatnosci musi być 1-7'
+        )
+      ) {
         return null;
       }
       elements.push(this.element('FormaPlatnosci', partial.method, innerLevel));
@@ -82,7 +104,9 @@ export class PaymentPartsBuilder {
     if (partial.otherMethod === true) {
       elements.push(this.element('PlatnoscInna', '1', innerLevel));
       if (this.hasValue(partial.methodDescription)) {
-        elements.push(this.element('OpisPlatnosci', partial.methodDescription, innerLevel));
+        elements.push(
+          this.element('OpisPlatnosci', partial.methodDescription, innerLevel)
+        );
       }
     }
 
@@ -145,30 +169,52 @@ export class PaymentPartsBuilder {
       const desc = data.dueDateDescription;
       const descElements: Array<string | null> = [];
 
-      if (!this.reqNumber(ctx, 'dueDateDescription.quantity', desc.quantity, 'Brak ilości w opisie terminu')) {
+      if (
+        !this.reqNumber(
+          ctx,
+          'dueDateDescription.quantity',
+          desc.quantity,
+          'Brak ilości w opisie terminu'
+        )
+      ) {
         return null;
       }
       descElements.push(this.element('Ilosc', desc.quantity, innerLevel + 1));
 
-      if (!this.reqString(ctx, 'dueDateDescription.unit', desc.unit, 'Brak jednostki w opisie terminu')) {
+      if (
+        !this.reqString(
+          ctx,
+          'dueDateDescription.unit',
+          desc.unit,
+          'Brak jednostki w opisie terminu'
+        )
+      ) {
         return null;
       }
       descElements.push(this.element('Jednostka', desc.unit, innerLevel + 1));
 
-      if (!this.reqString(
-        ctx,
-        'dueDateDescription.startEvent',
-        desc.startEvent,
-        'Brak zdarzenia początkowego w opisie terminu'
-      )) {
+      if (
+        !this.reqString(
+          ctx,
+          'dueDateDescription.startEvent',
+          desc.startEvent,
+          'Brak zdarzenia początkowego w opisie terminu'
+        )
+      ) {
         return null;
       }
-      descElements.push(this.element('ZdarzeniePoczatkowe', desc.startEvent, innerLevel + 1));
+      descElements.push(
+        this.element('ZdarzeniePoczatkowe', desc.startEvent, innerLevel + 1)
+      );
 
-      elements.push(this.block('TerminOpis', this.joinElements(descElements), innerLevel));
+      elements.push(
+        this.block('TerminOpis', this.joinElements(descElements), innerLevel)
+      );
     }
 
-    return elements.length > 0 ? this.block('TerminPlatnosci', this.joinElements(elements), level) : null;
+    return elements.length > 0
+      ? this.block('TerminPlatnosci', this.joinElements(elements), level)
+      : null;
   }
 
   // ============================================================
@@ -201,7 +247,13 @@ export class PaymentPartsBuilder {
     // Jeśli jest pojedynczy rachunek
     else if (singleAccount) {
       const normalized = this.normalizeBankAccount(singleAccount);
-      return this.buildBankAccount(normalized, level, 'RachunekBankowy', ctx, 0);
+      return this.buildBankAccount(
+        normalized,
+        level,
+        'RachunekBankowy',
+        ctx,
+        0
+      );
     }
 
     return null;
@@ -231,7 +283,9 @@ export class PaymentPartsBuilder {
     return this.joinElements(elements);
   }
 
-  private normalizeBankAccount(account: string | Fa3BankAccount): Fa3BankAccount {
+  private normalizeBankAccount(
+    account: string | Fa3BankAccount
+  ): Fa3BankAccount {
     if (typeof account === 'string') {
       return { accountNumber: account };
     }
@@ -250,7 +304,14 @@ export class PaymentPartsBuilder {
     const elements: Array<string | null> = [];
 
     // NrRB (wymagane)
-    if (!this.reqString(ctx, `${path}.accountNumber`, account.accountNumber, 'Brak numeru rachunku bankowego')) {
+    if (
+      !this.reqString(
+        ctx,
+        `${path}.accountNumber`,
+        account.accountNumber,
+        'Brak numeru rachunku bankowego'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('NrRB', account.accountNumber, innerLevel));
@@ -262,16 +323,24 @@ export class PaymentPartsBuilder {
 
     // RachunekWlasnyBanku (opcjonalne)
     if (account.ownBankAccountType !== undefined) {
-      if (!this.reqOneOf(
-        ctx,
-        `${path}.ownBankAccountType`,
-        account.ownBankAccountType,
-        [1, 2, 3] as const,
-        'RachunekWlasnyBanku musi być 1, 2 lub 3'
-      )) {
+      if (
+        !this.reqOneOf(
+          ctx,
+          `${path}.ownBankAccountType`,
+          account.ownBankAccountType,
+          [1, 2, 3] as const,
+          'RachunekWlasnyBanku musi być 1, 2 lub 3'
+        )
+      ) {
         return null;
       }
-      elements.push(this.element('RachunekWlasnyBanku', account.ownBankAccountType, innerLevel));
+      elements.push(
+        this.element(
+          'RachunekWlasnyBanku',
+          account.ownBankAccountType,
+          innerLevel
+        )
+      );
     }
 
     // NazwaBanku (opcjonalne)
@@ -281,7 +350,9 @@ export class PaymentPartsBuilder {
 
     // OpisRachunku (opcjonalne)
     if (this.hasValue(account.description)) {
-      elements.push(this.element('OpisRachunku', account.description, innerLevel));
+      elements.push(
+        this.element('OpisRachunku', account.description, innerLevel)
+      );
     }
 
     return this.block(tagName, this.joinElements(elements), level);
@@ -300,13 +371,29 @@ export class PaymentPartsBuilder {
     const elements: Array<string | null> = [];
 
     // WarunkiSkonta (wymagane)
-    if (!this.reqString(ctx, 'discount.conditions', discount.conditions, 'Brak warunków skonta')) {
+    if (
+      !this.reqString(
+        ctx,
+        'discount.conditions',
+        discount.conditions,
+        'Brak warunków skonta'
+      )
+    ) {
       return null;
     }
-    elements.push(this.element('WarunkiSkonta', discount.conditions, innerLevel));
+    elements.push(
+      this.element('WarunkiSkonta', discount.conditions, innerLevel)
+    );
 
     // WysokoscSkonta (wymagane)
-    if (!this.reqString(ctx, 'discount.amount', discount.amount, 'Brak wysokości skonta')) {
+    if (
+      !this.reqString(
+        ctx,
+        'discount.amount',
+        discount.amount,
+        'Brak wysokości skonta'
+      )
+    ) {
       return null;
     }
     elements.push(this.element('WysokoscSkonta', discount.amount, innerLevel));
@@ -384,7 +471,12 @@ export class PaymentPartsBuilder {
     message: string
   ): value is T {
     if ((allowed as readonly unknown[]).includes(value)) return true;
-    this.vError(ctx, 'ONE_OF', path, `${message}. Dozwolone wartości: ${allowed.join(', ')}`);
+    this.vError(
+      ctx,
+      'ONE_OF',
+      path,
+      `${message}. Dozwolone wartości: ${allowed.join(', ')}`
+    );
     return false;
   }
 
@@ -396,7 +488,11 @@ export class PaymentPartsBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  private element(tagName: string, value: unknown, level: number): string | null {
+  private element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

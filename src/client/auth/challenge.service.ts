@@ -1,21 +1,22 @@
 import { debugLog } from '../../utils/logger';
-import { HttpClient } from "../http.client";
-import { ChallengeResponse } from "./types";
+import { HttpClient } from '../http.client';
+import { ChallengeResponse } from './types';
 
 export class ChallengeService {
   constructor(private readonly httpClient: HttpClient) {}
 
   async getChallenge(): Promise<{ challenge: string; timestampMs: number }> {
-    debugLog("🔍 Getting challenge from KSeF...");
+    debugLog('🔍 Getting challenge from KSeF...');
 
-    const response = await this.httpClient.post<ChallengeResponse>("/auth/challenge");
+    const response =
+      await this.httpClient.post<ChallengeResponse>('/auth/challenge');
 
-    debugLog("✅ Challenge received");
+    debugLog('✅ Challenge received');
 
     const timestampMs = this.extractTimestampMs(response.timestamp);
 
     if (!timestampMs) {
-      throw new Error("Cannot extract timestampMs from challenge response");
+      throw new Error('Cannot extract timestampMs from challenge response');
     }
 
     return {

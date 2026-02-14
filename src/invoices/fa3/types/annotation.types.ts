@@ -62,7 +62,6 @@ export interface Fa3NewTransportMeans {
   factoryNumber?: string;
 }
 
-
 /**
  * Adnotacje faktury
  */

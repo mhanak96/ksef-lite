@@ -10,7 +10,10 @@ import { AttachmentBuilder } from './attachment/attachment.builder';
 import type { Fa3Invoice } from '../types';
 import type { Fa3BuildContext } from '../validators/build-context';
 
-type XmlAttributes = Record<string, string | number | boolean | null | undefined>;
+type XmlAttributes = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
 
 export class Fa3InvoiceBuilder {
   private indentSize: number = 2;
@@ -38,45 +41,53 @@ export class Fa3InvoiceBuilder {
 
   build(invoice: Fa3Invoice, ctx: Fa3BuildContext): string {
     const parts: string[] = [];
-    
+
     parts.push('<?xml version="1.0" encoding="UTF-8"?>');
     // parts.push('<Faktura xmlns:etd="http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/" xmlns="http://crd.gov.pl/wzor/2023/06/29/12648/">');
-    parts.push('<Faktura xmlns:etd="http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://crd.gov.pl/wzor/2025/06/25/13775/">');
-    
+    parts.push(
+      '<Faktura xmlns:etd="http://crd.gov.pl/xml/schematy/dziedzinowe/mf/2022/01/05/eD/DefinicjeTypy/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://crd.gov.pl/wzor/2025/06/25/13775/">'
+    );
+
     const header = this.headerBuilder.build(invoice.header, ctx);
     if (header) parts.push(header);
-    
+
     const seller = this.sellerBuilder.build(invoice.seller, ctx);
     if (seller) parts.push(seller);
-    
+
     const buyer = this.buyerBuilder.build(invoice.buyer, ctx);
     if (buyer) parts.push(buyer);
-    
+
     if (invoice.thirdParties && invoice.thirdParties.length > 0) {
-      const thirdParties = this.thirdPartyBuilder.buildAll(invoice.thirdParties, ctx);
+      const thirdParties = this.thirdPartyBuilder.buildAll(
+        invoice.thirdParties,
+        ctx
+      );
       if (thirdParties) parts.push(thirdParties);
     }
-    
+
     if (invoice.authorizedEntity) {
-      const authorized = this.authorizedEntityBuilder.build(invoice.authorizedEntity, ctx);
+      const authorized = this.authorizedEntityBuilder.build(
+        invoice.authorizedEntity,
+        ctx
+      );
       if (authorized) parts.push(authorized);
     }
-    
+
     const fa = this.faSectionBuilder.build(invoice, ctx);
     if (fa) parts.push(fa);
-    
+
     if (invoice.footer) {
       const footer = this.footerBuilder.build(invoice.footer, ctx);
       if (footer) parts.push(footer);
     }
-    
+
     if (invoice.attachment) {
       const attachment = this.attachmentBuilder.build(invoice.attachment, ctx);
       if (attachment) parts.push(attachment);
     }
-    
+
     parts.push('</Faktura>');
-    
+
     return parts.join('\n');
   }
 
@@ -189,7 +200,11 @@ export class Fa3InvoiceBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }
@@ -391,7 +406,8 @@ export class Fa3InvoiceBuilder {
     if (!dateTime) return '';
 
     if (typeof dateTime === 'string') {
-      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(dateTime)) return dateTime;
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(dateTime))
+        return dateTime;
       dateTime = new Date(dateTime);
     }
 
@@ -435,7 +451,11 @@ export class Fa3InvoiceBuilder {
     return value !== undefined && value !== null && value !== '';
   }
 
-  protected optionalElement(tagName: string, value: unknown, level: number): string | null {
+  protected optionalElement(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (!this.hasValue(value)) return null;
     return this.element(tagName, value, level);
   }
@@ -457,7 +477,8 @@ export class Fa3InvoiceBuilder {
     trueValue: string = '1',
     falseValue: string = '2'
   ): string | null {
-    const value = flag === true || flag === 1 || flag === '1' ? trueValue : falseValue;
+    const value =
+      flag === true || flag === 1 || flag === '1' ? trueValue : falseValue;
     return this.element(tagName, value, level);
   }
 

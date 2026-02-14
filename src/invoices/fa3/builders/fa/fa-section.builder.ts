@@ -67,27 +67,48 @@ export class FaSectionBuilder {
     if (!invoice.details.currency) {
       this.vError(ctx, 'REQUIRED', 'details.currency', 'Brak kodu waluty');
     }
-    elements.push(this.element('KodWaluty', invoice.details.currency, innerLevel));
+    elements.push(
+      this.element('KodWaluty', invoice.details.currency, innerLevel)
+    );
 
     // P_1 - Data wystawienia (wymagana)
     if (!invoice.details.issueDate) {
-      this.vError(ctx, 'REQUIRED', 'details.issueDate', 'Brak daty wystawienia faktury');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'details.issueDate',
+        'Brak daty wystawienia faktury'
+      );
     }
-    elements.push(this.dateElement('P_1', invoice.details.issueDate, innerLevel));
+    elements.push(
+      this.dateElement('P_1', invoice.details.issueDate, innerLevel)
+    );
 
     // P_1M - Miejsce wystawienia (opcjonalne)
     if (this.hasValue(invoice.details.issuePlace)) {
-      elements.push(this.element('P_1M', invoice.details.issuePlace, innerLevel));
+      elements.push(
+        this.element('P_1M', invoice.details.issuePlace, innerLevel)
+      );
     }
 
     // P_2 - Numer faktury (wymagany)
     if (!invoice.details.invoiceNumber) {
-      this.vError(ctx, 'REQUIRED', 'details.invoiceNumber', 'Brak numeru faktury');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'details.invoiceNumber',
+        'Brak numeru faktury'
+      );
     }
-    elements.push(this.element('P_2', invoice.details.invoiceNumber, innerLevel));
+    elements.push(
+      this.element('P_2', invoice.details.invoiceNumber, innerLevel)
+    );
 
     // WZ - Dokumenty magazynowe (0-1000)
-    if (invoice.details.deliveryNotes && invoice.details.deliveryNotes.length > 0) {
+    if (
+      invoice.details.deliveryNotes &&
+      invoice.details.deliveryNotes.length > 0
+    ) {
       const notes = invoice.details.deliveryNotes.slice(0, 1000);
       for (const note of notes) {
         elements.push(this.element('WZ', note, innerLevel));
@@ -95,7 +116,11 @@ export class FaSectionBuilder {
     }
 
     // P_6 lub OkresFa - Data/okres dostawy
-    const saleDateXml = this.saleDateBuilder.build(invoice.details, ctx, innerLevel);
+    const saleDateXml = this.saleDateBuilder.build(
+      invoice.details,
+      ctx,
+      innerLevel
+    );
     if (saleDateXml) elements.push(saleDateXml);
 
     // ============================================================
@@ -114,24 +139,49 @@ export class FaSectionBuilder {
     // ============================================================
 
     // P_15 - Kwota należności ogółem (wymagana)
-    if (invoice.summary?.grossAmount === undefined || invoice.summary?.grossAmount === null) {
-      this.vError(ctx, 'REQUIRED', 'summary.grossAmount', 'Brak kwoty należności ogółem (P_15)');
+    if (
+      invoice.summary?.grossAmount === undefined ||
+      invoice.summary?.grossAmount === null
+    ) {
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'summary.grossAmount',
+        'Brak kwoty należności ogółem (P_15)'
+      );
     }
-    elements.push(this.amountElement('P_15', invoice.summary?.grossAmount, innerLevel));
+    elements.push(
+      this.amountElement('P_15', invoice.summary?.grossAmount, innerLevel)
+    );
 
     // KursWalutyZ - Kurs waluty dla zaliczek (opcjonalny)
     if (this.hasValue(invoice.details.exchangeRateAdvance)) {
-      elements.push(this.quantityElement('KursWalutyZ', invoice.details.exchangeRateAdvance, innerLevel));
+      elements.push(
+        this.quantityElement(
+          'KursWalutyZ',
+          invoice.details.exchangeRateAdvance,
+          innerLevel
+        )
+      );
     }
 
     // ============================================================
     // ADNOTACJE
     // ============================================================
-    const annotationsXml = this.annotationsBuilder.build(invoice.details.annotations, ctx, innerLevel);
+    const annotationsXml = this.annotationsBuilder.build(
+      invoice.details.annotations,
+      ctx,
+      innerLevel
+    );
     if (annotationsXml) {
       elements.push(annotationsXml);
     } else {
-      this.vError(ctx, 'REQUIRED', 'details.annotations', 'Brak wymaganych adnotacji');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'details.annotations',
+        'Brak wymaganych adnotacji'
+      );
     }
 
     // ============================================================
@@ -140,23 +190,41 @@ export class FaSectionBuilder {
 
     // RodzajFaktury (wymagany)
     if (!invoice.details.invoiceType) {
-      this.vError(ctx, 'REQUIRED', 'details.invoiceType', 'Brak rodzaju faktury');
+      this.vError(
+        ctx,
+        'REQUIRED',
+        'details.invoiceType',
+        'Brak rodzaju faktury'
+      );
     }
-    elements.push(this.element('RodzajFaktury', invoice.details.invoiceType, innerLevel));
+    elements.push(
+      this.element('RodzajFaktury', invoice.details.invoiceType, innerLevel)
+    );
 
     // Korekta - jeśli typ faktury to KOR, KOR_ZAL lub KOR_ROZ
     if (this.isCorrection(invoice.details.invoiceType)) {
-        const correctionXml = this.correctionBuilder.build(invoice.details, ctx, innerLevel);
-        if (correctionXml) elements.push(correctionXml);
-        
-        const partiesXml = this.correctedPartiesBuilder.build(invoice.details, ctx, innerLevel);
-        if (partiesXml) elements.push(partiesXml);
+      const correctionXml = this.correctionBuilder.build(
+        invoice.details,
+        ctx,
+        innerLevel
+      );
+      if (correctionXml) elements.push(correctionXml);
+
+      const partiesXml = this.correctedPartiesBuilder.build(
+        invoice.details,
+        ctx,
+        innerLevel
+      );
+      if (partiesXml) elements.push(partiesXml);
     }
 
     // ============================================================
     // ZALICZKI CZĘŚCIOWE (0-31)
     // ============================================================
-    if (invoice.details.partialPayments && invoice.details.partialPayments.length > 0) {
+    if (
+      invoice.details.partialPayments &&
+      invoice.details.partialPayments.length > 0
+    ) {
       const payments = invoice.details.partialPayments.slice(0, 31);
       for (const payment of payments) {
         const paymentXml = this.buildPartialPayment(payment, innerLevel);
@@ -179,7 +247,10 @@ export class FaSectionBuilder {
     }
 
     // DodatkowyOpis (0-10000)
-    if (invoice.details.additionalInfo && invoice.details.additionalInfo.length > 0) {
+    if (
+      invoice.details.additionalInfo &&
+      invoice.details.additionalInfo.length > 0
+    ) {
       const infos = invoice.details.additionalInfo.slice(0, 10000);
       for (const info of infos) {
         const infoXml = this.buildAdditionalInfo(info, innerLevel);
@@ -188,7 +259,10 @@ export class FaSectionBuilder {
     }
 
     // FakturaZaliczkowa (0-100)
-    if (invoice.details.advanceInvoices && invoice.details.advanceInvoices.length > 0) {
+    if (
+      invoice.details.advanceInvoices &&
+      invoice.details.advanceInvoices.length > 0
+    ) {
       const advances = invoice.details.advanceInvoices.slice(0, 100);
       for (const advance of advances) {
         const advanceXml = this.buildAdvanceInvoice(advance, innerLevel);
@@ -207,31 +281,51 @@ export class FaSectionBuilder {
 
     // FaWiersz - Pozycje faktury (0-10000)
     if (invoice.details.items && invoice.details.items.length > 0) {
-      const itemsXml = this.invoiceItemBuilder.buildAll(invoice.details.items, ctx, innerLevel);
+      const itemsXml = this.invoiceItemBuilder.buildAll(
+        invoice.details.items,
+        ctx,
+        innerLevel
+      );
       if (itemsXml) elements.push(itemsXml);
     }
 
     // Rozliczenie (opcjonalne)
     if (invoice.details.settlement) {
-      const settlementXml = this.settlementBuilder.build(invoice.details.settlement, ctx, innerLevel);
+      const settlementXml = this.settlementBuilder.build(
+        invoice.details.settlement,
+        ctx,
+        innerLevel
+      );
       if (settlementXml) elements.push(settlementXml);
     }
 
     // Platnosc (opcjonalne)
     if (invoice.details.payment) {
-      const paymentXml = this.paymentBuilder.build(invoice.details.payment, ctx, innerLevel);
+      const paymentXml = this.paymentBuilder.build(
+        invoice.details.payment,
+        ctx,
+        innerLevel
+      );
       if (paymentXml) elements.push(paymentXml);
     }
 
     // WarunkiTransakcji (opcjonalne)
     if (invoice.details.transactionConditions) {
-      const transactionXml = this.transactionBuilder.build(invoice.details.transactionConditions, ctx, innerLevel);
+      const transactionXml = this.transactionBuilder.build(
+        invoice.details.transactionConditions,
+        ctx,
+        innerLevel
+      );
       if (transactionXml) elements.push(transactionXml);
     }
 
     // Zamowienie (opcjonalne, tylko dla faktur zaliczkowych)
     if (invoice.details.order) {
-      const orderXml = this.orderBuilder.build(invoice.details.order, ctx, innerLevel);
+      const orderXml = this.orderBuilder.build(
+        invoice.details.order,
+        ctx,
+        innerLevel
+      );
       if (orderXml) elements.push(orderXml);
     }
 
@@ -243,7 +337,11 @@ export class FaSectionBuilder {
   // ============================================================
 
   private isCorrection(invoiceType: string | undefined): boolean {
-    return invoiceType === 'KOR' || invoiceType === 'KOR_ZAL' || invoiceType === 'KOR_ROZ';
+    return (
+      invoiceType === 'KOR' ||
+      invoiceType === 'KOR_ZAL' ||
+      invoiceType === 'KOR_ROZ'
+    );
   }
 
   private buildPartialPayment(payment: any, level: number): string | null {
@@ -258,7 +356,9 @@ export class FaSectionBuilder {
 
     // KursWalutyZW - Kurs waluty (opcjonalny)
     if (this.hasValue(payment.exchangeRate)) {
-      elements.push(this.quantityElement('KursWalutyZW', payment.exchangeRate, innerLevel));
+      elements.push(
+        this.quantityElement('KursWalutyZW', payment.exchangeRate, innerLevel)
+      );
     }
 
     return this.block('ZaliczkaCzesciowa', this.joinElements(elements), level);
@@ -288,11 +388,15 @@ export class FaSectionBuilder {
 
     if (advance.ksefNumber) {
       // Faktura wystawiona w KSeF
-      elements.push(this.element('NrKSeFFaZaliczkowej', advance.ksefNumber, innerLevel));
+      elements.push(
+        this.element('NrKSeFFaZaliczkowej', advance.ksefNumber, innerLevel)
+      );
     } else if (advance.invoiceNumber) {
       // Faktura poza KSeF
       elements.push(this.element('NrKSeFZN', '1', innerLevel));
-      elements.push(this.element('NrFaZaliczkowej', advance.invoiceNumber, innerLevel));
+      elements.push(
+        this.element('NrFaZaliczkowej', advance.invoiceNumber, innerLevel)
+      );
     }
 
     return this.block('FakturaZaliczkowa', this.joinElements(elements), level);
@@ -328,7 +432,11 @@ export class FaSectionBuilder {
     return this.indentChar.repeat(level * this.indentSize);
   }
 
-  protected element(tagName: string, value: unknown, level: number): string | null {
+  protected element(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string | null {
     if (value === undefined || value === null || value === '') return null;
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }

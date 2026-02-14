@@ -1,11 +1,11 @@
-import { DOMParser } from "@xmldom/xmldom";
-import { C14nCanonicalization, ExclusiveCanonicalization } from "xml-crypto";
+import { DOMParser } from '@xmldom/xmldom';
+import { C14nCanonicalization, ExclusiveCanonicalization } from 'xml-crypto';
 
 /**
  * Exclusive C14N - używane przez KSeF dla wszystkich referencji
  */
 export function exclusiveCanonicalize(xmlString: string): string {
-  const doc = new DOMParser().parseFromString(xmlString, "text/xml");
+  const doc = new DOMParser().parseFromString(xmlString, 'text/xml');
   const c14n = new ExclusiveCanonicalization();
   return c14n.process(doc.documentElement as any, {});
 }
