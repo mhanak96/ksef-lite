@@ -3,6 +3,8 @@
  */
 export interface Fa3OrderItem {
   // ─── Dane wejściowe ───
+  /** Numer wiersza zamówienia (NrWierszaZam) */
+  lineNumber?: number;
   /** Nazwa towaru/usługi (P_7Z) */
   name?: string;
   /** Jednostka miary (P_8AZ) */

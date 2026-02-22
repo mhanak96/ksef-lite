@@ -46,6 +46,12 @@ export class SellerBuilder {
 
     const elements: Array<string | null> = [];
 
+    // PrefiksPodatnika (opcjonalne — dla WDT, np. "PL")
+    const sAny = seller as any;
+    if (this.hasValue(sAny.prefixVatUE)) {
+      elements.push(this.element('PrefiksPodatnika', sAny.prefixVatUE, innerLevel));
+    }
+
     const identXml = this.buildIdentification(
       seller as SellerLike,
       innerLevel,

@@ -479,6 +479,20 @@ Biblioteka eksportuje również niskopoziomowe klasy i funkcje, które można wy
 
 Szczegóły architektury znajdziesz w pliku [CONTEXT.md](./CONTEXT.md).
 
+## Przykłady faktur
+
+Generator był testowany na oficjalnych przykładowych plikach dla struktury logicznej FA(3) udostępnionych przez Ministerstwo Finansów:
+https://ksef.podatki.gov.pl/pliki-do-pobrania-ksef-20/
+
+Przetestowane przykłady (26) pokrywają m.in.:
+- Faktury VAT, korygujące (KOR), zaliczkowe (ZAL), uproszczone (UPR)
+- Procedurę marży, OSS, odwrotne obciążenie
+- Faktury z załącznikami (Zalacznik) — np. rozliczenie energii
+- Faktury walutowe, z transportem, warunkami transakcji
+- Korekty z parami pozycji (StanPrzed)
+
+JSON z fakturami znajdziesz w [invoiceExamples.json](./invoiceExamples.json).
+
 ## FAQ
 
 **1. Dlaczego dodawanie faktury wyrzuca błąd?**
@@ -491,11 +505,14 @@ https://www.gov.pl/web/kas/krajowy-system-e-faktur
 Schemy XML i dokumentacja techniczna są też w oficjalnym repozytorium KSeF API na GitHubie:
 https://github.com/CIRFMF/ksef-docs
 
-**3. Gdzie znajdę kod źródłowy?**
+**3. Dlaczego faktura w KSeF ma status "offline"?**
+Faktura przesłana do KSeF otrzymuje status offline gdy data wystawienia (`P_1`) nie przypada na ten sam dzień co moment przesłania do systemu. To normalne zachowanie — faktura jest poprawna i przyjęta, ale KSeF traktuje ją jako wystawioną poza systemem. Aby faktura miała status online, data wystawienia musi być taka sama jak data wysyłki do KSeF.
+
+**4. Gdzie znajdę kod źródłowy?**
 https://github.com/mhanak96/ksef-lite
 Możesz obserwować repo, zgłaszać uwagi i wrzucać issue — im więcej feedbacku, tym lepiej.
 
-**4. Czy polecasz jakąś muzykę dobrze oddającą współpracę z API KSeF?**
+**5. Czy polecasz jakąś muzykę dobrze oddającą współpracę z API KSeF?**
 Tak. Pixies – Where Is My Mind?
 
 ## Changelog

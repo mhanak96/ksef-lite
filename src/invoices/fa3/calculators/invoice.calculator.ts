@@ -292,7 +292,8 @@ export class InvoiceCalculator {
     );
 
     // 2. Zbuduj vatSummary (grupowanie po stawkach)
-    const vatSummary = this.buildVatSummary(calculatedItems, isForeignCurrency);
+    const isCorrection = this.isCorrection(invoice.details?.invoiceType);
+    const vatSummary = this.buildVatSummary(calculatedItems, isForeignCurrency, isCorrection);
 
     // 3. Oblicz sumy
     const summary = this.calculateSummary(calculatedItems, invoice);
@@ -387,15 +388,13 @@ export class InvoiceCalculator {
       vatAmountPLN = this.round(vatAmount * exchangeRate);
     }
 
-    // ============================================================
-    // ✅ KLUCZOWA ZMIANA - Auto-detect czy potrzebny breakdown
-    // ============================================================
+    // Czy item wymaga breakdown (P_11A, P_11Vat) w XML?
     const needsBreakdown =
-      item.isMargin || // procedura marży
-      item.vatRateOSS !== undefined || // OSS
-      grossPrice !== null || // cena brutto (B2C)
-      rateConfig?.type === 'margin' || // marża z config
-      rateConfig?.type === 'oss'; // OSS z config
+      item.isMargin ||
+      item.vatRateOSS !== undefined ||
+      grossPrice !== null ||
+      rateConfig?.type === 'margin' ||
+      rateConfig?.type === 'oss';
 
     // Buduj wynik bazowy (zawsze)
     const result: Fa3InvoiceItem = {
@@ -414,14 +413,17 @@ export class InvoiceCalculator {
       result.discount = discount;
     }
 
-    // ✅ Dodaj breakdown TYLKO gdy potrzebny
-    if (needsBreakdown) {
-      if (grossPrice !== null) {
-        result.grossPrice = grossPrice;
-      }
-      result.vatAmount = vatAmount;
-      result.grossAmount = grossAmount;
+    if (grossPrice !== null) {
+      result.grossPrice = grossPrice;
     }
+
+    // Zawsze przechowuj vatAmount i grossAmount — potrzebne do
+    // vatSummary (P_13_x / P_14_x) i summary (P_15)
+    result.vatAmount = vatAmount;
+    result.grossAmount = grossAmount;
+
+    // Flaga wewnętrzna: czy emitować P_11A/P_11Vat w XML
+    (result as any)._emitBreakdown = needsBreakdown;
 
     // Waluta obca - dodaj kurs
     if (isForeignCurrency && exchangeRate !== 1) {
@@ -441,19 +443,16 @@ export class InvoiceCalculator {
    */
   private buildVatSummary(
     items: Fa3InvoiceItem[],
-    isForeignCurrency: boolean
+    isForeignCurrency: boolean,
+    isCorrection: boolean = false
   ): Fa3VatSummary {
     // Używamy wewnętrznego typu z wymaganymi polami numerycznymi
     const groups: Record<string, VatGroupAccumulator> = {};
 
-    for (const item of items) {
-      // Pomiń pozycje "przed korektą"
-      if (item.beforeCorrection === 1) continue;
-
+    // Pomocnicza: dodaje item do grupy (z opcjonalnym znakiem -1 dla "before")
+    const addToGroup = (item: Fa3InvoiceItem, sign: 1 | -1) => {
       const vatRate = this.normalizeVatRate(item.vatRate);
       const rateConfig = VAT_RATE_CONFIG[vatRate];
-
-      // Klucz grupowania - używamy pola KSeF (P_13_x)
       const groupKey = rateConfig?.netField ?? `custom_${vatRate}`;
 
       if (!groups[groupKey]) {
@@ -468,18 +467,28 @@ export class InvoiceCalculator {
         };
       }
 
-      groups[groupKey].netAmount += item.netAmount ?? 0;
-      groups[groupKey].vatAmount += item.vatAmount ?? 0;
-      groups[groupKey].grossAmount += item.grossAmount ?? 0;
+      groups[groupKey].netAmount += sign * (item.netAmount ?? 0);
+      groups[groupKey].vatAmount += sign * (item.vatAmount ?? 0);
+      groups[groupKey].grossAmount += sign * (item.grossAmount ?? 0);
 
-      // VAT w PLN dla walut obcych
       if (isForeignCurrency && item.vatAmountPLN) {
-        groups[groupKey].vatAmountPLN += item.vatAmountPLN;
+        groups[groupKey].vatAmountPLN += sign * item.vatAmountPLN;
       }
 
-      // Aktualizuj flagi OSS jeśli item ma vatRateOSS
       if (item.vatRateOSS) {
         groups[groupKey].isOSS = true;
+      }
+    };
+
+    for (const item of items) {
+      if (item.beforeCorrection === 1) {
+        // Dla korekt: pozycje "przed" odejmij od sumy
+        if (isCorrection) {
+          addToGroup(item, -1);
+        }
+        // Dla zwykłych faktur: pomiń (nie powinny tu być, ale na wszelki wypadek)
+      } else {
+        addToGroup(item, 1);
       }
     }
 
@@ -493,12 +502,12 @@ export class InvoiceCalculator {
         vatAmount: this.round(group.vatAmount),
       };
 
-      // Dodaj opcjonalne pola tylko jeśli mają sens
-      if (group.grossAmount > 0) {
+      // Dodaj grossAmount (może być ujemny w korektach)
+      if (group.grossAmount !== 0) {
         summaryGroup.grossAmount = this.round(group.grossAmount);
       }
 
-      if (isForeignCurrency && group.vatAmountPLN > 0) {
+      if (isForeignCurrency && group.vatAmountPLN !== 0) {
         summaryGroup.vatAmountPLN = this.round(group.vatAmountPLN);
       }
 

@@ -408,7 +408,7 @@ export class AttachmentBuilder {
         typeof cell === 'object' && cell !== null
           ? ((cell as any).value ?? '')
           : cell;
-      elements.push(this.element('WKom', value, innerLevel));
+      elements.push(this.cellElement('WKom', value, innerLevel));
     }
 
     return this.block('Wiersz', this.joinElements(elements), level);
@@ -453,6 +453,8 @@ export class AttachmentBuilder {
         typeof cell === 'object' && cell !== null
           ? ((cell as any).value ?? '')
           : cell;
+      // SKom: pomijaj puste komórki (w przeciwieństwie do WKom które emituje <WKom/>)
+      if (value === '' || value === null || value === undefined) continue;
       elements.push(this.element('SKom', value, innerLevel));
     }
 
@@ -495,6 +497,20 @@ export class AttachmentBuilder {
     level: number
   ): string | null {
     if (value === undefined || value === null || value === '') return null;
+    return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
+  }
+
+  /**
+   * Element komórki tabeli — dla pustych wartości emituje `<Tag/>` zamiast pomijania.
+   */
+  private cellElement(
+    tagName: string,
+    value: unknown,
+    level: number
+  ): string {
+    if (value === undefined || value === null || value === '') {
+      return `${this.indent(level)}<${tagName}/>`;
+    }
     return `${this.indent(level)}<${tagName}>${this.escapeXml(value)}</${tagName}>`;
   }
 

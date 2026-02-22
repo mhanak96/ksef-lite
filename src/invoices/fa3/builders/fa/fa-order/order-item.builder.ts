@@ -31,7 +31,7 @@ export class OrderItemBuilder {
     const limitedItems = items.slice(0, 10000);
 
     const elements: Array<string | null> = limitedItems.map((item, index) =>
-      this.build(item, index + 1, level, ctx)
+      this.build(item, item.lineNumber ?? index + 1, level, ctx)
     );
 
     return this.joinElements(elements);
@@ -246,7 +246,7 @@ export class OrderItemBuilder {
   // ============================================================
 
   private formatAmount(amount: number): string {
-    return this.roundAmount(Number(amount)).toFixed(2);
+    return this.roundAmount(Number(amount)).toFixed(2).replace(/\.00$/, '');
   }
 
   private formatQuantity(quantity: number): string {

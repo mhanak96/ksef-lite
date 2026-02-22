@@ -22,15 +22,13 @@ export class CorrectionBuilder {
   ): string | null {
     const elements: Array<string | null> = [];
 
-    // PrzyczynaKorekty (opcjonalne)
-    if (this.hasValue((details as any).correctionReason)) {
-      elements.push(
-        this.element(
-          'PrzyczynaKorekty',
-          (details as any).correctionReason,
-          level
-        )
-      );
+    // PrzyczynaKorekty (opcjonalne) — trim() żeby usunąć ewentualny whitespace z inputu
+    const correctionReason =
+      typeof (details as any).correctionReason === 'string'
+        ? (details as any).correctionReason.trim()
+        : (details as any).correctionReason;
+    if (this.hasValue(correctionReason)) {
+      elements.push(this.element('PrzyczynaKorekty', correctionReason, level));
     }
 
     // TypKorekty (opcjonalne, ale jeśli podane to musi być 1, 2 lub 3)
@@ -336,7 +334,7 @@ export class CorrectionBuilder {
   }
 
   protected formatAmount(amount: number): string {
-    return this.roundAmount(Number(amount)).toFixed(2);
+    return this.roundAmount(Number(amount)).toFixed(2).replace(/\.00$/, '');
   }
 
   protected formatQuantity(quantity: number): string {

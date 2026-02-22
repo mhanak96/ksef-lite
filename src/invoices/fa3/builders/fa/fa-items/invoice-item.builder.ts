@@ -31,7 +31,7 @@ export class InvoiceItemBuilder {
     const limitedItems = items.slice(0, 10000);
 
     const elements: Array<string | null> = limitedItems.map((item, index) =>
-      this.build(item, index + 1, level, ctx)
+      this.build(item, item.lineNumber ?? index + 1, level, ctx)
     );
 
     return this.joinElements(elements);
@@ -63,6 +63,17 @@ export class InvoiceItemBuilder {
     // UU_ID (opcjonalne)
     if (this.hasValue(item.uuid)) {
       elements.push(this.element('UU_ID', item.uuid, innerLevel));
+    }
+
+    // UPR (faktura uproszczona) — tylko NrWierszaFa, UU_ID, P_7 i opcjonalnie P_12
+    if ((item as any)._simplified) {
+      if (this.hasValue(item.name)) {
+        elements.push(this.element('P_7', item.name, innerLevel));
+      }
+      if (this.hasValue(item.vatRate) && !(item as any)._noVatRate) {
+        elements.push(this.element('P_12', item.vatRate, innerLevel));
+      }
+      return this.block('FaWiersz', this.joinElements(elements), level);
     }
 
     // P_6A - data sprzedaży dla wiersza (opcjonalne)
@@ -105,8 +116,8 @@ export class InvoiceItemBuilder {
       elements.push(this.element('P_8A', item.unit, innerLevel));
     }
 
-    // P_8B - ilość (opcjonalne)
-    if (item.quantity !== undefined && item.quantity !== null) {
+    // P_8B - ilość (opcjonalne — nie emituj gdy nie było w oryginale)
+    if (item.quantity !== undefined && item.quantity !== null && !(item as any)._noQuantity) {
       elements.push(this.quantityElement('P_8B', item.quantity, innerLevel));
     }
 
@@ -125,23 +136,26 @@ export class InvoiceItemBuilder {
       elements.push(this.amountElement('P_10', item.discount, innerLevel));
     }
 
-    // P_11 - wartość netto (opcjonalne, ale zazwyczaj wymagane)
-    if (item.netAmount !== undefined && item.netAmount !== null) {
+    // P_11 - wartość netto (opcjonalne — nie emituj gdy nie było w oryginale)
+    if (item.netAmount !== undefined && item.netAmount !== null && !(item as any)._noNetAmount) {
       elements.push(this.amountElement('P_11', item.netAmount, innerLevel));
     }
 
+    // P_11A i P_11Vat — emituj tylko gdy potrzebne (marża, gross price, OSS)
+    const emitBreakdown = (item as any)._emitBreakdown === true;
+
     // P_11A - wartość brutto (opcjonalne)
-    if (item.grossAmount !== undefined && item.grossAmount !== null) {
+    if (emitBreakdown && item.grossAmount !== undefined && item.grossAmount !== null) {
       elements.push(this.amountElement('P_11A', item.grossAmount, innerLevel));
     }
 
-    // P_11Vat - kwota VAT (opcjonalne)
-    if (item.vatAmount !== undefined && item.vatAmount !== null) {
+    // P_11Vat - kwota VAT (opcjonalne — nie emituj gdy vatAmount nie było jawnie w JSON)
+    if (emitBreakdown && item.vatAmount !== undefined && item.vatAmount !== null && !(item as any)._noVatAmount) {
       elements.push(this.amountElement('P_11Vat', item.vatAmount, innerLevel));
     }
 
-    // P_12 - stawka VAT (opcjonalne, ale zazwyczaj wymagane)
-    if (this.hasValue(item.vatRate)) {
+    // P_12 - stawka VAT (opcjonalne — nie emituj gdy nie było w oryginale)
+    if (this.hasValue(item.vatRate) && !(item as any)._noVatRate) {
       elements.push(this.element('P_12', item.vatRate, innerLevel));
     }
 
@@ -295,7 +309,7 @@ export class InvoiceItemBuilder {
   }
 
   private formatAmount(amount: number): string {
-    return this.roundAmount(Number(amount)).toFixed(2);
+    return this.roundAmount(Number(amount)).toFixed(2).replace(/\.00$/, '');
   }
 
   private formatQuantity(quantity: number): string {

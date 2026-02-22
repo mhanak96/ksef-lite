@@ -1,0 +1,2823 @@
+[
+{
+  "source": "FA_3_Przykład_1.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/150",
+      "saleDate": "2026-01-27",
+      "invoiceType": "VAT",
+      "fp": 1,
+      "additionalInfo": [
+        {
+          "key": "preferowane godziny dowozu",
+          "value": "dni robocze 17:00 - 20:00"
+        }
+      ],
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 1626.01,
+          "netAmount": 1626.01,
+          "vatRate": "23"
+        },
+        {
+          "name": "wniesienie sprzętu",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 40.65,
+          "netAmount": 40.65,
+          "vatRate": "23"
+        },
+        {
+          "name": "promocja lodówka pełna mleka",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 0.95,
+          "netAmount": 0.95,
+          "vatRate": "5"
+        }
+      ],
+      "payment": {
+        "method": 6,
+        "paid": 1,
+        "paymentDate": "2026-01-27"
+      },
+      "transactionConditions": {
+        "orders": [
+          {
+            "date": "2026-01-26",
+            "number": "4354343"
+          }
+        ]
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_2.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-03-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FK2026/03/200",
+      "saleDate": "2026-01-27",
+      "invoiceType": "KOR",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "obniżka ceny o 200 zł z uwagi na uszkodzenia estetyczne",
+      "correctionType": 3,
+      "correctedInvoices": [
+        {
+          "number": "FV2026/02/150",
+          "issueDate": "2026-02-15",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ],
+      "items": [
+        {
+          "lineNumber": 1,
+          "uuId": "aaaa111133339990",
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 1626.01,
+          "netAmount": 1626.01,
+          "vatRate": "23",
+          "beforeCorrection": 1
+        },
+        {
+          "lineNumber": 1,
+          "uuId": "aaaa111133339990",
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 1463.41,
+          "netAmount": 1463.41,
+          "vatRate": "23"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_3.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-03-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FK2026/03/200",
+      "saleDate": "2026-01-27",
+      "invoiceType": "KOR",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "obniżka ceny o 200 zł z uwagi na uszkodzenia estetyczne",
+      "correctionType": 3,
+      "correctedInvoices": [
+        {
+          "number": "FV2026/02/150",
+          "issueDate": "2026-02-15",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ],
+      "items": [
+        {
+          "lineNumber": 1,
+          "uuId": "aaaa111133339990",
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": -162.60,
+          "netAmount": -162.60,
+          "vatRate": "23"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_4.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "CDE sp. j.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": {
+        "email": "cde@cde.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "2222222222",
+        "name": "Bank Bankowości Bankowej S. A. BBB Faktoring",
+        "addressLine1": "ul. Bankowa 1",
+        "addressLine2": "00-003 Łódź",
+        "countryCode": "PL",
+        "contact": {
+          "email": "bbb@efaktoring.pl",
+          "phone": "666888999"
+        },
+        "role": 1
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/150",
+      "wz": "44343434/2026",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 10,
+          "netPrice": 1626.01,
+          "netAmount": 16260.10,
+          "vatRate": "23",
+          "cn": "8418 21 91",
+          "saleDate": "2026-01-03"
+        },
+        {
+          "name": "zamrażarka Zimnotech mk2",
+          "unit": "szt.",
+          "quantity": 20,
+          "netPrice": 1000,
+          "netAmount": 18000,
+          "vatRate": "23",
+          "cn": "8418 40 20",
+          "discount": 100,
+          "saleDate": "2026-01-10"
+        },
+        {
+          "name": "zmywarka Bryza 100",
+          "unit": "szt.",
+          "quantity": 15,
+          "netPrice": 1200,
+          "netAmount": 18000,
+          "vatRate": "23",
+          "cn": "8422 11 00",
+          "saleDate": "2026-01-15"
+        }
+      ],
+      "settlement": {
+        "deductions": [
+          {
+            "amount": 1000,
+            "reason": "nadwyżka salda nierozliczonych środków"
+          }
+        ],
+        "totalDeductions": 1000,
+        "amountDue": 63279.92
+      },
+      "payment": {
+        "method": 6,
+        "dueDate": "2026-03-15",
+        "bankAccountFactor": {
+          "accountNumber": "73111111111111111111111111",
+          "ownBankAccount": 2,
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      },
+      "transactionConditions": {
+        "orders": [
+          {
+            "date": "2026-01-26",
+            "number": "4354343"
+          }
+        ],
+        "batchNumber": "2312323/2026",
+        "deliveryTerms": "CIP",
+        "transport": [
+          {
+            "type": 3,
+            "carrier": {
+              "nip": "6666666666",
+              "name": "Jan Nowak Transport",
+              "addressLine1": "ul. Bukowa 5",
+              "addressLine2": "00-004 Poznań",
+              "countryCode": "PL"
+            },
+            "cargoType": "13",
+            "packageUnit": "a",
+            "fromAddress": {
+              "countryCode": "PL",
+              "addressLine1": "Sadowa 1 lok. 2",
+              "addressLine2": "00-001 Warszawa"
+            },
+            "toAddress": {
+              "countryCode": "PL",
+              "addressLine1": "ul. Sadowa 1 lok. 3",
+              "addressLine2": "00-002 Kraków"
+            }
+          }
+        ]
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+  {
+    "source": "FA_3_Przykład_5.xml",
+    "invoice": {
+      "header": {
+        "systemInfo": "Samplofaktur",
+        "creationDate": "2026-02-15T09:30:47Z"
+      },
+      "seller": {
+        "nip": "9999999999",
+        "name": "ABC AGD sp. z o. o.",
+        "address": "ul. Kwiatowa 1 m. 2, 00-001 Warszawa",
+        "countryCode": "PL"
+      },
+      "buyer": {
+        "nip": "1111111111",
+        "name": "CDE sp. j.",
+        "address": "ul. Sadowa 1 lok. 3, 00-002 Kraków",
+        "countryCode": "PL"
+      },
+      "details": {
+        "currency": "PLN",
+        "issueDate": "2026-04-01",
+        "issuePlace": "Warszawa",
+        "invoiceNumber": "FK2026/04/23",
+        "invoiceType": "KOR",
+        "annotations": {
+          "p_16": 2,
+          "p_17": 2,
+          "p_18": 2,
+          "p_18a": 2,
+          "p_23": 2
+        },
+        "correctionReason": "błędna nazwa nabywcy",
+        "correctionType": 1,
+        "correctedInvoices": [
+          {
+            "number": "FV2026/02/150",
+            "issueDate": "2026-02-15",
+            "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+          }
+        ],
+        "totals": {
+          "P_15": 0
+        }
+      },
+      "_meta": {
+        "buyerOriginal": {
+          "nip": "1111111111",
+          "name": "CeDeE s.c.",
+          "address": "ul. Sadowa 1 lok. 3, 00-002 Kraków",
+          "countryCode": "PL",
+          "jst": 2,
+          "gv": 2
+        }
+      }
+    }
+  },
+{
+  "source": "FA_3_Przykład_6.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-07-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "CeDeE s.c.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": {
+        "email": "cde@cde.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-07-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FK2026/07/243",
+      "invoiceType": "KOR",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "rabat 50000 z uwagi na poziom zakupów pierwszym półroczu 2026",
+      "correctionType": 2,
+      "correctedInvoices": [
+        {
+          "number": "FV2026/01/134",
+          "issueDate": "2026-01-15",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        },
+        {
+          "number": "FV2026/02/150",
+          "issueDate": "2026-02-15",
+          "ksefNumber": "9999999999-20230908-76B2B580D4DC-80"
+        },
+        {
+          "number": "FV2026/03/143",
+          "issueDate": "2026-03-15",
+          "ksefNumber": "9999999999-20230908-4191312C0E57-09"
+        },
+        {
+          "number": "FV2026/04/23",
+          "issueDate": "2026-04-15",
+          "ksefNumber": "9999999999-20230908-2B9266CEF3C4-DD"
+        },
+        {
+          "number": "FV2026/05/54",
+          "issueDate": "2026-05-15",
+          "ksefNumber": "9999999999-20230908-16B99491C78B-3D"
+        },
+        {
+          "number": "FV2026/06/15",
+          "issueDate": "2026-06-15",
+          "ksefNumber": "9999999999-20230908-D08FB95950BE-3E"
+        }
+      ],
+      "correctedPeriod": "pierwsze półrocze 2026",
+      "totals": {
+        "P_15": -50000,
+        "P_13_1": -40650.41,
+        "P_14_1": -9349.59
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_7.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-07-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "CeDeE s.c.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": {
+        "email": "cde@cde.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-07-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FK2026/07/243",
+      "invoiceType": "KOR",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "rabat 50000 z uwagi na poziom zakupów pierwszym półroczu 2026",
+      "correctionType": 2,
+      "correctedInvoices": [
+        { "number": "FV2026/01/134", "issueDate": "2026-01-15", "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D" },
+        { "number": "FV2026/02/150", "issueDate": "2026-02-15", "ksefNumber": "9999999999-20230908-76B2B580D4DC-80" },
+        { "number": "FV2026/03/143", "issueDate": "2026-03-15", "ksefNumber": "9999999999-20230908-4191312C0E57-09" },
+        { "number": "FV2026/04/23",  "issueDate": "2026-04-15", "ksefNumber": "9999999999-20230908-2B9266CEF3C4-DD" },
+        { "number": "FV2026/05/54",  "issueDate": "2026-05-15", "ksefNumber": "9999999999-20230908-16B99491C78B-3D" },
+        { "number": "FV2026/06/15",  "issueDate": "2026-06-15", "ksefNumber": "9999999999-20230908-D08FB95950BE-3E" }
+      ],
+      "correctedPeriod": "pierwsze półrocze 2026",
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1000,
+          "cn": "8418 21 91"
+        }
+      ],
+      "totals": {
+        "P_15": -50000,
+        "P_13_1": -40650.41,
+        "P_14_1": -9349.59
+      }
+    },
+    "footer": {
+      "info": "Kapitał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_8.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "Komis ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-02-27",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FM2026/02/150",
+      "saleDate": "2026-01-27",
+      "invoiceType": "VAT",
+      "fp": 1,
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": {
+          "p_pMarzy": 1,
+          "p_pMarzy_3_1": 1
+        }
+      },
+      "items": [
+        {
+          "name": "samochód używany marki Autex rocznik 2010",
+          "unit": "szt.",
+          "quantity": 1,
+          "grossPrice": 15000,
+          "grossAmount": 15000,
+          "gtu": "GTU_07"
+        }
+      ],
+      "payment": {
+        "method": 6,
+        "termDescription": {
+          "count": 30,
+          "unit": "Dzień",
+          "event": "Otrzymanie faktury"
+        },
+        "bankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "bankName": "Bank Bankowości Bankowej S. A."
+        },
+        "partialPayment": {
+          "amount": 10000,
+          "date": "2026-01-27",
+          "method": 1
+        },
+        "partialPaymentFlag": 1
+      },
+      "totals": {
+        "P_15": 15000,
+        "P_13_11": 15000
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_9.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Leasing S.A.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "Gmina Bzdziszewo",
+      "addressLine1": "Bzdziszewo 1",
+      "addressLine2": "00-007 Bzdziszewo",
+      "countryCode": "PL",
+      "contact": {
+        "email": "bzdziszewo@tuwartoinwestowac.pl",
+        "phone": "555777999"
+      },
+      "clientNumber": "fdfd778343",
+      "jst": 1,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "2222222222",
+        "name": "Szkoła Podstawowa w Bzdziszewie",
+        "addressLine1": "ul. Akacjowa 200",
+        "addressLine2": "00-007 Bzdziszewo",
+        "countryCode": "PL",
+        "contact": {
+          "email": "sp@bzdziszewo.p",
+          "phone": "666888999"
+        },
+        "role": 8
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/150",
+      "saleDateRange": {
+        "from": "2026-01-01",
+        "to": "2026-01-01"
+      },
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": {
+          "p_19": 1,
+          "p_19a": "art. 43 ust. 1 pkt 37 ustawy VAT"
+        },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "additionalDescription": [
+        {
+          "key": "część odsetkowa raty",
+          "value": "netto 200, vat 46"
+        }
+      ],
+      "items": [
+        {
+          "name": "rata leasingowa za 01/2026",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 2000,
+          "netAmount": 2000,
+          "vatRate": "23"
+        },
+        {
+          "name": "pakiet ubezpieczeń za 01/2026",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 300,
+          "netAmount": 300,
+          "vatRate": "zw"
+        }
+      ],
+      "payment": {
+        "method": 6,
+        "dueDate": "2026-03-15",
+        "bankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      },
+      "totals": {
+        "P_15": 2760,
+        "P_13_1": 2000,
+        "P_14_1": 460,
+        "P_13_7": 300
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_10.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex sp. z o. o.",
+      "addressLine1": "ul. Sadowa 1 m. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": {
+          "email": "jan@kowalski.pl",
+          "phone": "555777999"
+        },
+        "role": 4,
+        "sharePercent": 50
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FZ2026/02/150",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-02-15",
+      "invoiceType": "ZAL",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "additionalDescription": [
+        {
+          "key": "wysokosć wpłaconego zadatku",
+          "value": "20000 zł"
+        }
+      ],
+      "totals": {
+        "P_13_1": 16260.16,
+        "P_14_1": 3739.84,
+        "P_15": 20000
+      },
+      "payment": {
+        "method": 6,
+        "paid": 1,
+        "paymentDate": "2026-02-15"
+      },
+      "order": {
+        "totalValue": 375150,
+        "items": [
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 300000,
+            "netAmount": 300000,
+            "vatAmount": 69000,
+            "vatRate": "23"
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 5000,
+            "netAmount": 5000,
+            "vatAmount": 1150,
+            "vatRate": "23"
+          }
+        ]
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_11.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex sp. z o. o.",
+      "addressLine1": "ul. Sadowa 1 m. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": {
+          "email": "jan@kowalski.pl",
+          "phone": "555777999"
+        },
+        "role": 4,
+        "sharePercent": 50
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FK2026/03/5",
+      "issueDate": "2026-03-15",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-02-15",
+      "invoiceType": "KOR_ZAL",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "błędna stawka VAT",
+      "correctionType": 3,
+      "correctedInvoices": [
+        {
+          "number": "FZ2026/02/150",
+          "issueDate": "2026-02-15",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ],
+      "totals": {
+        "P_13_1": -15993.6,
+        "P_14_1": -3678.53,
+        "P_13_2": 18214.94,
+        "P_14_2": 1457.19,
+        "P_15": 0,
+        "P_15ZK": 20000
+      },
+      "order": {
+        "totalValue": 375150,
+        "items": [
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 300000,
+            "netAmount": 300000,
+            "vatAmount": 69000,
+            "vatRate": "23",
+            "beforeCorrection": 1
+          },
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 341666.67,
+            "netAmount": 341666.67,
+            "vatAmount": 27333.33,
+            "vatRate": "8"
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 5000,
+            "netAmount": 5000,
+            "vatAmount": 1150,
+            "vatRate": "23",
+            "beforeCorrection": 1
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 5000,
+            "netAmount": 5000,
+            "vatAmount": 1150,
+            "vatRate": "23"
+          }
+        ]
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+  {
+  "source": "FA_3_Przykład_12.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex sp. z o. o.",
+      "addressLine1": "ul. Sadowa 1 m. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "jan@kowalski.pl",
+        "phone": "555777999"
+      },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": {
+          "email": "jan@kowalski.pl",
+          "phone": "555777999"
+        },
+        "role": 4,
+        "sharePercent": 50
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FK2026/03/7",
+      "issueDate": "2026-03-17",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-02-15",
+      "invoiceType": "KOR_ZAL",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "błędne zafakturowanie zaniżonej kwoty zadatku 20000 powinno być 30000",
+      "correctionType": 1,
+      "correctedInvoices": [
+        {
+          "number": "FZ2026/02/150",
+          "issueDate": "2026-02-15",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ],
+      "totals": {
+        "P_13_1": 133.28,
+        "P_14_1": 30.65,
+        "P_13_2": 9107.47,
+        "P_14_2": 728.6,
+        "P_15": 10000,
+        "P_15ZK": 20000
+      },
+      "order": {
+        "totalValue": 375150,
+        "items": [
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 341666.67,
+            "netAmount": 341666.67,
+            "vatAmount": 27333.33,
+            "vatRate": "8",
+            "beforeCorrection": 1
+          },
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 341666.67,
+            "netAmount": 341666.67,
+            "vatAmount": 27333.33,
+            "vatRate": "8"
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 5000,
+            "netAmount": 5000,
+            "vatAmount": 1150,
+            "vatRate": "23",
+            "beforeCorrection": 1
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 5000,
+            "netAmount": 5000,
+            "vatAmount": 1150,
+            "vatRate": "23"
+          }
+        ]
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_13.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-15T09:30:47Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex sp. z o. o.",
+      "addressLine1": "ul. Sadowa 1 m. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+        "role": 4,
+        "sharePercent": 50
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FK2026/03/7",
+      "issueDate": "2026-03-17",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-02-15",
+      "invoiceType": "KOR_ZAL",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "correctionReason": "korekta wartości zamówienia o -10%",
+      "correctionType": 3,
+      "correctedInvoices": [
+        {
+          "number": "FZ2026/02/150",
+          "issueDate": "2026-02-15",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ],
+      "totals": {
+        "P_15": 0,
+        "P_15ZK": 30000
+      },
+      "order": {
+        "totalValue": 337635,
+        "items": [
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 341666.67,
+            "netAmount": 341666.67,
+            "vatAmount": 27333.33,
+            "vatRate": "8",
+            "beforeCorrection": 1
+          },
+          {
+            "name": "mieszkanie 50m^2",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 307500,
+            "netAmount": 307500,
+            "vatAmount": 24600,
+            "vatRate": "8"
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 5000,
+            "netAmount": 5000,
+            "vatAmount": 1150,
+            "vatRate": "23",
+            "beforeCorrection": 1
+          },
+          {
+            "name": "usługi dodatkowe",
+            "unit": "szt.",
+            "quantity": 1,
+            "netPrice": 4500,
+            "netAmount": 4500,
+            "vatAmount": 1035,
+            "vatRate": "23"
+          }
+        ]
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "Fa_3_Przykład_14.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-08-17T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex S.A.",
+      "addressLine1": "ul. Sadowa 1 m. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+        "role": 4,
+        "sharePercent": 50
+      },
+      {
+        "nip": "9999999999",
+        "name": "ABC Developex sp. z o.o.",
+        "addressLine1": "ul. Sadowa 1 lok. 3",
+        "addressLine2": "00-002 Kraków",
+        "countryCode": "PL",
+        "contact": { "email": "abc@abc.pl", "phone": "667444555" },
+        "role": 3
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/08/12",
+      "issueDate": "2026-08-17",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-09-17",
+      "invoiceType": "ROZ",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "additionalDescription": [
+        {
+          "key": "wysokość pozostałej do zapłaty kwoty",
+          "value": "307635 zł"
+        },
+        {
+          "key": "W terminie 2026-09-15",
+          "value": "co najmniej 50% pozostałej kwoty"
+        },
+        {
+          "key": "W terminie 2026-10-15",
+          "value": "pozostała część"
+        }
+      ],
+      "totals": {
+        "P_13_1": 4100.16,
+        "P_14_1": 943.04,
+        "P_13_2": 280177.59,
+        "P_14_2": 22414.21,
+        "P_15": 307635
+      },
+      "payment": {
+        "method": 6,
+        "dueDates": ["2026-09-15", "2026-10-15"],
+        "bankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      },
+      "items": [
+        {
+          "name": "mieszkanie 50m^2",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 307500,
+          "netAmount": 307500,
+          "vatRate": "8",
+          "gtu": "GTU_10"
+        },
+        {
+          "name": "usługi dodatkowe",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 4500,
+          "netAmount": 4500,
+          "vatRate": "23"
+        }
+      ],
+      "advanceInvoices": [
+        {
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_15.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/02/150",
+      "issueDate": "2026-02-15",
+      "saleDate": "2026-01-03",
+      "invoiceType": "UPR",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_13_1": 365.85,
+        "P_14_1": 84.15,
+        "P_15": 450
+      },
+      "items": [
+        {
+          "name": "wiertarka Wiertex mk5",
+          "netAmount": 365.85,
+          "vatAmount": 84.15,
+          "grossAmount": 450,
+          "vatRate": "23"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_16.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/02/150",
+      "issueDate": "2026-02-15",
+      "saleDate": "2026-01-03",
+      "invoiceType": "UPR",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_15": 450
+      },
+      "items": [
+        {
+          "name": "wiertarka Wiertex mk5",
+          "vatRate": "23"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "Fa_3_Przykład_17.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-08-17T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex S.A.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+        "role": 4,
+        "sharePercent": 50
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/08/12",
+      "issueDate": "2026-08-17",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-09-17",
+      "invoiceType": "ROZ",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "additionalDescription": [
+        {
+          "key": "wysokosć pozostałej do zapłaty kwoty",
+          "value": "300000 zł"
+        }
+      ],
+      "totals": {
+        "P_13_1": 3998.4,
+        "P_14_1": 919.63,
+        "P_13_2": 273224.05,
+        "P_14_2": 21857.92,
+        "P_15": 300000
+      },
+      "items": [
+        {
+          "name": "mieszkanie 50m^2",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 307500,
+          "netAmount": 307500,
+          "vatRate": "8",
+          "gtu": "GTU_10"
+        },
+        {
+          "name": "usługi dodatkowe",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 4500,
+          "netAmount": 4500,
+          "vatRate": "23"
+        }
+      ],
+      "advanceInvoices": [
+        {
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+  {
+  "source": "Fa_3_Przykład_18.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-08-17T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Developex S.A.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "jst": 2,
+      "gv": 2
+    },
+    "thirdParties": [
+      {
+        "nip": "3333333333",
+        "name": "F.H.U. Grażyna Kowalska",
+        "addressLine1": "ul. Polna 1",
+        "addressLine2": "00-001 Warszawa",
+        "countryCode": "PL",
+        "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+        "role": 4,
+        "sharePercent": 50
+      }
+    ],
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FK2026/09/1",
+      "issueDate": "2026-08-17",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-09-17",
+      "invoiceType": "KOR_ROZ",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_13_1": 101.76,
+        "P_14_1": 23.41,
+        "P_13_2": 6953.54,
+        "P_14_2": 556.29,
+        "P_15": 7635,
+        "P_15ZK": 300000
+      },
+      "correctionReason": "błędne zafakturowanie kwoty pozostałej do zapłaty: było 300000, a powinno być 307635",
+      "correctionType": 1,
+      "correctedInvoices": [
+        {
+          "number": "FV2026/08/12",
+          "issueDate": "2026-08-17",
+          "ksefNumber": "9999999999-20230908-8BEF280C8D35-4D"
+        }
+      ],
+      "advanceInvoices": [
+        {
+          "ksefNumber": "9999999999-20230908-76B2B580D4DC-80"
+        }
+      ],
+      "items": [
+        {
+          "name": "mieszkanie 50m^2",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 307500,
+          "netAmount": 307500,
+          "vatRate": "8",
+          "gtu": "GTU_10",
+          "beforeCorrection": 1
+        },
+        {
+          "name": "mieszkanie 50m2",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 307500,
+          "netAmount": 307500,
+          "vatRate": "8",
+          "gtu": "GTU_10"
+        },
+        {
+          "name": "usługi dodatkowe",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 4500,
+          "netAmount": 4500,
+          "vatRate": "23",
+          "beforeCorrection": 1
+        },
+        {
+          "name": "usługi dodatkowe",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 4500,
+          "netAmount": 4500,
+          "vatRate": "23"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "Fa_3_Przykład_19.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "Biuro Podróży ABC sp. z o. o.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FM2026/02/150",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-01-27",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": {
+          "p_pMarzy": 1,
+          "p_pMarzy_2": 1
+        }
+      },
+      "totals": {
+        "P_13_1": 813,
+        "P_14_1": 187,
+        "P_13_11": 2000,
+        "P_15": 3000
+      },
+      "items": [
+        {
+          "name": "wycieczka na Mazury usługi obce",
+          "unit": "szt.",
+          "quantity": 1,
+          "grossPrice": 2000,
+          "grossAmount": 2000
+        },
+        {
+          "name": "wycieczka na Mazury usługa własna",
+          "unit": "szt.",
+          "quantity": 1,
+          "grossPrice": 1000,
+          "grossAmount": 1000,
+          "vatRate": "23"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "Fa_3_Przykład_20.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "CDE sp. j.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "gln": "a",
+      "contact": { "email": "cde@cde.pl", "phone": "555777999" },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "EUR",
+      "invoiceNumber": "FV2026/02/150",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_13_1": 13560,
+        "P_14_1": 3118.8,
+        "P_14_1W": 14036.16,
+        "P_15": 16678.8
+      },
+      "payment": {
+        "dueDate": "2026-03-15",
+        "method": 6,
+        "factorBankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "ownBankAccount": 2,
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "cn": "8418 21 91",
+          "unit": "szt.",
+          "quantity": 10,
+          "netPrice": 406,
+          "netAmount": 4060,
+          "vatRate": "23",
+          "deliveryDate": "2026-02-20",
+          "exchangeRate": 4.5005
+        },
+        {
+          "name": "zamrażarka Zimnotech mk2",
+          "cn": "8418 40 20",
+          "unit": "szt.",
+          "quantity": 20,
+          "netPrice": 250,
+          "netAmount": 5000,
+          "vatRate": "23",
+          "deliveryDate": "2026-02-25",
+          "exchangeRate": 4.5005
+        },
+        {
+          "name": "zmywarka Bryza 100",
+          "cn": "8422 11 00",
+          "unit": "szt.",
+          "quantity": 15,
+          "netPrice": 300,
+          "netAmount": 4500,
+          "vatRate": "23",
+          "deliveryDate": "2026-02-26",
+          "exchangeRate": 4.5005
+        }
+      ],
+      "transactionConditions": {
+        "orders": [{ "orderDate": "2026-01-26", "orderNumber": "4354343" }],
+        "batchNumber": "2312323/2026",
+        "deliveryConditions": "CIP",
+        "transport": {
+          "type": 3,
+          "carrier": {
+            "nip": "6666666666",
+            "name": "Jan Nowak Transport",
+            "addressLine1": "ul. Bukowa 5",
+            "addressLine2": "00-004 Poznań",
+            "countryCode": "PL"
+          },
+          "cargoDescription": 13,
+          "packagingUnit": "a",
+          "shipFrom": { "countryCode": "PL", "addressLine1": "Sadowa 1 lok. 2", "addressLine2": "00-001 Warszawa" },
+          "shipTo": { "countryCode": "PL", "addressLine1": "ul. Sadowa 1 lok. 3", "addressLine2": "00-002 Kraków" }
+        }
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_21.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "Samplofaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "CDE sp. j.",
+      "addressLine1": "ul. Sadowa 1 lok. 3",
+      "addressLine2": "00-002 Kraków",
+      "countryCode": "PL",
+      "gln": "a",
+      "contact": { "email": "cde@cde.pl", "phone": "555777999" },
+      "clientNumber": "fdfd778343",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "EUR",
+      "invoiceNumber": "FV2026/02/150",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_13_1": 13560,
+        "P_14_1": 3118.8,
+        "P_14_1W": 13768.14,
+        "P_15": 16678.8
+      },
+      "payment": {
+        "dueDate": "2026-03-15",
+        "method": 6,
+        "factorBankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "ownBankAccount": 2,
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "cn": "8418 21 91",
+          "unit": "szt.",
+          "quantity": 10,
+          "netPrice": 406,
+          "netAmount": 4060,
+          "vatRate": "23",
+          "deliveryDate": "2026-02-05",
+          "exchangeRate": 4.4080
+        },
+        {
+          "name": "zamrażarka Zimnotech mk2",
+          "cn": "8418 40 20",
+          "unit": "szt.",
+          "quantity": 20,
+          "netPrice": 250,
+          "netAmount": 5000,
+          "vatRate": "23",
+          "deliveryDate": "2026-02-10",
+          "exchangeRate": 4.5005
+        },
+        {
+          "name": "zmywarka Bryza 100",
+          "cn": "8422 11 00",
+          "unit": "szt.",
+          "quantity": 15,
+          "netPrice": 300,
+          "netAmount": 4500,
+          "vatRate": "23",
+          "deliveryDate": "2026-02-20",
+          "exchangeRate": 4.3250
+        }
+      ],
+      "transactionConditions": {
+        "orders": [{ "orderDate": "2026-01-26", "orderNumber": "4354343" }],
+        "batchNumber": "2312323/2026",
+        "deliveryConditions": "CIP",
+        "transport": {
+          "type": 3,
+          "carrier": {
+            "nip": "6666666666",
+            "name": "Jan Nowak Transport",
+            "addressLine1": "ul. Bukowa 5",
+            "addressLine2": "00-004 Poznań",
+            "countryCode": "PL"
+          },
+          "cargoDescription": 13,
+          "packagingUnit": "a",
+          "shipFrom": { "countryCode": "PL", "addressLine1": "Sadowa 1 lok. 2", "addressLine2": "00-001 Warszawa" },
+          "shipTo": { "countryCode": "PL", "addressLine1": "ul. Sadowa 1 lok. 3", "addressLine2": "00-002 Kraków" }
+        }
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_22.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "countryCode": "PL",
+      "vatPrefix": "PL",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "countryCode": "DE",
+      "vatUE": {
+        "countryCode": "DE",
+        "vatNumber": "999999999"
+      },
+      "name": "EFG GmbH",
+      "addressLine1": "Blümchenstraße 1",
+      "addressLine2": "10999 Berlin",
+      "contact": {
+        "email": "johan@shmidt.de",
+        "phone": "555777999"
+      },
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "EUR",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/150",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 10,
+          "netPrice": 400,
+          "netAmount": 4000,
+          "vatRate": "0 WDT",
+          "saleDate": "2026-01-03"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_23.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "countryCode": "US",
+      "taxId": "999999999",
+      "name": "EFG Ltd.",
+      "addressLine1": "Flower (St) 1",
+      "addressLine2": "Seattle, WA 99999",
+      "contact": {
+        "email": "john@smith.us",
+        "phone": "555777999"
+      },
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "USD",
+      "issueDate": "2026-06-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/150",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 20,
+          "netPrice": 400,
+          "netAmount": 8000,
+          "vatRate": "0 EX",
+          "saleDate": "2026-01-03"
+        }
+      ]
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_24.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-28T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "Elektrownia S.A.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "elektrownia@elektrownia.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "clientNumber": "99999999",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/02/150",
+      "issueDate": "2026-02-28",
+      "issuePlace": "Warszawa",
+      "billingPeriod": { "from": "2026-01-01", "to": "2026-02-28" },
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "additionalDescription": [
+        {
+          "key": "Informacja o akcyzie",
+          "value": "Od 20 kWh energii elektrycznej czynnej naliczono akcyzę w kwocie 0,10 zł"
+        }
+      ],
+      "totals": {
+        "P_13_1": 43.6,
+        "P_14_1": 10.03,
+        "P_15": 53.63
+      },
+      "items": [
+        { "name": "Razem za energię czynną", "netAmount": 18.0, "vatRate": "23" },
+        { "name": "Razem za usługi dystrybucji", "netAmount": 25.6, "vatRate": "23" }
+      ],
+      "settlement": {
+        "charges": [{ "amount": 0.00, "reason": "Odsetki" }],
+        "totalCharges": 0.00,
+        "deductions": [{ "amount": 0.00, "reason": "Nadpłata" }],
+        "totalDeductions": 0.00,
+        "amountDue": 53.63
+      },
+      "payment": {
+        "dueDate": "2026-03-15",
+        "method": 6,
+        "bankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    },
+    "attachment": {
+      "dataBlock": {
+        "metadata": [
+          { "key": "Miejsce poboru energii", "value": "ul. Polna 1, 00-001 Warszawa" },
+          { "key": "Kod PPE", "value": "999999999999999999" },
+          { "key": "Nr kontrahenta (odbiorcy)", "value": "99999999" },
+          { "key": "Za okres od", "value": "2026-01-01" },
+          { "key": "Za okres do", "value": "2026-02-28" },
+          { "key": "Grupa taryfowa", "value": "G11" },
+          { "key": "Energia zużyta w roku 2025", "value": "999 kWh" },
+          { "key": "Energia zużyta w analogicznym okresie poprzedniego roku kalendarzowego", "value": "118 kWh" }
+        ],
+        "tables": [
+          {
+            "description": "Odczyty",
+            "columns": [
+              { "type": "txt", "name": "Licznik/Strefa" },
+              { "type": "date", "name": "Data" },
+              { "type": "int", "name": "Wskazanie bieżące" },
+              { "type": "int", "name": "Wskazanie poprzednie" },
+              { "type": "int", "name": "Mnożna" },
+              { "type": "int", "name": "Ilość" },
+              { "type": "txt", "name": "Sposób odczytu" },
+              { "type": "int", "name": "Straty" },
+              { "type": "int", "name": "Razem" }
+            ],
+            "rows": [
+              ["Licznik rozliczeniowy  energii czynnej nr 99999999"],
+              ["całodobowa", "2026-02-28", "1020", "1000", "1", "20", "Fizyczny", "0", "20"]
+            ]
+          },
+          {
+            "tableMetadata": { "key": "Informacja o akcyzie", "value": "Od 20 kWh energii elektrycznej czynnej naliczono akcyzę w kwocie 0,10 zł" },
+            "description": "Rozliczenie - sprzedaż energii",
+            "columns": [
+              { "type": "txt", "name": "Opis/Strefa" },
+              { "type": "txt", "name": "j. m." },
+              { "type": "int", "name": "Ilość" },
+              { "type": "dec", "name": "Cena jedn. netto (zł)" },
+              { "type": "dec", "name": "Należność netto (zł)" },
+              { "type": "int", "name": "Stawka VAT(%)" }
+            ],
+            "rows": [
+              ["Energia elektryczna czynna"],
+              ["całodobowa", "kWh", "20", "0.9000", "18.00", "23"]
+            ],
+            "summary": ["Ogółem wartość - sprzedaż energii:", "-", "-", "-", "18.00", "-"]
+          },
+          {
+            "description": "Rozliczenie - usługa dystrybucji energii",
+            "columns": [
+              { "type": "txt", "name": "Opis/Strefa" },
+              { "type": "txt", "name": "j. m." },
+              { "type": "date", "name": "Data" },
+              { "type": "int", "name": "Ilość" },
+              { "type": "int", "name": "Ilość m-cy" },
+              { "type": "dec", "name": "Współczynniki" },
+              { "type": "dec", "name": "Cena jedn. netto (zł)" },
+              { "type": "dec", "name": "Należność netto (zł)" },
+              { "type": "int", "name": "Stawka VAT(%)" }
+            ],
+            "rows": [
+              ["Opłata stała sieciowa - układ 1-fazowy"],
+              ["-", "zł/mc", "2026-02-28", "-", "2", "0.0000", "7.3000", "14.60", "23"],
+              ["Opłata przejściowa <500 kWh"],
+              ["-", "zł/mc", "2026-02-28", "-", "2", "0.0000", "0.0300", "0.06", "23"],
+              ["Opłata mocowa <500 kWh"],
+              ["-", "zł/mc", "2026-02-28", "-", "2", "0.0000", "0.0000", "0.00", "23"],
+              ["Opłata zmienna sieciowa"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "-", "-", "0.2500", "5.00", "23"],
+              ["Opłata jakościowa"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "-", "-", "0.0400", "0.80", "23"],
+              ["Opłata OZE"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "-", "-", "0.0040", "0.08", "23"],
+              ["Opłata kogeneracyjna"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "-", "-", "0.0030", "0.06", "23"],
+              ["Opłata abonamentowa"],
+              ["-", "zł/mc", "2026-02-28", "-", "2", "0.0000", "2.5000", "5.00", "23"]
+            ],
+            "summary": ["Ogółem wartość - usługa dystrybucji:", "-", "-", "-", "-", "-", "-", "25.60", "-"]
+          }
+        ]
+      }
+    }
+  }
+},
+ {
+  "source": "FA_3_Przykład_25.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-28T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "Elektrownia S.A.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "elektrownia@elektrownia.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" },
+      "clientNumber": "99999999",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/02/150",
+      "issueDate": "2026-02-28",
+      "issuePlace": "Warszawa",
+      "billingPeriod": { "from": "2026-01-01", "to": "2026-02-28" },
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "additionalDescription": [
+        { "key": "Informacja o akcyzie", "value": "Od 20 kWh energii elektrycznej czynnej naliczono akcyzę w kwocie 0,10 zł" }
+      ],
+      "totals": { "P_13_1": 43.6, "P_14_1": 10.03, "P_15": 53.63 },
+      "items": [
+        { "name": "Razem za energię czynną", "netAmount": 18.0, "vatRate": "23" },
+        { "name": "Razem za usługi dystrybucji", "netAmount": 25.6, "vatRate": "23" }
+      ],
+      "settlement": {
+        "charges": [{ "amount": 0.00, "reason": "Odsetki" }],
+        "totalCharges": 0.00,
+        "deductions": [{ "amount": 0.00, "reason": "Nadpłata" }],
+        "totalDeductions": 0.00,
+        "amountDue": 53.63
+      },
+      "payment": {
+        "dueDate": "2026-03-15",
+        "method": 6,
+        "bankAccount": {
+          "accountNumber": "73111111111111111111111111",
+          "bankName": "Bank Bankowości Bankowej S. A.",
+          "accountDescription": "PLN"
+        }
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    },
+    "attachment": {
+      "dataBlock": {
+        "metadata": [
+          { "key": "Miejsce poboru energii", "value": "ul. Polna 1, 00-001 Warszawa" },
+          { "key": "Kod PPE", "value": "999999999999999999" },
+          { "key": "Nr kontrahenta (odbiorcy)", "value": "99999999" },
+          { "key": "Za okres od", "value": "2026-02-01" },
+          { "key": "Za okres do", "value": "2026-02-28" },
+          { "key": "Grupa taryfowa", "value": "G11" },
+          { "key": "Energia zużyta w roku 2025", "value": "999 kWh" },
+          { "key": "Energia zużyta w analogicznym okresie poprzedniego roku kalendarzowego", "value": "118 kWh" }
+        ],
+        "tables": [
+          {
+            "description": "Odczyty",
+            "columns": [
+              { "type": "txt", "name": "Licznik/Strefa" },
+              { "type": "date", "name": "Data" },
+              { "type": "int", "name": "Wskazanie bieżące" },
+              { "type": "int", "name": "Wskazanie poprzednie" },
+              { "type": "int", "name": "Mnożna" },
+              { "type": "int", "name": "Ilość" },
+              { "type": "txt", "name": "Sposób odczytu" },
+              { "type": "int", "name": "Straty" },
+              { "type": "int", "name": "Razem" }
+            ],
+            "rows": [
+              ["Licznik rozliczeniowy  energii czynnej nr 99999999"],
+              ["całodobowa", "2026-02-28", "1020", "1000", "1", "20", "Fizyczny", "0", "20"]
+            ]
+          },
+          {
+            "tableMetadata": { "key": "Informacja o akcyzie", "value": "Od 20 kWh energii elektrycznej czynnej naliczono akcyzę w kwocie 0,10 zł" },
+            "description": "Rozliczenie - sprzedaż energii",
+            "columns": [
+              { "type": "txt", "name": "Opis/Strefa" },
+              { "type": "txt", "name": "j. m." },
+              { "type": "int", "name": "Ilość" },
+              { "type": "dec", "name": "Cena jedn. netto (zł)" },
+              { "type": "dec", "name": "Należność netto (zł)" },
+              { "type": "int", "name": "Stawka VAT(%)" }
+            ],
+            "rows": [
+              ["Energia elektryczna czynna"],
+              ["całodobowa", "kWh", "20", "0.9000", "18.00", "23"]
+            ],
+            "summary": ["Ogółem wartość - sprzedaż energii:", "", "", "", "18.00", ""]
+          },
+          {
+            "description": "Rozliczenie - usługa dystrybucji energii",
+            "columns": [
+              { "type": "txt", "name": "Opis/Strefa" },
+              { "type": "txt", "name": "j. m." },
+              { "type": "date", "name": "Data" },
+              { "type": "int", "name": "Ilość" },
+              { "type": "int", "name": "Ilość m-cy" },
+              { "type": "dec", "name": "Współczynniki" },
+              { "type": "dec", "name": "Cena jedn. netto (zł)" },
+              { "type": "dec", "name": "Należność netto (zł)" },
+              { "type": "int", "name": "Stawka VAT(%)" }
+            ],
+            "rows": [
+              ["Opłata stała sieciowa - układ 1-fazowy"],
+              ["", "zł/mc", "2026-02-28", "", "2", "0.0000", "7.3000", "14.60", "23"],
+              ["Opłata przejściowa <500 kWh"],
+              ["", "zł/mc", "2026-02-28", "", "2", "0.0000", "0.0300", "0.06", "23"],
+              ["Opłata mocowa <500 kWh"],
+              ["", "zł/mc", "2026-02-28", "", "2", "0.0000", "0.0000", "0.00", "23"],
+              ["Opłata zmienna sieciowa"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "", "", "0.2500", "5.00", "23"],
+              ["Opłata jakościowa"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "", "", "0.0400", "0.80", "23"],
+              ["Opłata OZE"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "", "", "0.0040", "0.08", "23"],
+              ["Opłata kogeneracyjna"],
+              ["całodobowa", "kWh", "2026-02-28", "20", "", "", "0.0030", "0.06", "23"],
+              ["Opłata abonamentowa"],
+              ["", "zł/mc", "2026-02-28", "", "2", "0.0000", "2.5000", "5.00", "23"]
+            ],
+            "summary": ["Ogółem wartość - usługa dystrybucji:", "", "", "", "", "", "", "25.60", ""]
+          }
+        ]
+      }
+    }
+  }
+},
+{
+  "source": "FA_3_Przykład_26.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1, 00-001 Warszawa",
+      "countryCode": "PL"
+    },
+    "buyer": {
+      "nip": "2222222222",
+      "name": "Jan Kowalski",
+      "addressLine1": "Akacjowa 1, 00-001 Warszawa",
+      "countryCode": "PL",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FA/2026/02/999",
+      "issueDate": "2026-02-01",
+      "issuePlace": "Warszawa",
+      "saleDate": "2026-02-01",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_13_3": 30,
+        "P_14_3": 1.5,
+        "P_15": 31.5
+      },
+      "items": [
+        {
+          "name": "Napój Owocowy 1.5l",
+          "unit": "szt.",
+          "quantity": 10,
+          "netPrice": 3,
+          "netAmount": 30,
+          "vatRate": "5"
+        }
+      ],
+      "settlement": {
+        "charges": [{ "amount": 5, "reason": "Kaucja (system kaucyjny) 10 x 0,50  PLN" }],
+        "totalCharges": 5,
+        "amountDue": 36.5
+      }
+    }
+  }
+},
+  {
+  "source": "TEST_osoba_fizyczna_PL.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "brakId": true,
+      "name": "Anna Nowak",
+      "addressLine1": "ul. Biała 52a",
+      "addressLine2": "11-111 Poznań",
+      "countryCode": "PL",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "PLN",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/999",
+      "saleDate": "2026-02-15",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 1626.01,
+          "netAmount": 1626.01,
+          "vatRate": "23"
+        }
+      ],
+      "payment": {
+        "method": 6,
+        "dueDate": "2026-03-15"
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "TEST_osoba_fizyczna_EUR.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC AGD sp. z o. o.",
+      "addressLine1": "ul. Kwiatowa 1 m. 2",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "vatPrefix": "PL",
+      "contact": {
+        "email": "abc@abc.pl",
+        "phone": "667444555"
+      }
+    },
+    "buyer": {
+      "brakId": true,
+      "name": "Hans Müller",
+      "addressLine1": "Hauptstraße 12",
+      "addressLine2": "10115 Berlin",
+      "countryCode": "DE",
+      "jst": 2,
+      "gv": 2
+    },
+    "details": {
+      "currency": "EUR",
+      "issueDate": "2026-02-15",
+      "issuePlace": "Warszawa",
+      "invoiceNumber": "FV2026/02/1000",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2,
+        "p_17": 2,
+        "p_18": 2,
+        "p_18a": 2,
+        "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "items": [
+        {
+          "name": "lodówka Zimnotech mk1",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 400,
+          "netAmount": 400,
+          "vatRate": "23",
+          "saleDate": "2026-02-10"
+        }
+      ],
+      "payment": {
+        "method": 6,
+        "dueDate": "2026-03-15"
+      }
+    },
+    "footer": {
+      "info": "Kapiał zakładowy 5 000 000",
+      "krs": "0000099999",
+      "regon": "999999999",
+      "bdo": "000099999"
+    }
+  }
+},
+{
+  "source": "test_subskrypcja.xml",
+  "invoice": {
+    "header": {
+      "systemInfo": "SamploFaktur",
+      "creationDate": "2026-02-01T00:00:00Z"
+    },
+    "seller": {
+      "nip": "9999999999",
+      "name": "ABC Software sp. z o.o.",
+      "addressLine1": "ul. Kwiatowa 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "abc@abc.pl", "phone": "667444555" }
+    },
+    "buyer": {
+      "nip": "1111111111",
+      "name": "F.H.U. Jan Kowalski",
+      "addressLine1": "ul. Polna 1",
+      "addressLine2": "00-001 Warszawa",
+      "countryCode": "PL",
+      "contact": { "email": "jan@kowalski.pl", "phone": "555777999" }
+    },
+    "details": {
+      "currency": "PLN",
+      "invoiceNumber": "FV2026/02/1",
+      "issueDate": "2026-02-01",
+      "saleDate": "2026-02-01",
+      "invoiceType": "VAT",
+      "annotations": {
+        "p_16": 2, "p_17": 2, "p_18": 2, "p_18a": 2, "p_23": 2,
+        "zwolnienie": { "p_19n": 1 },
+        "noweSrodkiTransportu": { "p_22n": 1 },
+        "pMarzy": { "p_pMarzyN": 1 }
+      },
+      "totals": {
+        "P_13_1": 813.01,
+        "P_14_1": 186.99,
+        "P_15": 1000
+      },
+      "items": [
+        {
+          "name": "Subskrypcja roczna ABC Software",
+          "unit": "szt.",
+          "quantity": 1,
+          "netPrice": 813.01,
+          "netAmount": 813.01,
+          "vatRate": "23"
+        }
+      ]
+    }
+  }
+}
+]

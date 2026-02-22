@@ -284,7 +284,7 @@ export class SettlementBuilder {
   // ============================================================
 
   private formatAmount(amount: number): string {
-    return this.roundAmount(Number(amount)).toFixed(2);
+    return this.roundAmount(Number(amount)).toFixed(2).replace(/\.00$/, '');
   }
 
   private roundAmount(amount: number): number {

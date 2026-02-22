@@ -77,15 +77,17 @@ export class PaymentBuilder {
       if (partialPaymentsXml) elements.push(partialPaymentsXml);
     }
 
-    // TerminPlatnosci (deleguj do PaymentPartsBuilder)
-    const dueDatesXml = this.paymentPartsBuilder.buildDueDates(
-      payment.dueDates,
-      payment.dueDate,
-      payment.dueDateDescription,
-      innerLevel,
-      ctx
-    );
-    if (dueDatesXml) elements.push(dueDatesXml);
+    // TerminPlatnosci (deleguj do PaymentPartsBuilder) — pomijaj gdy zapłacono
+    if (payment.paid !== true) {
+      const dueDatesXml = this.paymentPartsBuilder.buildDueDates(
+        payment.dueDates,
+        payment.dueDate,
+        payment.dueDateDescription,
+        innerLevel,
+        ctx
+      );
+      if (dueDatesXml) elements.push(dueDatesXml);
+    }
 
     // FormaPlatnosci
     if (typeof payment.method === 'number') {

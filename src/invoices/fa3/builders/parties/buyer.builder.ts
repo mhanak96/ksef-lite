@@ -54,6 +54,12 @@ export class BuyerBuilder {
     const contactXml = this.buildContact(buyer, innerLevel);
     if (contactXml) elements.push(contactXml);
 
+    // NrKlienta (opcjonalne)
+    const bAnyOuter = buyer as any;
+    if (this.hasValue(bAnyOuter.customerNumber)) {
+      elements.push(this.element('NrKlienta', bAnyOuter.customerNumber, innerLevel));
+    }
+
     if (tagName === 'Podmiot2') {
       elements.push(...this.buildJstAndGv(buyer as Fa3Buyer, innerLevel, ctx));
     }
@@ -168,6 +174,11 @@ export class BuyerBuilder {
 
     if (address.line2) {
       elements.push(this.element('AdresL2', address.line2, elementLevel));
+    }
+
+    // GLN (opcjonalne)
+    if ((address as any).gln) {
+      elements.push(this.element('GLN', (address as any).gln, elementLevel));
     }
 
     return this.joinElements(elements);
